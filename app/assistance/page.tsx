@@ -70,7 +70,7 @@ export default function AssistancePage() {
                                 Connexion
                             </Button>
                         </Link>
-                        <Link href="https://goriya-standard.vercel.app">
+                        <Link href="https://goriya.net">
                             <Button className="h-8 px-4 rounded-full text-[12px] bg-[#2157d3] hover:bg-[#1d4cb9]">
                                 Espace candidat
                             </Button>
@@ -229,7 +229,7 @@ export default function AssistancePage() {
                             <Link href="/auth/signin">
                                 <Button variant="outline" className="h-8 rounded-full border-[#374153] text-[#d9e5ff] bg-transparent text-[12px]">Connexion</Button>
                             </Link>
-                            <Link href="https://goriya-standard.vercel.app">
+                            <Link href="https://goriya.net">
                                 <Button className="h-8 rounded-full bg-[#2f6de6] hover:bg-[#2458ba] text-[12px]">Espace candidat</Button>
                             </Link>
                         </div>
