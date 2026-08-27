@@ -15,6 +15,7 @@ import { SignupStepper } from "@/components/signup-stepper"
 import { OTPVerificationModal } from "@/components/otp-verification-modal"
 import { Upload, Plus, ArrowRight, ArrowLeft, EyeOff, Eye } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { fraunces } from "@/lib/marketing/fonts"
 
 const steps = ["Entreprise", "Détails", "Contact"]
 
@@ -177,6 +178,11 @@ export default function Page() {
 
     return (
         <div>
+            <div className="mb-8 text-center">
+                <h1 className={`${fraunces.className} text-3xl text-[#0B1220]`}>Créez votre espace entreprise</h1>
+                <p className="mt-2 text-sm text-[#5B6472]">Quelques informations pour démarrer — deux minutes suffisent.</p>
+            </div>
+
             <SignupStepper currentStep={currentStep} steps={steps} />
 
             {/* Step 1: Entreprise */}
@@ -186,18 +192,18 @@ export default function Page() {
                         <h3 className="text-sm font-medium text-foreground mb-4">Logo et bannières</h3>
                         <div className="grid gap-4 md:grid-cols-2">
                             {/* Logo Upload */}
-                            <label className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-primary/30 bg-secondary/30 p-8 text-center cursor-pointer hover:border-primary/50 transition-colors">
+                            <label className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#2447FF]/25 bg-[#2447FF]/5 p-8 text-center cursor-pointer transition-colors hover:border-[#2447FF]/50 hover:bg-[#2447FF]/10">
                                 {formData.logo ? (
                                     <img
                                         src={URL.createObjectURL(formData.logo as File)}
                                         alt="Logo"
-                                        className="h-24 w-24 object-contain rounded-sm"
+                                        className="h-24 w-24 object-contain rounded-xl"
                                     />
                                 ) : (
                                     <>
-                                        <Upload className="h-8 w-8 text-primary/60 mb-2" />
-                                        <p className="text-sm font-medium text-foreground">Importer votre logo</p>
-                                        <p className="text-xs text-muted-foreground mt-1">PNG, JPEG, JPG, WEBP - max 2Mo</p>
+                                        <Upload className="h-8 w-8 text-[#2447FF]/60 mb-2" />
+                                        <p className="text-sm font-medium text-[#0B1220]">Importer votre logo</p>
+                                        <p className="text-xs text-[#5B6472] mt-1">PNG, JPEG, JPG, WEBP - max 2Mo</p>
                                     </>
                                 )}
                                 <input
@@ -211,18 +217,18 @@ export default function Page() {
                             </label>
 
                             {/* Cover Image Upload */}
-                            <label className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-primary/30 bg-secondary/30 p-8 text-center cursor-pointer hover:border-primary/50 transition-colors">
+                            <label className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#FF6B4A]/30 bg-[#FF6B4A]/5 p-8 text-center cursor-pointer transition-colors hover:border-[#FF6B4A]/50 hover:bg-[#FF6B4A]/10">
                                 {formData.coverImage ? (
                                     <img
                                         src={URL.createObjectURL(formData.coverImage as File)}
                                         alt="Cover Image"
-                                        className="h-32 w-full object-cover rounded-sm"
+                                        className="h-32 w-full object-cover rounded-xl"
                                     />
                                 ) : (
                                     <>
-                                        <Upload className="h-8 w-8 text-primary/60 mb-2" />
-                                        <p className="text-sm font-medium text-foreground">Importer votre image de couverture</p>
-                                        <p className="text-xs text-muted-foreground mt-1">PNG, JPEG, JPG, WEBP - max 2Mo</p>
+                                        <Upload className="h-8 w-8 text-[#FF6B4A]/70 mb-2" />
+                                        <p className="text-sm font-medium text-[#0B1220]">Importer votre image de couverture</p>
+                                        <p className="text-xs text-[#5B6472] mt-1">PNG, JPEG, JPG, WEBP - max 2Mo</p>
                                     </>
                                 )}
                                 <input
@@ -325,7 +331,7 @@ export default function Page() {
                         </Field>
                     ))}
 
-                    <Button type="button" variant="outline" onClick={addSocialLink} className="w-full border-dashed">
+                    <Button type="button" variant="outline" onClick={addSocialLink} className="w-full rounded-full border-dashed">
                         <Plus className="mr-2 h-4 w-4" /> Ajouter un autre lien
                     </Button>
                 </div>
@@ -404,9 +410,13 @@ export default function Page() {
             {/* Navigation Button */}
             <div className="mt-8 flex justify-center gap-2">
                 {currentStep >= 1 ? (
-                    <Button onClick={handlePrevious} variant="outline" className="w-30" size="lg"><ArrowLeft /></Button>
+                    <Button onClick={handlePrevious} variant="outline" className="w-30 rounded-full" size="lg"><ArrowLeft /></Button>
                 ) : ''}
-                <Button onClick={handleNext} className="w-30" size="lg">
+                <Button
+                    onClick={handleNext}
+                    className="w-30 rounded-full bg-[#0B1220] transition-transform duration-200 hover:scale-[1.02] hover:bg-[#0B1220]/90"
+                    size="lg"
+                >
                     {currentStep === steps.length - 1 ? "Terminer" : (<ArrowRight />)}
                 </Button>
             </div>

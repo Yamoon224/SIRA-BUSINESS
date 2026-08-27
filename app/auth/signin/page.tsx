@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Field, FieldLabel, FieldGroup } from "@/components/ui/field"
 import { getSession, signIn, signOut } from "next-auth/react"
+import { fraunces } from "@/lib/marketing/fonts"
 
 export default function Page() {
     const router = useRouter()
@@ -76,11 +77,11 @@ export default function Page() {
     }
 
     return (
-        <div className="max-w-md mx-auto mt-10 p-8 border rounded-sm shadow-md">
-            <h2 className="text-2xl font-semibold mb-6 text-center">Se connecter</h2>
-            {/* {error && <p className="text-center text-destructive text-sm">{error}</p>} */}
+        <div className="mx-auto mt-6 w-full max-w-md rounded-3xl border border-black/[0.06] bg-white p-8 shadow-[0_20px_60px_-30px_rgba(11,18,32,0.25)] sm:p-10">
+            <h2 className={`${fraunces.className} text-center text-3xl text-[#0B1220]`}>Bon retour.</h2>
+            <p className="mt-2 text-center text-sm text-[#5B6472]">Connectez-vous à votre espace entreprise.</p>
 
-            <form onSubmit={handleSubmit} className="space-y-3">
+            <form onSubmit={handleSubmit} className="mt-8 space-y-3">
                 <FieldGroup>
                     <Field>
                         <FieldLabel>Email</FieldLabel>
@@ -90,6 +91,7 @@ export default function Page() {
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="Votre email"
                             required
+                            className="h-11 rounded-xl focus-visible:ring-[#2447FF]/30"
                         />
                     </Field>
 
@@ -102,30 +104,34 @@ export default function Page() {
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="Votre mot de passe"
                                 required
-                                className="pr-10"
+                                className="h-11 rounded-xl pr-10 focus-visible:ring-[#2447FF]/30"
                             />
 
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5B6472] hover:text-[#0B1220]">
                                 {showPassword ? (<EyeOff className="h-4 w-4" />) : (<Eye className="h-4 w-4" />)}
                             </button>
                         </div>
                     </Field>
                 </FieldGroup>
 
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button
+                    type="submit"
+                    className="w-full rounded-full bg-[#0B1220] transition-transform duration-200 hover:scale-[1.01] hover:bg-[#0B1220]/90"
+                    disabled={loading}
+                >
                     {loading ? "Connexion..." : "Se connecter"}
                 </Button>
             </form>
 
-            <div className="mt-4 text-center text-sm text-muted-foreground">
-                Vous n'avez pas de compte entreprise ?{" "}
+            <div className="mt-6 text-center text-sm text-[#5B6472]">
+                Vous n&apos;avez pas de compte entreprise ?{" "}
                 <Link
                     href="/auth/signup"
-                    className="text-primary font-medium hover:underline">
-                    S'inscrire
+                    className="font-semibold text-[#2447FF] hover:underline">
+                    S&apos;inscrire
                 </Link>
             </div>
         </div>
