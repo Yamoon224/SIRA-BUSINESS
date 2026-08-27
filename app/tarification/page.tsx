@@ -3,7 +3,17 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { GoriyaLogo } from "@/components/goriya-logo"
+import { Skeleton } from "@/components/ui/skeleton"
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/ui/accordion"
+import { fraunces, marketingMono as mono } from "@/lib/marketing/fonts"
+import { Reveal, ScrollProgress, MarketingMotionStyles } from "@/components/marketing/reveal"
+import { SiteHeader } from "@/components/marketing/site-header"
+import { SiteFooter } from "@/components/marketing/site-footer"
 import { Check } from "lucide-react"
 import { subscriptionService } from "@/lib/api/subscription.service"
 
@@ -52,75 +62,120 @@ export default function TarificationPage() {
     const businessPlus = plans.find((p) => p.billingPeriod === "ANNUAL")
 
     return (
-        <div className="min-h-screen bg-background">
-            {/* Navigation */}
-            <header className="sticky top-0 z-50 border-b border-border bg-card">
-                <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
-                    <GoriyaLogo />
-                    <nav className="hidden md:flex items-center gap-6">
-                        <Link href="/" className="text-sm font-medium text-muted-foreground hover:text-foreground">
-                            Accueil
-                        </Link>
-                        <Link href="/tarification" className="text-sm font-medium text-primary">
-                            Tarifs
-                        </Link>
-                        <Button variant="outline" asChild>
-                            <Link href="/auth/signin">Se connecter</Link>
-                        </Button>
-                        <Button asChild>
-                            <Link href="/auth/signup">Commencer</Link>
-                        </Button>
-                    </nav>
-                </div>
-            </header>
+        <div className={`min-h-screen bg-[#F7F8FC] ${mono.variable}`}>
+            <ScrollProgress />
+            <SiteHeader page="tarification" />
 
-            {/* Hero Section */}
-            <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-12 sm:py-16">
-                <div className="container mx-auto px-6 text-center">
-                    <h1 className="text-3xl sm:text-4xl font-bold mb-4 text-balance">
-                        La tarification pour les entreprises
+            {/* Hero */}
+            <section className="relative overflow-hidden bg-[#0B1220]">
+                <div
+                    className="pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-soft-light"
+                    style={{
+                        backgroundImage:
+                            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+                    }}
+                />
+                <div className="orb-drift-1 pointer-events-none absolute -top-24 right-[-10%] h-[480px] w-[480px] rounded-full bg-[#2447FF]/25 blur-[120px]" />
+                <div className="orb-drift-2 pointer-events-none absolute bottom-[-25%] left-[-10%] h-[360px] w-[360px] rounded-full bg-[#FF6B4A]/15 blur-[110px]" />
+
+                <div className="container relative z-10 mx-auto px-4 pb-20 pt-32 text-center md:px-6 md:pb-24 md:pt-40">
+                    <div className={`inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9db4ff] ${mono.className}`}>
+                        <span className="h-1.5 w-1.5 rounded-full bg-[#FF6B4A]" />
+                        Tarification
+                    </div>
+                    <h1 className={`${fraunces.className} mx-auto mt-6 max-w-2xl text-4xl leading-[1.1] tracking-tight text-white sm:text-5xl`}>
+                        Un tarif simple,{" "}
+                        <span
+                            className="bg-gradient-to-r from-[#FF6B4A] via-[#c9a2ff] to-[#9db4ff] bg-clip-text italic text-transparent"
+                            style={{ fontWeight: 400 }}
+                        >
+                            qui grandit avec vous.
+                        </span>
                     </h1>
-                    <p className="text-lg sm:text-xl max-w-2xl mx-auto text-pretty">
-                        Trouvez le forfait qui accompagne votre recrutement, du premier poste publié à la croissance de votre équipe
+                    <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-[#B7C0DB] sm:text-lg">
+                        Du premier poste publié à la croissance de votre équipe RH — sans surprise sur la facture,
+                        réglable en Mobile Money.
                     </p>
                 </div>
             </section>
 
             {/* Plans */}
-            <div className="container mx-auto px-4 sm:px-6 py-10 sm:py-16">
-                {loading ? (
-                    <div className="flex justify-center py-16">
-                        <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-                    </div>
-                ) : (
-                    <div className="flex flex-col items-stretch justify-center gap-6 lg:flex-row lg:items-start mb-12 sm:mb-16">
-                        {business && (
-                            <div className="relative w-full max-w-[400px] self-center lg:w-[320px] lg:max-w-none">
-                                <div className="absolute -top-3 left-1/2 z-10 -translate-x-1/2">
-                                    <span className="whitespace-nowrap rounded-full border border-gray-200 bg-white px-4 py-1 text-xs text-gray-500 shadow-sm">
-                                        Forfait populaire
-                                    </span>
-                                </div>
-                                <div className="rounded-2xl bg-gradient-to-br from-cyan-300 via-blue-400 to-blue-600 p-[3px] shadow-xl">
-                                    <div className="overflow-hidden rounded-2xl bg-white">
-                                        <div className="p-6">
-                                            <h3 className="text-2xl font-bold text-foreground">{business.name}</h3>
-                                            <p className="mb-4 text-sm text-muted-foreground">Pour les entreprises en croissance</p>
-                                            <div className="mb-4">
-                                                <span className="text-3xl font-bold text-foreground">
-                                                    {Number(business.price).toLocaleString("fr-FR")}
-                                                </span>
-                                                <span className="ml-1 text-sm font-semibold text-muted-foreground">FCFA / mois</span>
+            <section className="bg-[#F7F8FC] py-20">
+                <div className="container mx-auto px-4 md:px-6">
+                    {loading ? (
+                        <div className="mx-auto flex max-w-3xl flex-col items-stretch justify-center gap-6 lg:flex-row">
+                            <Skeleton className="h-[420px] w-full rounded-3xl lg:w-[320px]" />
+                            <Skeleton className="h-[420px] w-full rounded-3xl lg:mt-7 lg:w-[300px]" />
+                        </div>
+                    ) : (
+                        <Reveal className="flex flex-col items-stretch justify-center gap-6 lg:flex-row lg:items-start">
+                            {business && (
+                                <div className="relative w-full max-w-[400px] self-center lg:w-[320px] lg:max-w-none">
+                                    <div className="absolute -top-3 left-1/2 z-10 -translate-x-1/2">
+                                        <span
+                                            className={`${mono.className} whitespace-nowrap rounded-full bg-[#0B1220] px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-white shadow-lg`}
+                                        >
+                                            Forfait populaire
+                                        </span>
+                                    </div>
+                                    <div className="rounded-[28px] bg-gradient-to-br from-[#2447FF] via-[#8f7bff] to-[#FF6B4A] p-[2.5px] shadow-[0_25px_60px_-25px_rgba(36,71,255,0.55)] transition-transform duration-300 hover:-translate-y-1">
+                                        <div className="overflow-hidden rounded-[26px] bg-white">
+                                            <div className="p-7">
+                                                <h3 className="text-2xl font-semibold text-[#0B1220]">{business.name}</h3>
+                                                <p className="mt-1 text-sm text-[#5B6472]">Pour les entreprises en croissance</p>
+                                                <div className="mt-5 flex items-baseline gap-1.5">
+                                                    <span className={`${fraunces.className} text-4xl text-[#0B1220]`}>
+                                                        {Number(business.price).toLocaleString("fr-FR")}
+                                                    </span>
+                                                    <span className="text-sm font-medium text-[#5B6472]">FCFA / mois</span>
+                                                </div>
+                                                <Button
+                                                    asChild
+                                                    className="mt-6 w-full rounded-full bg-[#0B1220] text-white transition-transform duration-200 hover:scale-[1.02] hover:bg-[#0B1220]/90"
+                                                >
+                                                    <Link href="/auth/signup">Commencer</Link>
+                                                </Button>
                                             </div>
-                                            <Button asChild className="w-full rounded-full bg-blue-600 hover:bg-blue-700">
+                                            <div className="border-t border-black/[0.06] bg-[#F7F8FC] px-7 py-6">
+                                                <ul className="space-y-3">
+                                                    {business.features.map((f, i) => (
+                                                        <li key={i} className="flex items-start gap-2.5 text-sm text-[#5B6472]">
+                                                            <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#2447FF]" />
+                                                            {f}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {businessPlus && (
+                                <div className="w-full max-w-[400px] self-center lg:mt-7 lg:w-[300px] lg:max-w-none">
+                                    <div className="overflow-hidden rounded-[26px] border border-black/[0.06] bg-white shadow-sm transition-transform duration-300 hover:-translate-y-1">
+                                        <div className="p-7">
+                                            <h3 className="text-2xl font-semibold text-[#0B1220]">{businessPlus.name}</h3>
+                                            <p className="mt-1 text-sm text-[#5B6472]">Pour les grandes entreprises</p>
+                                            <div className="mt-5 flex items-baseline gap-1.5">
+                                                <span className={`${fraunces.className} text-4xl text-[#0B1220]`}>
+                                                    {Number(businessPlus.price).toLocaleString("fr-FR")}
+                                                </span>
+                                                <span className="text-sm font-medium text-[#5B6472]">FCFA / an</span>
+                                            </div>
+                                            <Button
+                                                asChild
+                                                variant="outline"
+                                                className="mt-6 w-full rounded-full border-black/10 transition-transform duration-200 hover:scale-[1.02]"
+                                            >
                                                 <Link href="/auth/signup">Commencer</Link>
                                             </Button>
                                         </div>
-                                        <div className="bg-gray-50 px-6 py-5">
-                                            <ul className="space-y-2">
-                                                {business.features.map((f, i) => (
-                                                    <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                        <Check className="h-4 w-4 shrink-0 text-blue-500" />
+                                        <div className="border-t border-black/[0.06] bg-[#F7F8FC] px-7 py-6">
+                                            <ul className="space-y-3">
+                                                {businessPlus.features.map((f, i) => (
+                                                    <li key={i} className="flex items-start gap-2.5 text-sm text-[#5B6472]">
+                                                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#5B6472]" />
                                                         {f}
                                                     </li>
                                                 ))}
@@ -128,88 +183,75 @@ export default function TarificationPage() {
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {businessPlus && (
-                            <div className="w-full max-w-[400px] self-center lg:mt-7 lg:w-[300px] lg:max-w-none">
-                                <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
-                                    <div className="p-6">
-                                        <h3 className="text-2xl font-bold text-blue-600">{businessPlus.name}</h3>
-                                        <p className="mb-4 text-sm text-muted-foreground">Pour les grandes entreprises</p>
-                                        <div className="mb-4">
-                                            <span className="text-3xl font-bold text-foreground">
-                                                {Number(businessPlus.price).toLocaleString("fr-FR")}
-                                            </span>
-                                            <span className="ml-1 text-sm font-semibold text-muted-foreground">FCFA / an</span>
-                                        </div>
-                                        <Button asChild variant="outline" className="w-full rounded-full">
-                                            <Link href="/auth/signup">Commencer</Link>
-                                        </Button>
-                                    </div>
-                                    <div className="bg-gray-50 px-6 py-5">
-                                        <ul className="space-y-2">
-                                            {businessPlus.features.map((f, i) => (
-                                                <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                    <Check className="h-4 w-4 shrink-0 text-gray-400" />
-                                                    {f}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+                            {!business && !businessPlus && (
+                                <p className="text-center text-sm text-[#5B6472]">
+                                    Les forfaits ne sont pas disponibles pour le moment. Réessayez plus tard.
+                                </p>
+                            )}
+                        </Reveal>
+                    )}
+                </div>
+            </section>
 
-                        {!business && !businessPlus && (
-                            <p className="text-center text-sm text-muted-foreground">
-                                Les forfaits ne sont pas disponibles pour le moment. Réessayez plus tard.
-                            </p>
-                        )}
-                    </div>
-                )}
+            {/* FAQ */}
+            <section className="bg-white py-24">
+                <div className="container mx-auto px-4 md:px-6">
+                    <Reveal className="mx-auto max-w-2xl text-center">
+                        <p className={`${mono.className} text-[11px] font-semibold uppercase tracking-[0.14em] text-[#FF6B4A]`}>
+                            Questions fréquentes
+                        </p>
+                        <h2 className={`${fraunces.className} mt-3 text-3xl text-[#0B1220] sm:text-4xl`}>
+                            Ce que nos clients demandent le plus
+                        </h2>
+                    </Reveal>
 
-                {/* FAQ Section */}
-                <section className="mt-8">
-                    <h2 className="text-3xl font-bold text-center mb-12">Questions fréquentes</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                        {faqs.map((faq) => (
-                            <div key={faq.question} className="rounded-xl border border-border bg-card p-6">
-                                <h3 className="font-semibold mb-2">{faq.question}</h3>
-                                <p className="text-muted-foreground">{faq.answer}</p>
-                            </div>
-                        ))}
-                    </div>
-                </section>
+                    <Reveal delay={100} className="mx-auto mt-12 max-w-2xl">
+                        <Accordion type="single" collapsible className="rounded-3xl border border-black/[0.06] bg-[#F7F8FC] px-6">
+                            {faqs.map((faq) => (
+                                <AccordionItem key={faq.question} value={faq.question} className="border-black/[0.06]">
+                                    <AccordionTrigger className="py-5 text-[15px] font-semibold text-[#0B1220] hover:no-underline">
+                                        {faq.question}
+                                    </AccordionTrigger>
+                                    <AccordionContent className="text-sm leading-relaxed text-[#5B6472]">
+                                        {faq.answer}
+                                    </AccordionContent>
+                                </AccordionItem>
+                            ))}
+                        </Accordion>
+                    </Reveal>
+                </div>
+            </section>
 
-                {/* CTA Section */}
-                <section className="text-center mt-16 sm:mt-20 py-12 sm:py-16 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/30 rounded-2xl border border-border">
-                    <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-foreground">Prêt à recruter avec Goriya ?</h2>
-                    <p className="text-muted-foreground mb-6 sm:mb-8 max-w-2xl mx-auto text-sm sm:text-base">
-                        Rejoins des milliers d&apos;entreprises qui font confiance à Goriya pour trouver les meilleurs talents
+            {/* Final CTA */}
+            <section className="relative overflow-hidden bg-[#0B1220] py-24">
+                <div className="orb-drift-1 pointer-events-none absolute left-1/2 top-0 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-[#2447FF]/20 blur-[130px]" />
+                <Reveal className="container relative z-10 mx-auto px-4 text-center md:px-6">
+                    <h2 className={`${fraunces.className} mx-auto max-w-xl text-3xl text-white sm:text-4xl`}>
+                        Prêt à recruter avec Goriya ?
+                    </h2>
+                    <p className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-[#B7C0DB]">
+                        Sans engagement caché, sans carte bancaire internationale — commencez dès aujourd&apos;hui.
                     </p>
-                    <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                        <Button size="lg" className="bg-blue-600 hover:bg-blue-700" asChild>
+                    <div className="mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row">
+                        <Button size="lg" className="rounded-full bg-white px-7 font-semibold text-[#0B1220] transition-transform duration-200 hover:scale-[1.03] hover:bg-white/90" asChild>
                             <Link href="/auth/signup">Commencer gratuitement</Link>
                         </Button>
-                        <Button size="lg" variant="outline" asChild>
+                        <Button
+                            size="lg"
+                            variant="outline"
+                            className="rounded-full border-white/25 bg-transparent px-7 text-white transition-transform duration-200 hover:scale-[1.03] hover:bg-white/10"
+                            asChild
+                        >
                             <Link href="/assistance">Nous contacter</Link>
                         </Button>
                     </div>
-                </section>
-            </div>
+                </Reveal>
+            </section>
 
-            {/* Footer */}
-            <footer className="border-t border-border py-3 bg-card">
-                <div className="container mx-auto px-4">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
-                        <GoriyaLogo showTagline={false} />
-                        <p className="text-sm text-muted-foreground">
-                            © {new Date().getFullYear()} Goriya. Tous droits réservés. Boost votre carrière.
-                        </p>
-                    </div>
-                </div>
-            </footer>
+            <SiteFooter />
+            <MarketingMotionStyles />
         </div>
     )
 }

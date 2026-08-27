@@ -1,10 +1,11 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useRef, useState, type ReactNode } from "react"
-import { Fraunces, JetBrains_Mono } from "next/font/google"
 import { Button } from "@/components/ui/button"
-import { GoriyaLogo } from "@/components/goriya-logo"
+import { fraunces, marketingMono as mono } from "@/lib/marketing/fonts"
+import { Reveal, ScrollProgress, MarketingMotionStyles } from "@/components/marketing/reveal"
+import { SiteHeader } from "@/components/marketing/site-header"
+import { SiteFooter } from "@/components/marketing/site-footer"
 import {
     ArrowRight,
     ArrowUpRight,
@@ -13,19 +14,6 @@ import {
     Wallet,
     Languages,
 } from "lucide-react"
-
-const fraunces = Fraunces({
-    subsets: ["latin"],
-    weight: ["400", "500", "600"],
-    style: ["normal", "italic"],
-    variable: "--font-fraunces",
-})
-
-const mono = JetBrains_Mono({
-    subsets: ["latin"],
-    weight: ["500", "600"],
-    variable: "--font-mono-marketing",
-})
 
 const candidates = [
     { name: "Aïcha Koné", role: "Product Designer", score: 96, tone: "cobalt" },
@@ -61,73 +49,6 @@ const regionPoints = [
     { title: "Mobile Money", description: "Payez votre abonnement via Kkiapay, sans carte bancaire internationale." },
     { title: "Support local", description: "Une équipe basée en Côte d'Ivoire, aux fuseaux et usages qui sont les vôtres." },
 ]
-
-// ---------- Scroll helpers ----------
-
-function useScrolled(threshold = 40) {
-    const [scrolled, setScrolled] = useState(false)
-    useEffect(() => {
-        const onScroll = () => setScrolled(window.scrollY > threshold)
-        onScroll()
-        window.addEventListener("scroll", onScroll, { passive: true })
-        return () => window.removeEventListener("scroll", onScroll)
-    }, [threshold])
-    return scrolled
-}
-
-function useScrollProgress() {
-    const [progress, setProgress] = useState(0)
-    useEffect(() => {
-        const onScroll = () => {
-            const el = document.documentElement
-            const scrollable = el.scrollHeight - el.clientHeight
-            setProgress(scrollable > 0 ? Math.min(100, (el.scrollTop / scrollable) * 100) : 0)
-        }
-        onScroll()
-        window.addEventListener("scroll", onScroll, { passive: true })
-        return () => window.removeEventListener("scroll", onScroll)
-    }, [])
-    return progress
-}
-
-function Reveal({
-    children,
-    className = "",
-    delay = 0,
-}: {
-    children: ReactNode
-    className?: string
-    delay?: number
-}) {
-    const ref = useRef<HTMLDivElement>(null)
-    const [visible, setVisible] = useState(false)
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) {
-                    setVisible(true)
-                    observer.disconnect()
-                }
-            },
-            { threshold: 0.15, rootMargin: "0px 0px -60px 0px" },
-        )
-        observer.observe(el)
-        return () => observer.disconnect()
-    }, [])
-
-    return (
-        <div
-            ref={ref}
-            className={`reveal ${visible ? "reveal-visible" : ""} ${className}`}
-            style={{ transitionDelay: visible ? `${delay}ms` : "0ms" }}
-        >
-            {children}
-        </div>
-    )
-}
 
 // ---------- Match card ----------
 
@@ -198,64 +119,10 @@ function MatchCard({
 }
 
 export default function HomePage() {
-    const scrolled = useScrolled()
-    const progress = useScrollProgress()
-
     return (
         <div className={`min-h-screen bg-[#F7F8FC] ${mono.variable}`}>
-            {/* Scroll progress */}
-            <div className="fixed left-0 top-0 z-[60] h-[3px] w-full bg-transparent">
-                <div
-                    className="h-full bg-gradient-to-r from-[#FF6B4A] to-[#9db4ff] transition-[width] duration-150 ease-out"
-                    style={{ width: `${progress}%` }}
-                />
-            </div>
-
-            {/* Navigation */}
-            <header
-                className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
-                    scrolled ? "border-b border-black/[0.06] bg-[#F7F8FC]/90 backdrop-blur-md" : "border-b border-transparent bg-transparent"
-                }`}
-            >
-                <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
-                    <GoriyaLogo variant={scrolled ? "default" : "white"} />
-                    <nav className="hidden md:flex items-center gap-7">
-                        <a
-                            href="#comment-ca-marche"
-                            className={`text-sm font-medium transition-colors ${scrolled ? "text-[#5B6472] hover:text-[#0B1220]" : "text-white/80 hover:text-white"}`}
-                        >
-                            Comment ça marche
-                        </a>
-                        <Link
-                            href="/tarification"
-                            className={`text-sm font-medium transition-colors ${scrolled ? "text-[#5B6472] hover:text-[#0B1220]" : "text-white/80 hover:text-white"}`}
-                        >
-                            Tarifs
-                        </Link>
-                        <Link
-                            href="/auth/signin"
-                            className={`text-sm font-medium transition-colors ${scrolled ? "text-[#5B6472] hover:text-[#0B1220]" : "text-white/80 hover:text-white"}`}
-                        >
-                            Se connecter
-                        </Link>
-                        <Button
-                            className={`rounded-full px-5 transition-all duration-200 hover:scale-[1.04] ${
-                                scrolled ? "bg-[#0B1220] text-white hover:bg-[#0B1220]/90" : "bg-white text-[#0B1220] hover:bg-white/90"
-                            }`}
-                            asChild
-                        >
-                            <Link href="/auth/signup">Commencer</Link>
-                        </Button>
-                    </nav>
-                    <Button
-                        size="sm"
-                        className={`rounded-full transition-colors md:hidden ${scrolled ? "bg-[#0B1220] text-white" : "bg-white text-[#0B1220]"}`}
-                        asChild
-                    >
-                        <Link href="/auth/signup">Commencer</Link>
-                    </Button>
-                </div>
-            </header>
+            <ScrollProgress />
+            <SiteHeader page="home" />
 
             {/* Hero */}
             <section className="relative overflow-hidden bg-[#0B1220]">
@@ -557,72 +424,8 @@ export default function HomePage() {
                 </Reveal>
             </section>
 
-            {/* Footer */}
-            <footer className="bg-white py-10">
-                <div className="container mx-auto flex flex-col items-center justify-between gap-6 px-4 md:flex-row md:px-6">
-                    <GoriyaLogo showTagline={true} />
-                    <nav className="flex items-center gap-6 text-sm text-[#5B6472]">
-                        <a href="#comment-ca-marche" className="hover:text-[#0B1220] transition-colors">Comment ça marche</a>
-                        <Link href="/tarification" className="hover:text-[#0B1220] transition-colors">Tarifs</Link>
-                        <Link href="/assistance" className="hover:text-[#0B1220] transition-colors">Assistance</Link>
-                    </nav>
-                    <p className="text-xs text-[#8891ab]">
-                        © {new Date().getFullYear()} Goriya — Recrutement pour l&apos;Afrique de l&apos;Ouest.
-                    </p>
-                </div>
-            </footer>
-
-            <style jsx global>{`
-                .reveal {
-                    opacity: 0;
-                    transform: translateY(28px);
-                    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-                    will-change: opacity, transform;
-                }
-                .reveal-visible {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-                .match-card-hover:hover {
-                    transform: translateY(-3px);
-                }
-                @keyframes matchFloat1 {
-                    0%, 100% { transform: translateY(0) rotate(-3deg); }
-                    50% { transform: translateY(-12px) rotate(-3deg); }
-                }
-                @keyframes matchFloat2 {
-                    0%, 100% { transform: translateY(0) rotate(2deg); }
-                    50% { transform: translateY(10px) rotate(2deg); }
-                }
-                @keyframes matchFloat3 {
-                    0%, 100% { transform: translateY(0) rotate(-1deg); }
-                    50% { transform: translateY(-8px) rotate(-1deg); }
-                }
-                .match-float-1 { animation: matchFloat1 6s ease-in-out infinite; }
-                .match-float-2 { animation: matchFloat2 7s ease-in-out infinite; }
-                .match-float-3 { animation: matchFloat3 5.5s ease-in-out infinite; }
-                @keyframes orbDrift1 {
-                    0%, 100% { transform: translate(0, 0) scale(1); }
-                    50% { transform: translate(-30px, 30px) scale(1.08); }
-                }
-                @keyframes orbDrift2 {
-                    0%, 100% { transform: translate(0, 0) scale(1); }
-                    50% { transform: translate(25px, -20px) scale(1.06); }
-                }
-                .orb-drift-1 { animation: orbDrift1 14s ease-in-out infinite; }
-                .orb-drift-2 { animation: orbDrift2 16s ease-in-out infinite; }
-                @media (prefers-reduced-motion: reduce) {
-                    .reveal {
-                        opacity: 1;
-                        transform: none;
-                        transition: none;
-                    }
-                    .match-float-1, .match-float-2, .match-float-3,
-                    .orb-drift-1, .orb-drift-2 {
-                        animation: none;
-                    }
-                }
-            `}</style>
+            <SiteFooter />
+            <MarketingMotionStyles />
         </div>
     )
 }
