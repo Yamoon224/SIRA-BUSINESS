@@ -11,7 +11,7 @@ function RecrutementsContent() {
       <Card className="border border-border">
         <CardContent className="p-12 text-center text-muted-foreground">
           <UserPlus className="h-12 w-12 mx-auto mb-3 opacity-30" />
-          <p>Pipeline de recrutement — bientôt disponible</p>
+          <p>Pipeline de recrutement - bientôt disponible</p>
         </CardContent>
       </Card>
     </div>

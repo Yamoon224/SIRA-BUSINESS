@@ -50,7 +50,7 @@ function offerButtons(status: string): string[] {
 export default function Content(props: DashboardContentProps) {
   const kpis = KPI_TITLES.map((title, i) => ({
     title,
-    value: props.statsData?.[i]?.value ?? "—",
+    value: props.statsData?.[i]?.value ?? "-",
     Icon: KPI_ICONS[i],
   }))
 
@@ -72,11 +72,11 @@ export default function Content(props: DashboardContentProps) {
         tagClass: CANDIDATE_STATUS[c.status]?.tagClass ?? "bg-gray-100 text-gray-600",
       }))
     : [
-        { name: "—", role: "—", when: "—", score: 0, tag: "En attente", tagClass: "bg-amber-100 text-amber-600" },
+        { name: "-", role: "-", when: "-", score: 0, tag: "En attente", tagClass: "bg-amber-100 text-amber-600" },
       ]
 
   const bestOffers = props.topOffers?.length > 0
-    ? props.topOffers.map(o => ({ title: o.title, company: o.company?.name ?? "—" }))
+    ? props.topOffers.map(o => ({ title: o.title, company: o.company?.name ?? "-" }))
     : []
 
   const recents = props.recentOffers?.length > 0

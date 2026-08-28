@@ -16,7 +16,7 @@ export default function AuthLayout({
 }) {
     return (
         <div className="min-h-screen bg-[#F7F8FC] lg:grid lg:grid-cols-[440px_1fr]">
-            {/* Brand panel — desktop only */}
+            {/* Brand panel - desktop only */}
             <aside className="relative hidden overflow-hidden bg-[#0B1220] lg:flex lg:flex-col lg:justify-between lg:p-10">
                 <div
                     className="pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-soft-light"

@@ -230,7 +230,7 @@ function IntegrationsApiContent() {
                     {revealedToken ? (
                         <div className="space-y-3">
                             <p className="text-sm text-muted-foreground">
-                                Copiez cette clé maintenant — elle ne sera plus jamais affichée.
+                                Copiez cette clé maintenant - elle ne sera plus jamais affichée.
                             </p>
                             <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2">
                                 <code className="flex-1 truncate text-xs">{revealedToken}</code>
@@ -267,7 +267,7 @@ function IntegrationsApiContent() {
                     {revealedSecret ? (
                         <div className="space-y-3">
                             <p className="text-sm text-muted-foreground">
-                                Copiez ce secret maintenant — utilisez-le pour vérifier la signature HMAC des payloads reçus. Il ne sera plus jamais affiché.
+                                Copiez ce secret maintenant - utilisez-le pour vérifier la signature HMAC des payloads reçus. Il ne sera plus jamais affiché.
                             </p>
                             <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2">
                                 <code className="flex-1 truncate text-xs">{revealedSecret}</code>

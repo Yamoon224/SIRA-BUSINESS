@@ -152,7 +152,7 @@ export default function HomePage() {
 
                         <p className="mt-6 max-w-lg text-base leading-relaxed text-[#B7C0DB] sm:text-lg">
                             Goriya note et classe vos candidatures avec l&apos;IA, organise vos entretiens vidéo,
-                            et vous laisse le temps de choisir — pas de trier.
+                            et vous laisse le temps de choisir - pas de trier.
                         </p>
 
                         <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -171,7 +171,7 @@ export default function HomePage() {
                         </div>
                     </div>
 
-                    {/* Signature: floating match-card stack — desktop */}
+                    {/* Signature: floating match-card stack - desktop */}
                     <div className="relative hidden h-[380px] lg:block">
                         <MatchCard
                             candidate={candidates[0]}
@@ -190,7 +190,7 @@ export default function HomePage() {
                         />
                     </div>
 
-                    {/* Signature: static stack — mobile/tablet */}
+                    {/* Signature: static stack - mobile/tablet */}
                     <div className="flex flex-col gap-3 lg:hidden">
                         {candidates.map((c) => (
                             <MatchCard key={c.name} candidate={c} variant="glass" />
@@ -316,7 +316,7 @@ export default function HomePage() {
                                         <Video className="h-4 w-4 text-[#9db4ff]" />
                                     </span>
                                     <div>
-                                        <p className="text-sm font-semibold text-white">Entretien — Aïcha Koné</p>
+                                        <p className="text-sm font-semibold text-white">Entretien - Aïcha Koné</p>
                                         <p className="text-xs text-[#8891ab]">Goriya Call</p>
                                     </div>
                                 </div>

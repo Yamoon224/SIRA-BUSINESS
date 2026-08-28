@@ -152,7 +152,7 @@ export function Content({ init }: AnnonceContentProps) {
             <Dialog open={!!compareFor} onOpenChange={(open) => !open && setCompareFor(null)}>
                 <DialogContent className="max-w-lg">
                     <DialogHeader>
-                        <DialogTitle>Classement des candidats — {compareFor?.title}</DialogTitle>
+                        <DialogTitle>Classement des candidats - {compareFor?.title}</DialogTitle>
                     </DialogHeader>
                     {compareLoading ? (
                         <div className="flex items-center justify-center py-10">
@@ -160,7 +160,7 @@ export function Content({ init }: AnnonceContentProps) {
                         </div>
                     ) : !ranking || ranking.length === 0 ? (
                         <p className="text-sm text-muted-foreground">
-                            Pas encore assez de candidats évalués pour cette offre (au moins 2 évaluations IA requises — voir l'onglet Candidatures).
+                            Pas encore assez de candidats évalués pour cette offre (au moins 2 évaluations IA requises - voir l'onglet Candidatures).
                         </p>
                     ) : (
                         <ol className="space-y-2">

@@ -67,7 +67,7 @@ function CandidaturesContent() {
         load()
     }, [])
 
-    // Pas de route dédiée /candidatures/{id}/status côté backend — PATCH
+    // Pas de route dédiée /candidatures/{id}/status côté backend - PATCH
     // /candidatures/{id} accepte déjà `status` et vérifie que l'appelant est
     // bien le candidat ou l'entreprise propriétaire de l'offre concernée.
     const handleAccept = async (id: string) => {
@@ -115,7 +115,7 @@ function CandidaturesContent() {
             const res = await candidateAssessmentService.get(candidate.id)
             setAssessment((res as any)?.data ?? res)
         } catch {
-            // Pas encore d'évaluation générée pour cette candidature — normal, l'utilisateur peut en lancer une.
+            // Pas encore d'évaluation générée pour cette candidature - normal, l'utilisateur peut en lancer une.
             setAssessment(null)
         } finally {
             setAssessmentLoading(false)
@@ -277,7 +277,7 @@ function CandidaturesContent() {
             <Dialog open={!!assessmentFor} onOpenChange={(open) => !open && setAssessmentFor(null)}>
                 <DialogContent className="max-w-lg">
                     <DialogHeader>
-                        <DialogTitle>Évaluation IA — {assessmentFor?.name}</DialogTitle>
+                        <DialogTitle>Évaluation IA - {assessmentFor?.name}</DialogTitle>
                     </DialogHeader>
 
                     {assessmentLoading ? (
@@ -348,7 +348,7 @@ function ScoreRow({ label, value }: { label: string; value: number | null }) {
         <div>
             <div className="mb-1 flex items-center justify-between text-xs">
                 <span className="text-foreground">{label}</span>
-                <span className="font-semibold text-foreground">{value ?? "—"}{value !== null ? "/100" : ""}</span>
+                <span className="font-semibold text-foreground">{value ?? "-"}{value !== null ? "/100" : ""}</span>
             </div>
             <Progress value={value ?? 0} className="h-1.5" />
         </div>

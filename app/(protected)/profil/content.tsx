@@ -24,10 +24,10 @@ export default function Content({ company }: ProfilContentProps) {
     const totalApplicants = (company.jobOffers as any[])?.reduce((sum: number, j: any) => sum + (j.applicants ?? 0), 0) ?? null
 
     const stats = [
-        { value: company.companySize ?? "—", label: "Employés",       color: "text-blue-500" },
-        { value: activeOffers != null ? String(activeOffers) : "—",  label: "Offres actives",  color: "text-orange-400" },
-        { value: "—", label: "Note moyenne",    color: "text-yellow-400" },
-        { value: totalApplicants != null ? String(totalApplicants) : "—", label: "Candidatures",    color: "text-green-500" },
+        { value: company.companySize ?? "-", label: "Employés",       color: "text-blue-500" },
+        { value: activeOffers != null ? String(activeOffers) : "-",  label: "Offres actives",  color: "text-orange-400" },
+        { value: "-", label: "Note moyenne",    color: "text-yellow-400" },
+        { value: totalApplicants != null ? String(totalApplicants) : "-", label: "Candidatures",    color: "text-green-500" },
     ]
 
     const addBenefit = () => {

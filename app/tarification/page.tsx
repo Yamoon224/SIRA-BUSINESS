@@ -92,7 +92,7 @@ export default function TarificationPage() {
                         </span>
                     </h1>
                     <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-[#B7C0DB] sm:text-lg">
-                        Du premier poste publié à la croissance de votre équipe RH — sans surprise sur la facture,
+                        Du premier poste publié à la croissance de votre équipe RH - sans surprise sur la facture,
                         réglable en Mobile Money.
                     </p>
                 </div>
@@ -231,7 +231,7 @@ export default function TarificationPage() {
                         Prêt à recruter avec Goriya ?
                     </h2>
                     <p className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-[#B7C0DB]">
-                        Sans engagement caché, sans carte bancaire internationale — commencez dès aujourd&apos;hui.
+                        Sans engagement caché, sans carte bancaire internationale - commencez dès aujourd&apos;hui.
                     </p>
                     <div className="mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row">
                         <Button size="lg" className="rounded-full bg-white px-7 font-semibold text-[#0B1220] transition-transform duration-200 hover:scale-[1.03] hover:bg-white/90" asChild>

@@ -11,7 +11,7 @@ function CongesContent() {
       <Card className="border border-border">
         <CardContent className="p-12 text-center text-muted-foreground">
           <Calendar className="h-12 w-12 mx-auto mb-3 opacity-30" />
-          <p>Gestion des congés — bientôt disponible</p>
+          <p>Gestion des congés - bientôt disponible</p>
         </CardContent>
       </Card>
     </div>

@@ -120,7 +120,7 @@ function EvaluationsContent() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-xl font-semibold text-foreground">Évaluations Employés</h1>
-                    <p className="mt-1 text-sm text-muted-foreground">Enquêtes internes anonymes — les réponses ne sont jamais individuellement identifiables.</p>
+                    <p className="mt-1 text-sm text-muted-foreground">Enquêtes internes anonymes - les réponses ne sont jamais individuellement identifiables.</p>
                 </div>
                 <Button className="gap-1.5 bg-blue-500 hover:bg-blue-600" onClick={() => setCreateOpen(true)}>
                     <Plus className="h-4 w-4" />Nouvelle enquête
@@ -226,7 +226,7 @@ function EvaluationsContent() {
             {/* Statistiques */}
             <Dialog open={!!statsFor} onOpenChange={(open) => !open && setStatsFor(null)}>
                 <DialogContent className="max-w-lg">
-                    <DialogHeader><DialogTitle>Statistiques — {statsFor?.title}</DialogTitle></DialogHeader>
+                    <DialogHeader><DialogTitle>Statistiques - {statsFor?.title}</DialogTitle></DialogHeader>
                     {statsLoading ? (
                         <div className="flex items-center justify-center py-10">
                             <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
@@ -241,7 +241,7 @@ function EvaluationsContent() {
                                             <span className="text-xs text-foreground">{q.question}</span>
                                             <span className="flex items-center gap-1 text-xs font-semibold text-foreground">
                                                 <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                                                {stats.ratings[q.id] ?? "—"}
+                                                {stats.ratings[q.id] ?? "-"}
                                             </span>
                                         </div>
                                     ))}

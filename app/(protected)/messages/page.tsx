@@ -14,9 +14,9 @@ type Message = { id: string; content: string; time: string; isMe: boolean }
 function mapConversation(raw: any): Conversation {
     return {
         id: String(raw.id ?? raw._id ?? ""),
-        name: raw.name ?? raw.participantName ?? raw.candidate?.name ?? "—",
+        name: raw.name ?? raw.participantName ?? raw.candidate?.name ?? "-",
         role: raw.role ?? raw.candidate?.title ?? "Candidat",
-        time: raw.lastMessageAt ? new Date(raw.lastMessageAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "—",
+        time: raw.lastMessageAt ? new Date(raw.lastMessageAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "-",
         unread: raw.unreadCount ?? 0,
         lastMessage: raw.lastMessage ?? raw.preview ?? "",
     }

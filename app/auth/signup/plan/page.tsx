@@ -59,7 +59,7 @@ export default function ChoosePlanPage() {
         }
     }
 
-    // Callbacks du widget Kkiapay, branchés une seule fois via Script.onLoad —
+    // Callbacks du widget Kkiapay, branchés une seule fois via Script.onLoad -
     // pendingCheckoutRef reste à jour même si ce closure n'est pas recréé.
     const handleKkiapaySuccess = (response: { transactionId: string }) => {
         const pending = pendingCheckoutRef.current

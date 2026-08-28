@@ -179,7 +179,7 @@ export default function Page() {
         <div>
             <div className="mb-8 text-center">
                 <h1 className="text-3xl text-[#0B1220]">Créez votre espace entreprise</h1>
-                <p className="mt-2 text-sm text-[#5B6472]">Quelques informations pour démarrer — deux minutes suffisent.</p>
+                <p className="mt-2 text-sm text-[#5B6472]">Quelques informations pour démarrer - deux minutes suffisent.</p>
             </div>
 
             <SignupStepper currentStep={currentStep} steps={steps} />
