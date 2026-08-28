@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Field, FieldLabel, FieldGroup } from "@/components/ui/field"
 import { getSession, signIn, signOut } from "next-auth/react"
-import { fraunces } from "@/lib/marketing/fonts"
 
 export default function Page() {
     const router = useRouter()
@@ -78,7 +77,7 @@ export default function Page() {
 
     return (
         <div className="mx-auto mt-6 w-full max-w-md rounded-3xl border border-black/[0.06] bg-white p-8 shadow-[0_20px_60px_-30px_rgba(11,18,32,0.25)] sm:p-10">
-            <h2 className={`${fraunces.className} text-center text-3xl text-[#0B1220]`}>Bon retour.</h2>
+            <h2 className="text-center text-3xl text-[#0B1220]">Bon retour.</h2>
             <p className="mt-2 text-center text-sm text-[#5B6472]">Connectez-vous à votre espace entreprise.</p>
 
             <form onSubmit={handleSubmit} className="mt-8 space-y-3">

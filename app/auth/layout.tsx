@@ -1,7 +1,6 @@
 import Link from "next/link"
 import { ChevronLeft, Sparkles, Video, Wallet } from "lucide-react"
 import { GoriyaLogo } from "@/components/goriya-logo"
-import { fraunces, marketingMono as mono } from "@/lib/marketing/fonts"
 import { MarketingMotionStyles } from "@/components/marketing/reveal"
 
 const pitchPoints = [
@@ -16,7 +15,7 @@ export default function AuthLayout({
     children: React.ReactNode
 }) {
     return (
-        <div className={`min-h-screen bg-[#F7F8FC] lg:grid lg:grid-cols-[440px_1fr] ${mono.variable}`}>
+        <div className="min-h-screen bg-[#F7F8FC] lg:grid lg:grid-cols-[440px_1fr]">
             {/* Brand panel — desktop only */}
             <aside className="relative hidden overflow-hidden bg-[#0B1220] lg:flex lg:flex-col lg:justify-between lg:p-10">
                 <div
@@ -36,7 +35,7 @@ export default function AuthLayout({
 
                 <div className="relative z-10">
                     <GoriyaLogo variant="white" />
-                    <h2 className={`${fraunces.className} mt-8 max-w-xs text-3xl leading-[1.15] text-white`}>
+                    <h2 className="mt-8 max-w-xs text-3xl leading-[1.15] text-white">
                         Le bon candidat,{" "}
                         <span
                             className="bg-gradient-to-r from-[#FF6B4A] via-[#c9a2ff] to-[#9db4ff] bg-clip-text italic text-transparent"

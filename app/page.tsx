@@ -2,7 +2,6 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { fraunces, marketingMono as mono } from "@/lib/marketing/fonts"
 import { Reveal, ScrollProgress, MarketingMotionStyles } from "@/components/marketing/reveal"
 import { SiteHeader } from "@/components/marketing/site-header"
 import { SiteFooter } from "@/components/marketing/site-footer"
@@ -120,7 +119,7 @@ function MatchCard({
 
 export default function HomePage() {
     return (
-        <div className={`min-h-screen bg-[#F7F8FC] ${mono.variable}`}>
+        <div className="min-h-screen bg-[#F7F8FC]">
             <ScrollProgress />
             <SiteHeader page="home" />
 
@@ -138,13 +137,8 @@ export default function HomePage() {
 
                 <div className="container relative z-10 mx-auto grid grid-cols-1 gap-16 px-4 pb-20 pt-32 md:px-6 md:pb-28 md:pt-36 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pb-32 lg:pt-40">
                     <div>
-                        <div className={`inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9db4ff] ${mono.className}`}>
-                            <span className="h-1.5 w-1.5 rounded-full bg-[#FF6B4A]" />
-                            Recrutement augmenté par l&apos;IA · UEMOA
-                        </div>
-
                         <h1
-                            className={`${fraunces.className} mt-6 text-4xl leading-[1.06] tracking-tight text-white sm:text-5xl md:text-[3.75rem]`}
+                            className="text-4xl leading-[1.06] tracking-tight text-white sm:text-5xl md:text-[3.75rem]"
                         >
                             Le bon candidat,
                             <br />
@@ -264,10 +258,10 @@ export default function HomePage() {
             <section id="comment-ca-marche" className="bg-[#F7F8FC] py-24">
                 <div className="container mx-auto px-4 md:px-6">
                     <Reveal className="mx-auto max-w-2xl text-center">
-                        <p className={`${mono.className} text-[11px] font-semibold uppercase tracking-[0.14em] text-[#FF6B4A]`}>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#FF6B4A]">
                             Le parcours
                         </p>
-                        <h2 className={`${fraunces.className} mt-3 text-3xl text-[#0B1220] sm:text-4xl`}>
+                        <h2 className="mt-3 text-3xl text-[#0B1220] sm:text-4xl">
                             De l&apos;offre à l&apos;embauche, en quatre étapes
                         </h2>
                     </Reveal>
@@ -277,7 +271,7 @@ export default function HomePage() {
                         {steps.map((step, i) => (
                             <Reveal key={step.n} delay={i * 90} className="relative flex flex-col items-start">
                                 <span
-                                    className={`${mono.className} relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-[#0B1220] text-sm text-white transition-transform duration-300 hover:scale-110`}
+                                    className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-[#0B1220] text-sm text-white transition-transform duration-300 hover:scale-110"
                                 >
                                     {step.n}
                                 </span>
@@ -294,10 +288,10 @@ export default function HomePage() {
                 <div className="container mx-auto flex flex-col gap-24 px-4 md:px-6">
                     <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
                         <Reveal>
-                            <p className={`${mono.className} text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2447FF]`}>
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2447FF]">
                                 Scoring IA
                             </p>
-                            <h3 className={`${fraunces.className} mt-3 text-2xl text-[#0B1220] sm:text-3xl`}>
+                            <h3 className="mt-3 text-2xl text-[#0B1220] sm:text-3xl">
                                 Un tri qui vous fait gagner des journées entières
                             </h3>
                             <p className="mt-4 max-w-md text-[15px] leading-relaxed text-[#5B6472]">
@@ -342,10 +336,10 @@ export default function HomePage() {
                             </div>
                         </Reveal>
                         <Reveal delay={120} className="order-1 lg:order-2">
-                            <p className={`${mono.className} text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2447FF]`}>
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2447FF]">
                                 Goriya Call
                             </p>
-                            <h3 className={`${fraunces.className} mt-3 text-2xl text-[#0B1220] sm:text-3xl`}>
+                            <h3 className="mt-3 text-2xl text-[#0B1220] sm:text-3xl">
                                 Des entretiens qui ne quittent jamais la plateforme
                             </h3>
                             <p className="mt-4 max-w-md text-[15px] leading-relaxed text-[#5B6472]">
@@ -361,7 +355,7 @@ export default function HomePage() {
             <section className="bg-[#FFF4F0] py-20">
                 <div className="container mx-auto px-4 md:px-6">
                     <Reveal className="mx-auto max-w-2xl text-center">
-                        <h2 className={`${fraunces.className} text-3xl text-[#0B1220] sm:text-4xl`}>
+                        <h2 className="text-3xl text-[#0B1220] sm:text-4xl">
                             Conçu pour vos réalités, pas importé d&apos;ailleurs
                         </h2>
                     </Reveal>
@@ -401,7 +395,7 @@ export default function HomePage() {
             <section className="relative overflow-hidden bg-[#0B1220] py-24">
                 <div className="orb-drift-1 pointer-events-none absolute left-1/2 top-0 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-[#2447FF]/20 blur-[130px]" />
                 <Reveal className="container relative z-10 mx-auto px-4 text-center md:px-6">
-                    <h2 className={`${fraunces.className} mx-auto max-w-xl text-3xl text-white sm:text-4xl`}>
+                    <h2 className="mx-auto max-w-xl text-3xl text-white sm:text-4xl">
                         Donnez à votre équipe RH une longueur d&apos;avance
                     </h2>
                     <p className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-[#B7C0DB]">

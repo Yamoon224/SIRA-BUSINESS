@@ -10,7 +10,6 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion"
-import { fraunces, marketingMono as mono } from "@/lib/marketing/fonts"
 import { Reveal, ScrollProgress, MarketingMotionStyles } from "@/components/marketing/reveal"
 import { SiteHeader } from "@/components/marketing/site-header"
 import { SiteFooter } from "@/components/marketing/site-footer"
@@ -62,7 +61,7 @@ export default function TarificationPage() {
     const businessPlus = plans.find((p) => p.billingPeriod === "ANNUAL")
 
     return (
-        <div className={`min-h-screen bg-[#F7F8FC] ${mono.variable}`}>
+        <div className="min-h-screen bg-[#F7F8FC]">
             <ScrollProgress />
             <SiteHeader page="tarification" />
 
@@ -79,11 +78,11 @@ export default function TarificationPage() {
                 <div className="orb-drift-2 pointer-events-none absolute bottom-[-25%] left-[-10%] h-[360px] w-[360px] rounded-full bg-[#FF6B4A]/15 blur-[110px]" />
 
                 <div className="container relative z-10 mx-auto px-4 pb-20 pt-32 text-center md:px-6 md:pb-24 md:pt-40">
-                    <div className={`inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9db4ff] ${mono.className}`}>
+                    <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9db4ff]">
                         <span className="h-1.5 w-1.5 rounded-full bg-[#FF6B4A]" />
                         Tarification
                     </div>
-                    <h1 className={`${fraunces.className} mx-auto mt-6 max-w-2xl text-4xl leading-[1.1] tracking-tight text-white sm:text-5xl`}>
+                    <h1 className="mx-auto mt-6 max-w-2xl text-4xl leading-[1.1] tracking-tight text-white sm:text-5xl">
                         Un tarif simple,{" "}
                         <span
                             className="bg-gradient-to-r from-[#FF6B4A] via-[#c9a2ff] to-[#9db4ff] bg-clip-text italic text-transparent"
@@ -113,7 +112,7 @@ export default function TarificationPage() {
                                 <div className="relative w-full max-w-[400px] self-center lg:w-[320px] lg:max-w-none">
                                     <div className="absolute -top-3 left-1/2 z-10 -translate-x-1/2">
                                         <span
-                                            className={`${mono.className} whitespace-nowrap rounded-full bg-[#0B1220] px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-white shadow-lg`}
+                                            className="whitespace-nowrap rounded-full bg-[#0B1220] px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-white shadow-lg"
                                         >
                                             Forfait populaire
                                         </span>
@@ -124,7 +123,7 @@ export default function TarificationPage() {
                                                 <h3 className="text-2xl font-semibold text-[#0B1220]">{business.name}</h3>
                                                 <p className="mt-1 text-sm text-[#5B6472]">Pour les entreprises en croissance</p>
                                                 <div className="mt-5 flex items-baseline gap-1.5">
-                                                    <span className={`${fraunces.className} text-4xl text-[#0B1220]`}>
+                                                    <span className="text-4xl text-[#0B1220]">
                                                         {Number(business.price).toLocaleString("fr-FR")}
                                                     </span>
                                                     <span className="text-sm font-medium text-[#5B6472]">FCFA / mois</span>
@@ -158,7 +157,7 @@ export default function TarificationPage() {
                                             <h3 className="text-2xl font-semibold text-[#0B1220]">{businessPlus.name}</h3>
                                             <p className="mt-1 text-sm text-[#5B6472]">Pour les grandes entreprises</p>
                                             <div className="mt-5 flex items-baseline gap-1.5">
-                                                <span className={`${fraunces.className} text-4xl text-[#0B1220]`}>
+                                                <span className="text-4xl text-[#0B1220]">
                                                     {Number(businessPlus.price).toLocaleString("fr-FR")}
                                                 </span>
                                                 <span className="text-sm font-medium text-[#5B6472]">FCFA / an</span>
@@ -199,10 +198,10 @@ export default function TarificationPage() {
             <section className="bg-white py-24">
                 <div className="container mx-auto px-4 md:px-6">
                     <Reveal className="mx-auto max-w-2xl text-center">
-                        <p className={`${mono.className} text-[11px] font-semibold uppercase tracking-[0.14em] text-[#FF6B4A]`}>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#FF6B4A]">
                             Questions fréquentes
                         </p>
-                        <h2 className={`${fraunces.className} mt-3 text-3xl text-[#0B1220] sm:text-4xl`}>
+                        <h2 className="mt-3 text-3xl text-[#0B1220] sm:text-4xl">
                             Ce que nos clients demandent le plus
                         </h2>
                     </Reveal>
@@ -228,7 +227,7 @@ export default function TarificationPage() {
             <section className="relative overflow-hidden bg-[#0B1220] py-24">
                 <div className="orb-drift-1 pointer-events-none absolute left-1/2 top-0 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-[#2447FF]/20 blur-[130px]" />
                 <Reveal className="container relative z-10 mx-auto px-4 text-center md:px-6">
-                    <h2 className={`${fraunces.className} mx-auto max-w-xl text-3xl text-white sm:text-4xl`}>
+                    <h2 className="mx-auto max-w-xl text-3xl text-white sm:text-4xl">
                         Prêt à recruter avec Goriya ?
                     </h2>
                     <p className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-[#B7C0DB]">
