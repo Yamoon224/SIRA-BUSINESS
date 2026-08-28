@@ -3,7 +3,7 @@ import { GoriyaLogo } from "@/components/goriya-logo"
 
 export function SiteFooter() {
     return (
-        <footer className="bg-white py-4">
+        <footer className="bg-white py-2">
             <div className="container mx-auto flex flex-col items-center justify-between gap-6 px-4 md:flex-row md:px-6">
                 <GoriyaLogo showTagline={true} />
                 <nav className="flex items-center gap-6 text-sm text-[#5B6472]">
