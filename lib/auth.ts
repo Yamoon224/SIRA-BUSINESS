@@ -110,6 +110,47 @@ export const authOptions = {
                 };
             },
         }),
+
+        // Connexion via Google. Le `credential` (ID token) est revérifié côté
+        // serveur par POST /auth/google — on ne fait jamais confiance à des
+        // données d'identité envoyées par le client. `allowSignup: false` :
+        // l'espace entreprise n'ouvre une session que pour un compte ENTREPRISE
+        // déjà existant (la création d'un compte passe par /auth/signup).
+        CredentialsProvider({
+            id: "google",
+            name: "Google",
+            credentials: {
+                credential: { label: "Google credential", type: "text" },
+            },
+            async authorize(credentials) {
+                const credential = credentials?.credential as string | undefined;
+                if (!credential) return null;
+
+                try {
+                    const res = await apiRequest<{ access_token: string; user: any }>({
+                        endpoint: "/auth/google",
+                        method: "POST",
+                        data: { credential, allowSignup: false },
+                    });
+
+                    const payload = (res as any)?.data ?? res;
+                    if (!payload?.access_token || !payload?.user) return null;
+                    if (payload.user.role !== "ENTREPRISE" || !payload.user.company?.id) return null;
+
+                    return {
+                        id: payload.user.id,
+                        name: payload.user.name,
+                        email: payload.user.email,
+                        role: payload.user.role,
+                        companyId: payload.user.company.id,
+                        access_token: payload.access_token,
+                    };
+                } catch (error: any) {
+                    console.error("[authorize:google] échec:", error?.message ?? error);
+                    return null;
+                }
+            },
+        }),
     ],
     session: { strategy: "jwt" as const },
     secret: authSecret,
