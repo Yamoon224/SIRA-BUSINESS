@@ -17,7 +17,10 @@ function PaymentSuccessContent() {
     useEffect(() => {
         const userId = params.get("userId") || sessionStorage.getItem("entreprise_signup_userId")
         const planId = params.get("planId")
-        const transactionId = sessionStorage.getItem("kkiapay_transaction_id")
+        const gateway = params.get("gateway") ?? undefined
+        const transactionId = gateway === "paiementpro"
+            ? params.get("ref")
+            : sessionStorage.getItem("kkiapay_transaction_id")
 
         if (!userId || !planId || !transactionId) {
             setErrorMsg("Paramètres de paiement introuvables.")
@@ -25,17 +28,35 @@ function PaymentSuccessContent() {
             return
         }
 
-        subscriptionService.verifyCheckout(transactionId, userId, planId)
-            .then(() => {
-                sessionStorage.removeItem("kkiapay_transaction_id")
-                sessionStorage.removeItem("entreprise_signup_userId")
-                setState("success")
-            })
-            .catch((err: any) => {
-                const msg = err?.response?.data?.message ?? err?.message ?? "Paiement non confirmé."
-                setErrorMsg(msg)
-                setState("error")
-            })
+        let cancelled = false
+        // Paiement Pro confirme via une notification serveur-à-serveur qui peut
+        // arriver après le retour du navigateur — on re-tente quelques fois.
+        const maxAttempts = gateway === "paiementpro" ? 5 : 1
+
+        const attempt = (n: number) => {
+            subscriptionService.verifyCheckout(transactionId, userId, planId, gateway)
+                .then(() => {
+                    if (cancelled) return
+                    sessionStorage.removeItem("kkiapay_transaction_id")
+                    sessionStorage.removeItem("entreprise_signup_userId")
+                    setState("success")
+                })
+                .catch((err: any) => {
+                    if (cancelled) return
+                    if (n < maxAttempts) {
+                        setTimeout(() => attempt(n + 1), 3000)
+                        return
+                    }
+                    const msg = gateway === "paiementpro"
+                        ? "Paiement en cours de confirmation. Réessayez dans un instant."
+                        : err?.response?.data?.message ?? err?.message ?? "Paiement non confirmé."
+                    setErrorMsg(msg)
+                    setState("error")
+                })
+        }
+        attempt(1)
+
+        return () => { cancelled = true }
     }, [params])
 
     useEffect(() => {

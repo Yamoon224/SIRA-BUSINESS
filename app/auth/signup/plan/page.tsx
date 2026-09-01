@@ -23,7 +23,20 @@ export default function ChoosePlanPage() {
     const [loading, setLoading] = useState(true)
     const [subscribing, setSubscribing] = useState<string | null>(null)
     const [loadError, setLoadError] = useState(false)
+    const [gateways, setGateways] = useState<string[]>([])
+    const [gateway, setGateway] = useState<string>("kkiapay")
+    const [phone, setPhone] = useState("")
     const pendingCheckoutRef = useRef<{ userId: string; planId: string } | null>(null)
+
+    useEffect(() => {
+        subscriptionService.getPaymentGateways()
+            .then((res) => {
+                const data = (res as any)?.data ?? res
+                setGateways(data?.enabledGateways ?? [])
+                if (data?.defaultGateway) setGateway(data.defaultGateway)
+            })
+            .catch(() => {})
+    }, [])
 
     useEffect(() => {
         subscriptionService.getPlans("ENTREPRISE")
@@ -45,8 +58,28 @@ export default function ChoosePlanPage() {
             router.push("/auth/signup/success")
             return
         }
+        if (gateway === "paiementpro" && phone.trim().length < 8) {
+            toast.error("Renseignez un numéro de téléphone pour payer via Paiement Pro.")
+            return
+        }
         setSubscribing(planId)
         try {
+            if (gateway === "paiementpro") {
+                const origin = window.location.origin
+                const res = await subscriptionService.createCheckout({
+                    userId,
+                    planId,
+                    gateway: "paiementpro",
+                    customerPhone: phone.trim(),
+                    successUrl: `${origin}/auth/payment-success?userId=${userId}&planId=${planId}&gateway=paiementpro`,
+                    errorUrl: `${origin}/auth/payment-error?planId=${planId}`,
+                })
+                const data = (res as any)?.data ?? res
+                if (!data?.checkoutUrl) throw new Error("checkoutUrl manquante")
+                window.location.href = data.checkoutUrl
+                return
+            }
+
             const res = await subscriptionService.createCheckout({ userId, planId })
             const data = (res as any)?.data ?? res
             pendingCheckoutRef.current = { userId, planId }
@@ -119,6 +152,41 @@ export default function ChoosePlanPage() {
             <p className="mb-8 text-center text-base tracking-[0.4em] text-muted-foreground sm:mb-10">
                 + + +
             </p>
+
+            {gateways.includes("kkiapay") && gateways.includes("paiementpro") && (
+                <div className="mx-auto mb-8 max-w-md">
+                    <p className="mb-2 text-center text-xs font-medium text-muted-foreground">Moyen de paiement</p>
+                    <div className="grid grid-cols-2 gap-2">
+                        {[
+                            { id: "kkiapay", label: "Kkiapay" },
+                            { id: "paiementpro", label: "Paiement Pro" },
+                        ].map((g) => (
+                            <button
+                                key={g.id}
+                                type="button"
+                                onClick={() => setGateway(g.id)}
+                                className={`rounded-xl border-2 px-4 py-2 text-sm font-semibold transition-colors ${
+                                    gateway === g.id
+                                        ? "border-blue-600 bg-blue-50 text-blue-600"
+                                        : "border-gray-200 text-muted-foreground hover:border-gray-300"
+                                }`}
+                            >
+                                {g.label}
+                            </button>
+                        ))}
+                    </div>
+                    {gateway === "paiementpro" && (
+                        <input
+                            type="tel"
+                            inputMode="tel"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            placeholder="Numéro de téléphone (Mobile Money)"
+                            className="mt-3 w-full rounded-xl border border-gray-200 px-4 py-2 text-sm outline-none focus:border-blue-600"
+                        />
+                    )}
+                </div>
+            )}
 
             <div className="flex flex-col items-stretch justify-center gap-4 lg:flex-row lg:items-start">
                 {/* Business (monthly) */}
