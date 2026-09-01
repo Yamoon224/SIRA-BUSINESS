@@ -9,13 +9,18 @@ import { updateCompany } from "@/actions/companies"
 import { ProfilContentProps } from "@/@types/props"
 import { ICompany } from "@/@types/interface"
 import { toast } from "sonner"
-import { Camera, MapPin, Globe, Users, Calendar, Save, Plus, X } from "lucide-react"
+import { Camera, MapPin, Globe, Users, Calendar, Save, Plus, X, ImagePlus } from "lucide-react"
 
 export default function Content({ company }: ProfilContentProps) {
     const { data: session } = useSession()
     const [loading, setLoading] = useState(false)
     const [logo, setLogo] = useState<File | null>(null)
+    const [cover, setCover] = useState<File | null>(null)
+    const [galleryNew, setGalleryNew] = useState<File[]>([])
+    const [removedGallery, setRemovedGallery] = useState<string[]>([])
     const [companyData, setCompanyData] = useState<ICompany>(company)
+
+    const existingGallery = (companyData.gallery ?? []).filter((url) => !removedGallery.includes(url))
     const [benefits, setBenefits] = useState<string[]>([])
     const [newBenefit, setNewBenefit] = useState("")
     const [mission, setMission] = useState(company.about ?? "")
@@ -57,9 +62,20 @@ export default function Content({ company }: ProfilContentProps) {
                 formData.append("creationDate", new Date(companyData.creationDate).toISOString())
             }
             if (logo) formData.append("logo", logo)
+            if (cover) formData.append("coverImage", cover)
+            galleryNew.forEach((file) => formData.append("gallery[]", file))
+            removedGallery.forEach((url) => formData.append("removedGallery[]", url))
             // ✅ Appel relayé via /api/proxy : le Bearer token est attaché côté serveur
             // à partir de la session NextAuth, sans jamais transiter par le client.
-            await updateCompany(companyId, formData)
+            const updated = await updateCompany(companyId, formData) as any
+            const fresh = (updated?.data ?? updated) as ICompany
+            if (fresh?.id) {
+                setCompanyData(fresh)
+                setGalleryNew([])
+                setRemovedGallery([])
+                setLogo(null)
+                setCover(null)
+            }
             toast.success("Profil Entreprise mis à jour")
         } catch (error: any) {
             toast.error(error.message)
@@ -76,21 +92,43 @@ export default function Content({ company }: ProfilContentProps) {
             </div>
 
             {/* ── Section identité ── */}
-            <div className="rounded-xl border border-border bg-white p-6">
-                <div className="flex flex-col items-start gap-5 md:flex-row">
+            <div className="overflow-hidden rounded-xl border border-border bg-white">
+                {/* Bandeau de couverture éditable */}
+                <div className="relative h-40 w-full bg-gradient-to-r from-blue-600 to-blue-400">
+                    {(cover || companyData.coverImage) && (
+                        <img
+                            src={cover ? URL.createObjectURL(cover) : (companyData.coverImage as string)}
+                            alt="couverture"
+                            className="h-full w-full object-cover"
+                            onError={(e) => { e.currentTarget.style.display = "none" }}
+                        />
+                    )}
+                    <label className="absolute bottom-3 right-3 flex cursor-pointer items-center gap-1.5 rounded-full bg-black/50 px-3 py-1.5 text-xs font-medium text-white backdrop-blur hover:bg-black/60">
+                        <Camera className="h-3.5 w-3.5" />
+                        Modifier la couverture
+                        <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/jpg,image/webp"
+                            className="hidden"
+                            onChange={(e) => setCover(e.target.files?.[0] || null)}
+                        />
+                    </label>
+                </div>
+
+                <div className="flex flex-col items-start gap-5 p-6 md:flex-row">
                     {/* Avatar + camera */}
-                    <div className="relative shrink-0">
-                        <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-blue-500">
-                            {companyData.logo ? (
+                    <div className="relative -mt-14 shrink-0">
+                        <div className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-blue-500">
+                            <span className="text-2xl font-bold text-white">
+                                {companyData.name?.[0]?.toUpperCase() ?? "C"}
+                            </span>
+                            {(logo || companyData.logo) && (
                                 <img
-                                    src={"https://goriya-backend-production.up.railway.app/" + companyData.logo}
+                                    src={logo ? URL.createObjectURL(logo) : (companyData.logo as string)}
                                     alt="logo"
-                                    className="h-full w-full object-cover"
+                                    className="absolute inset-0 h-full w-full object-cover"
+                                    onError={(e) => { e.currentTarget.style.display = "none" }}
                                 />
-                            ) : (
-                                <span className="text-2xl font-bold text-white">
-                                    {companyData.name?.[0]?.toUpperCase() ?? "C"}
-                                </span>
                             )}
                         </div>
                         <label className="absolute -bottom-1 -right-1 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-blue-500 shadow">
@@ -203,6 +241,61 @@ export default function Content({ company }: ProfilContentProps) {
                         rows={3}
                         className="text-sm resize-none"
                     />
+                </div>
+            </div>
+
+            {/* ── Galerie photos ── */}
+            <div className="rounded-xl border border-border bg-white p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-base font-semibold text-foreground">Galerie photos</h2>
+                    <span className="text-xs text-muted-foreground">{existingGallery.length + galleryNew.length}/12</span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                    Ces photos illustrent votre entreprise sur votre fiche publique (locaux, équipe, événements…).
+                </p>
+
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                    {existingGallery.map((url) => (
+                        <div key={url} className="group relative aspect-video overflow-hidden rounded-lg border border-border">
+                            <img src={url} alt="" className="h-full w-full object-cover" onError={(e) => { e.currentTarget.style.display = "none" }} />
+                            <button
+                                type="button"
+                                onClick={() => setRemovedGallery((prev) => [...prev, url])}
+                                className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                            >
+                                <X className="h-3.5 w-3.5" />
+                            </button>
+                        </div>
+                    ))}
+                    {galleryNew.map((file, i) => (
+                        <div key={i} className="group relative aspect-video overflow-hidden rounded-lg border border-dashed border-blue-400">
+                            <img src={URL.createObjectURL(file)} alt="" className="h-full w-full object-cover" />
+                            <button
+                                type="button"
+                                onClick={() => setGalleryNew((prev) => prev.filter((_, idx) => idx !== i))}
+                                className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                            >
+                                <X className="h-3.5 w-3.5" />
+                            </button>
+                        </div>
+                    ))}
+                    {existingGallery.length + galleryNew.length < 12 && (
+                        <label className="flex aspect-video cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border text-muted-foreground hover:border-blue-400 hover:text-blue-500">
+                            <ImagePlus className="h-5 w-5" />
+                            <span className="text-[11px]">Ajouter</span>
+                            <input
+                                type="file"
+                                accept="image/png,image/jpeg,image/jpg,image/webp"
+                                multiple
+                                className="hidden"
+                                onChange={(e) => {
+                                    const files = Array.from(e.target.files ?? [])
+                                    setGalleryNew((prev) => [...prev, ...files].slice(0, 12))
+                                    e.target.value = ""
+                                }}
+                            />
+                        </label>
+                    )}
                 </div>
             </div>
 

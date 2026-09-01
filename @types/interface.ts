@@ -105,6 +105,7 @@ export interface ICompany {
     phone: string
     logo?: string | null
     coverImage?: string | null
+    gallery?: string[]
     socialLinks: string[]
     country: string
     headquarters: string
