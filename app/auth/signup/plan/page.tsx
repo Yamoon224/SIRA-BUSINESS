@@ -24,7 +24,7 @@ export default function ChoosePlanPage() {
     const [subscribing, setSubscribing] = useState<string | null>(null)
     const [loadError, setLoadError] = useState(false)
     const [gateways, setGateways] = useState<string[]>([])
-    const [gateway, setGateway] = useState<string>("kkiapay")
+    const [gateway, setGateway] = useState<string>("paiementpro")
     const [phone, setPhone] = useState("")
     const pendingCheckoutRef = useRef<{ userId: string; planId: string } | null>(null)
 
@@ -80,7 +80,7 @@ export default function ChoosePlanPage() {
                 return
             }
 
-            const res = await subscriptionService.createCheckout({ userId, planId })
+            const res = await subscriptionService.createCheckout({ userId, planId, gateway: "kkiapay" })
             const data = (res as any)?.data ?? res
             pendingCheckoutRef.current = { userId, planId }
             openKkiapayWidget({ amount: data.amount, clientReference: data.clientReference })
@@ -153,28 +153,32 @@ export default function ChoosePlanPage() {
                 + + +
             </p>
 
-            {gateways.includes("kkiapay") && gateways.includes("paiementpro") && (
+            {(( gateways.includes("kkiapay") && gateways.includes("paiementpro")) || gateway === "paiementpro") && (
                 <div className="mx-auto mb-8 max-w-md">
-                    <p className="mb-2 text-center text-xs font-medium text-muted-foreground">Moyen de paiement</p>
-                    <div className="grid grid-cols-2 gap-2">
-                        {[
-                            { id: "kkiapay", label: "Kkiapay" },
-                            { id: "paiementpro", label: "Paiement Pro" },
-                        ].map((g) => (
-                            <button
-                                key={g.id}
-                                type="button"
-                                onClick={() => setGateway(g.id)}
-                                className={`rounded-xl border-2 px-4 py-2 text-sm font-semibold transition-colors ${
-                                    gateway === g.id
-                                        ? "border-blue-600 bg-blue-50 text-blue-600"
-                                        : "border-gray-200 text-muted-foreground hover:border-gray-300"
-                                }`}
-                            >
-                                {g.label}
-                            </button>
-                        ))}
-                    </div>
+                    {gateways.includes("kkiapay") && gateways.includes("paiementpro") && (
+                        <>
+                            <p className="mb-2 text-center text-xs font-medium text-muted-foreground">Moyen de paiement</p>
+                            <div className="grid grid-cols-2 gap-2">
+                                {[
+                                    { id: "paiementpro", label: "Paiement Pro" },
+                                    { id: "kkiapay", label: "Kkiapay" },
+                                ].map((g) => (
+                                    <button
+                                        key={g.id}
+                                        type="button"
+                                        onClick={() => setGateway(g.id)}
+                                        className={`rounded-xl border-2 px-4 py-2 text-sm font-semibold transition-colors ${
+                                            gateway === g.id
+                                                ? "border-blue-600 bg-blue-50 text-blue-600"
+                                                : "border-gray-200 text-muted-foreground hover:border-gray-300"
+                                        }`}
+                                    >
+                                        {g.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </>
+                    )}
                     {gateway === "paiementpro" && (
                         <input
                             type="tel"
