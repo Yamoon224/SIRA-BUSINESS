@@ -23,6 +23,7 @@ declare module "next-auth" {
             companyId: string;
             access_token: string;
         } & DefaultSession["user"];
+        error?: "RefreshAccessTokenError";
     }
 
     interface User extends DefaultUser {
@@ -33,6 +34,46 @@ declare module "next-auth" {
         companyId: string
         access_token: string
     }
+}
+
+declare module "next-auth/jwt" {
+    interface JWT {
+        id?: string
+        role?: string
+        companyId?: string
+        access_token?: string
+        accessTokenExpires?: number
+        error?: "RefreshAccessTokenError"
+    }
+}
+
+// Le token backend (tymon/jwt-auth) expire au bout de JWT_TTL (60 min par
+// défaut), alors que la session NextAuth vit 30 jours : sans rotation, toute
+// requête authentifiée renvoyait "Unauthorized" une heure après la connexion.
+// On lit l'échéance directement dans le JWT et on le rafraîchit un peu avant.
+const REFRESH_MARGIN_MS = 5 * 60 * 1000
+
+function jwtExpiresAtMs(jwt?: string): number {
+    if (!jwt) return 0
+    try {
+        const payload = jwt.split(".")[1]
+        const json = JSON.parse(
+            Buffer.from(payload.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8")
+        )
+        return typeof json.exp === "number" ? json.exp * 1000 : 0
+    } catch {
+        return 0
+    }
+}
+
+async function refreshBackendToken(currentToken: string): Promise<string> {
+    const res = await apiRequest<{ token: string }>({
+        endpoint: "/auth/refresh",
+        method: "POST",
+        token: currentToken,
+    })
+    if (!res?.token) throw new Error("no token in refresh response")
+    return res.token
 }
 
 // 🔹 NextAuth options (tu peux aussi les mettre dans un fichier séparé `auth.ts`)
@@ -81,11 +122,32 @@ export const authOptions = {
             token: JWT
             user?: User & { access_token?: string; role?: string }
         }) {
+            // 1. Connexion initiale : on hydrate le token de session.
             if (user) {
                 token.access_token = user.access_token
                 token.role = user.role
                 token.id = user.id
                 token.companyId = user.companyId
+                token.accessTokenExpires = jwtExpiresAtMs(user.access_token)
+                delete token.error
+                return token
+            }
+
+            // 2. Token backend encore valide (marge de sécurité) : rien à faire.
+            const expiresAt = (token.accessTokenExpires as number) || jwtExpiresAtMs(token.access_token as string)
+            if (expiresAt && Date.now() < expiresAt - REFRESH_MARGIN_MS) {
+                return token
+            }
+
+            // 3. Rotation avant expiration (ou juste après, dans la fenêtre refresh_ttl).
+            try {
+                const fresh = await refreshBackendToken(token.access_token as string)
+                token.access_token = fresh
+                token.accessTokenExpires = jwtExpiresAtMs(fresh)
+                delete token.error
+            } catch (err) {
+                console.error("[auth] échec du rafraîchissement du token backend:", err)
+                token.error = "RefreshAccessTokenError"
             }
             return token
         },
@@ -102,6 +164,9 @@ export const authOptions = {
                 session.user.role = token.role as string
                 session.user.access_token = token.access_token as string
                 session.user.companyId = token.companyId as string // 🔹 Ajouté
+            }
+            if (token.error === "RefreshAccessTokenError") {
+                session.error = "RefreshAccessTokenError"
             }
             return session
         },

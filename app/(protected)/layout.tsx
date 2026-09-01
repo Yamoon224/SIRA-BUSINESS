@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
-import { SessionProvider, useSession } from "next-auth/react"
+import { SessionProvider, useSession, signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { AppHeader } from "@/components/app-header"
 import { AppSidebar } from "@/components/app-sidebar"
@@ -13,7 +13,10 @@ export default function ProtectedLayout({
     children: React.ReactNode
 }) {
     return (
-        <SessionProvider>
+        // refetchInterval : force le passage régulier dans le callback `jwt`
+        // (côté route /api/auth/session, seul endroit où le cookie est réécrit)
+        // pour que le token backend soit tourné avant son expiration à 60 min.
+        <SessionProvider refetchInterval={20 * 60} refetchOnWindowFocus>
             <SidebarProvider>
                 <AuthGuard>{children}</AuthGuard>
             </SidebarProvider>
@@ -22,7 +25,7 @@ export default function ProtectedLayout({
 }
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
-    const { status } = useSession()
+    const { data: session, status } = useSession()
     const router = useRouter()
 
     useEffect(() => {
@@ -30,6 +33,14 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
             router.replace("/auth/signin")
         }
     }, [status, router])
+
+    // Le rafraîchissement du token backend a échoué (session trop ancienne) :
+    // on déconnecte proprement plutôt que de laisser l'app enchaîner les 401.
+    useEffect(() => {
+        if (session?.error === "RefreshAccessTokenError") {
+            signOut({ callbackUrl: "/auth/signin" })
+        }
+    }, [session?.error])
 
     if (status === "loading" || status === "unauthenticated") {
         return (

@@ -3,10 +3,18 @@ import { apiRequest } from "@/lib/api-client-http"
 
 // `token` n'est requis que pour les appels serveur explicites ; côté navigateur, l'appel
 // est relayé via /api/proxy qui attache l'Authorization à partir de la session NextAuth.
+//
+// PHP ne parse PAS le corps multipart/form-data d'une requête PATCH (uniquement POST) :
+// un vrai PATCH arrivait donc côté Laravel sans fichiers ni champs (logo, coverImage,
+// galerie jamais enregistrés). On envoie un POST avec method spoofing `_method=PATCH`,
+// que Laravel réachemine vers la route PATCH.
 export const updateCompany = (id: string, data: FormData, token?: string) => {
+    if (!data.has("_method")) {
+        data.append("_method", "PATCH")
+    }
     return apiRequest({
         endpoint: `/companies/${id}`,
-        method: "PATCH",
+        method: "POST",
         data: data,
         token,
     })
