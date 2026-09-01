@@ -11,14 +11,24 @@ import { ICompany } from "@/@types/interface"
 import { toast } from "sonner"
 import { Camera, MapPin, Globe, Users, Calendar, Save, Plus, X, ImagePlus } from "lucide-react"
 
-/** Extrait un message lisible quelle que soit la forme de l'erreur (Error, body JSON Laravel, string, Blob…). */
-function errorMessage(error: unknown): string {
+/** Extrait un message lisible quelle que soit la forme de l'erreur (Error, body JSON Laravel, string, Blob, ArrayBuffer…). */
+async function errorMessage(error: unknown): Promise<string> {
     const fallback = "Une erreur est survenue lors de l'enregistrement."
     if (!error) return fallback
-    if (typeof error === "string") return error || fallback
+    if (typeof error === "string") return error.trim().slice(0, 300) || fallback
     if (error instanceof Error) return error.message || fallback
-    if (typeof error === "object") {
-        const e = error as Record<string, any>
+
+    // Réponses binaires renvoyées par le proxy (413 nginx, page d'erreur HTML…)
+    let raw = error
+    if (typeof Blob !== "undefined" && raw instanceof Blob) {
+        try { raw = JSON.parse(await raw.text()) } catch { try { raw = (await (error as Blob).text()) } catch { /* noop */ } }
+    } else if (raw instanceof ArrayBuffer) {
+        try { raw = JSON.parse(new TextDecoder().decode(raw)) } catch { raw = new TextDecoder().decode(error as ArrayBuffer) }
+    }
+    if (typeof raw === "string") return raw.trim().slice(0, 300) || fallback
+
+    if (raw && typeof raw === "object") {
+        const e = raw as Record<string, any>
         if (typeof e.message === "string" && e.message) return e.message
         if (e.errors && typeof e.errors === "object") {
             const first = Object.values(e.errors)[0]
@@ -26,6 +36,32 @@ function errorMessage(error: unknown): string {
         }
     }
     return fallback
+}
+
+/**
+ * Redimensionne/compresse une image côté navigateur avant upload.
+ * Évite les 413 (le proxy Next / la plateforme plafonnent le corps de requête)
+ * et accélère l'envoi. Retourne le fichier d'origine si la compression échoue.
+ */
+async function compressImage(file: File, maxSize = 1600, quality = 0.82): Promise<File> {
+    if (!file.type.startsWith("image/") || file.type === "image/gif") return file
+    try {
+        const bitmap = await createImageBitmap(file)
+        const scale = Math.min(1, maxSize / Math.max(bitmap.width, bitmap.height))
+        const w = Math.round(bitmap.width * scale)
+        const h = Math.round(bitmap.height * scale)
+        const canvas = document.createElement("canvas")
+        canvas.width = w
+        canvas.height = h
+        const ctx = canvas.getContext("2d")
+        if (!ctx) return file
+        ctx.drawImage(bitmap, 0, 0, w, h)
+        const blob: Blob | null = await new Promise((res) => canvas.toBlob(res, "image/jpeg", quality))
+        if (!blob || blob.size >= file.size) return file
+        return new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" })
+    } catch {
+        return file
+    }
 }
 
 export default function Content({ company }: ProfilContentProps) {
@@ -104,7 +140,8 @@ export default function Content({ company }: ProfilContentProps) {
             }
             toast.success("Profil Entreprise mis à jour")
         } catch (error: any) {
-            toast.error(errorMessage(error))
+            console.error("[profil] erreur enregistrement (brut) :", error)
+            toast.error(await errorMessage(error))
         } finally {
             setLoading(false)
         }
@@ -136,7 +173,10 @@ export default function Content({ company }: ProfilContentProps) {
                             type="file"
                             accept="image/png,image/jpeg,image/jpg,image/webp"
                             className="hidden"
-                            onChange={(e) => setCover(e.target.files?.[0] || null)}
+                            onChange={async (e) => {
+                                const f = e.target.files?.[0]
+                                setCover(f ? await compressImage(f, 2000) : null)
+                            }}
                         />
                     </label>
                 </div>
@@ -163,7 +203,10 @@ export default function Content({ company }: ProfilContentProps) {
                                 type="file"
                                 accept="image/*"
                                 className="hidden"
-                                onChange={(e) => setLogo(e.target.files?.[0] || null)}
+                                onChange={async (e) => {
+                                    const f = e.target.files?.[0]
+                                    setLogo(f ? await compressImage(f, 512) : null)
+                                }}
                             />
                         </label>
                     </div>
@@ -314,10 +357,11 @@ export default function Content({ company }: ProfilContentProps) {
                                 accept="image/png,image/jpeg,image/jpg,image/webp"
                                 multiple
                                 className="hidden"
-                                onChange={(e) => {
+                                onChange={async (e) => {
                                     const files = Array.from(e.target.files ?? [])
-                                    setGalleryNew((prev) => [...prev, ...files].slice(0, 12))
                                     e.target.value = ""
+                                    const compressed = await Promise.all(files.map((f) => compressImage(f)))
+                                    setGalleryNew((prev) => [...prev, ...compressed].slice(0, 12))
                                 }}
                             />
                         </label>
