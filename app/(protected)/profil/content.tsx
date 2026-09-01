@@ -11,6 +11,23 @@ import { ICompany } from "@/@types/interface"
 import { toast } from "sonner"
 import { Camera, MapPin, Globe, Users, Calendar, Save, Plus, X, ImagePlus } from "lucide-react"
 
+/** Extrait un message lisible quelle que soit la forme de l'erreur (Error, body JSON Laravel, string, Blob…). */
+function errorMessage(error: unknown): string {
+    const fallback = "Une erreur est survenue lors de l'enregistrement."
+    if (!error) return fallback
+    if (typeof error === "string") return error || fallback
+    if (error instanceof Error) return error.message || fallback
+    if (typeof error === "object") {
+        const e = error as Record<string, any>
+        if (typeof e.message === "string" && e.message) return e.message
+        if (e.errors && typeof e.errors === "object") {
+            const first = Object.values(e.errors)[0]
+            if (Array.isArray(first) && typeof first[0] === "string") return first[0]
+        }
+    }
+    return fallback
+}
+
 export default function Content({ company }: ProfilContentProps) {
     const { data: session } = useSession()
     const [loading, setLoading] = useState(false)
@@ -49,17 +66,26 @@ export default function Content({ company }: ProfilContentProps) {
             setLoading(true)
             const companyId = session?.user?.companyId
             if (!companyId) throw new Error("Non authentifié")
+
+            // Garde-fou taille : évite un 413 opaque côté serveur.
+            const MAX_BYTES = 8 * 1024 * 1024
+            const oversized = [logo, cover, ...galleryNew].find((f) => f && f.size > MAX_BYTES)
+            if (oversized) {
+                throw new Error(`« ${oversized.name} » dépasse 8 Mo. Choisis une image plus légère.`)
+            }
+
             const formData = new FormData()
-            formData.append("companyName", companyData.name)
-            formData.append("about", companyData.about)
-            formData.append("sector", companyData.sector)
-            formData.append("companySize", companyData.companySize)
-            formData.append("location", companyData.location)
-            formData.append("website", companyData.website)
-            formData.append("email", companyData.email)
-            formData.append("phone", companyData.phone)
+            formData.append("companyName", companyData.name ?? "")
+            formData.append("about", companyData.about ?? "")
+            formData.append("sector", companyData.sector ?? "")
+            formData.append("companySize", companyData.companySize ?? "")
+            formData.append("location", companyData.location ?? "")
+            formData.append("website", companyData.website ?? "")
+            formData.append("email", companyData.email ?? "")
+            formData.append("phone", companyData.phone ?? "")
             if (companyData.creationDate) {
-                formData.append("creationDate", new Date(companyData.creationDate).toISOString())
+                const d = new Date(companyData.creationDate)
+                if (!isNaN(d.getTime())) formData.append("creationDate", d.toISOString())
             }
             if (logo) formData.append("logo", logo)
             if (cover) formData.append("coverImage", cover)
@@ -78,7 +104,7 @@ export default function Content({ company }: ProfilContentProps) {
             }
             toast.success("Profil Entreprise mis à jour")
         } catch (error: any) {
-            toast.error(error.message)
+            toast.error(errorMessage(error))
         } finally {
             setLoading(false)
         }

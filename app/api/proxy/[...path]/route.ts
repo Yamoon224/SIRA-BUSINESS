@@ -74,6 +74,17 @@ async function handleProxy(request: NextRequest, { params }: RouteContext) {
             return NextResponse.json(payload, { status: upstreamResponse.status })
         }
 
+        // Réponse d'erreur non-JSON (413 nginx, 500 HTML, gateway…) : on ne la traite
+        // pas comme un fichier à télécharger — on renvoie un message exploitable au client.
+        if (!upstreamResponse.ok) {
+            const text = await upstreamResponse.text().catch(() => "")
+            const message =
+                upstreamResponse.status === 413
+                    ? "Fichier(s) trop volumineux. Réduis la taille des images (max ~8 Mo chacune)."
+                    : (text.trim().slice(0, 300) || `Erreur ${upstreamResponse.status} du serveur.`)
+            return NextResponse.json({ message }, { status: upstreamResponse.status })
+        }
+
         // Réponses binaires / blob (fichiers, images, etc.)
         const blob = await upstreamResponse.blob()
         const baseType = upstreamContentType.split(";")[0].trim().toLowerCase()
