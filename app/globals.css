@@ -123,6 +123,40 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* ── Dégradé de marque ─────────────────────────────────────────────────────
+   Repris du logo, qui va du bleu clair (à gauche du « g ») au bleu profond
+   (fin du mot). Toutes les surfaces bleues de l'app le portent, plutôt qu'un
+   aplat : hero de la landing, panneau de marque des pages d'authentification,
+   bandeaux du tableau de bord et du profil. Défini une seule fois ici pour que
+   le sens et les teintes du dégradé restent identiques partout.
+
+   Le dégradé est stocké entier dans `--brand-gradient` plutôt que reconstruit
+   à partir de trois variables de couleur : la minification recolle
+   `var(--x) 0%` en `var(--x)0%`, et la substitution d'une variable ne doit pas
+   se retrouver soudée à l'arrêt qui la suit. */
+:root {
+  --brand-from: #2b7fff;
+  --brand-via: #1e7df2;
+  --brand-to: #0b2ca8;
+  --brand-gradient: linear-gradient(135deg, #2b7fff 0%, #1e7df2 45%, #0b2ca8 100%);
+}
+
+@layer utilities {
+  .bg-brand-gradient {
+    background-image: var(--brand-gradient);
+  }
+
+  /* Le logo est en dégradé : sur fond bleu il perdrait son contraste, et le
+     passer en blanc reviendrait à le rendre monochrome. On lui pose donc une
+     surface claire dessous, ses couleurs restent intactes. */
+  .logo-surface {
+    background-color: #fff;
+    border-radius: 9999px;
+    padding: 0.375rem 0.875rem;
+    box-shadow: 0 8px 24px -12px rgb(11 18 32 / 0.45);
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

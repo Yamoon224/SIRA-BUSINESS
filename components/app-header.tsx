@@ -26,21 +26,21 @@ export function AppHeader() {
     const { open, setOpen } = useSidebar()
 
     return (
-        <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-border bg-card px-4 md:px-6">
-            {/* Left */}
-            <div className="flex items-center gap-4">
-
-                {/* Mobile menu button */}
+        <header className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-border bg-card px-4 md:gap-6 md:px-6">
+            {/* Gauche : ouverture du menu (mobile) et navigation (desktop).
+                `shrink-0` pour que la recherche prenne l'espace restant sans
+                jamais chevaucher les liens. */}
+            <div className="flex shrink-0 items-center gap-4">
                 <Button
                     variant="ghost"
                     size="icon"
                     className="md:hidden"
+                    aria-label="Ouvrir le menu"
                     onClick={() => setOpen(!open)}>
                     <Menu className="h-5 w-5" />
                 </Button>
 
-                {/* Desktop navigation */}
-                <nav className="hidden md:flex items-center gap-6">
+                <nav className="hidden items-center gap-4 lg:flex xl:gap-6">
                     {navItems.map((item) => {
                         const isActive =
                             pathname === item.href || pathname.startsWith(`${item.href}/`)
@@ -50,7 +50,7 @@ export function AppHeader() {
                                 key={item.href}
                                 href={item.href}
                                 className={cn(
-                                    "text-sm font-medium transition-colors",
+                                    "whitespace-nowrap text-sm font-medium transition-colors",
                                     isActive
                                         ? "text-primary"
                                         : "text-muted-foreground hover:text-foreground"
@@ -63,23 +63,23 @@ export function AppHeader() {
                 </nav>
             </div>
 
-            {/* Right side */}
-            <div className="flex items-center gap-2 md:gap-4">
-                {/* Search (hidden mobile) */}
-                <div className="relative hidden sm:block">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            {/* Recherche : occupe toute la largeur laissée libre, plafonnée pour
+                ne pas s'étirer démesurément sur les très grands écrans. Masquée
+                sous `sm`, comme avant, la place y étant prise par le menu. */}
+            <div className="relative hidden min-w-0 flex-1 sm:block sm:max-w-xl lg:max-w-2xl">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                    type="search"
+                    placeholder="Rechercher une offre, une candidature..."
+                    aria-label="Rechercher"
+                    className="w-full rounded-sm pl-9" />
+            </div>
 
-                    <Input
-                        type="search"
-                        placeholder="Rechercher..."
-                        className="w-40 md:w-64 pl-9 rounded-sm" />
-                </div>
-
-                {/* Icons */}
+            {/* Droite : actions seules — le nom et l'e-mail ont quitté l'en-tête,
+                ils restent affichés en bas de la barre latérale. */}
+            <div className="ml-auto flex shrink-0 items-center gap-1 md:gap-2">
                 <NotificationBell />
-
-                {/* User Menu Dropdown */}
-                <UserMenu />
+                <UserMenu variant="header" />
             </div>
         </header>
     )

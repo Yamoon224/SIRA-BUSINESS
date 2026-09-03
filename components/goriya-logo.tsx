@@ -8,7 +8,16 @@ interface GoriyaLogoProps {
     showTagline?: boolean
     width?: number
     height?: number
-    variant?: "default" | "white"
+    /**
+     * "default" : logo dégradé posé directement sur un fond clair.
+     * "onDark"  : même logo dégradé, sur une pastille claire qui lui rend son
+     *             contraste au-dessus d'une surface bleue ou sombre.
+     *
+     * "white" est conservé comme alias de "onDark" pour les appels existants :
+     * le logo est en dégradé par nature, le remplacer par un aplat blanc lui
+     * ferait perdre son identité.
+     */
+    variant?: "default" | "onDark" | "white"
     /**
      * Destination du clic sur le logo. Par défaut la page d'accueil publique ;
      * dans l'espace entreprise connecté, on passe "/dashboard" pour ne pas
@@ -28,14 +37,16 @@ export function GoriyaLogo({
     href = "/",
     ariaLabel,
 }: GoriyaLogoProps) {
+    const surDark = variant === "onDark" || variant === "white"
+
     return (
         <Link
             href={href}
             aria-label={ariaLabel ?? (href === "/" ? "Goriya - accueil" : "Goriya - mon espace")}
-            className={`flex items-center gap-2 ${className}`}
+            className={`flex w-fit items-center gap-2 ${surDark ? "logo-surface" : ""} ${className}`}
         >
             <Image
-                src={variant === "white" ? "/images/logo-white.png" : "/images/logo.png"}
+                src="/images/logo.png"
                 alt="Goriya"
                 width={width}
                 height={height}

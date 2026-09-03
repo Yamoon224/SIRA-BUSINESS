@@ -71,7 +71,7 @@ function SplitShell({ children }: { children: React.ReactNode }) {
     return (
         <div className="min-h-screen bg-[#F7F8FC] lg:grid lg:grid-cols-[440px_1fr]">
             {/* Brand panel - desktop only */}
-            <aside className="relative hidden overflow-hidden bg-[#1e7df2] lg:flex lg:flex-col lg:justify-between lg:p-10">
+            <aside className="relative hidden overflow-hidden bg-brand-gradient lg:flex lg:flex-col lg:justify-between lg:p-10">
                 <div
                     className="pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-soft-light"
                     style={{
@@ -89,7 +89,7 @@ function SplitShell({ children }: { children: React.ReactNode }) {
                 </Link>
 
                 <div className="relative z-10">
-                    <GoriyaLogo variant="white" />
+                    <GoriyaLogo variant="onDark" />
                     <h2 className="mt-8 max-w-xs text-3xl leading-[1.15] text-white">
                         Le bon candidat, sans le tri de CV.
                     </h2>

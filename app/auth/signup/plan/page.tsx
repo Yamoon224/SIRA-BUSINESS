@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
+import { PhoneInput, telephoneValide } from "@/components/phone-input"
 import { Check, Gift, Loader2, Sparkles, Star } from "lucide-react"
 import { subscriptionService } from "@/lib/api/subscription.service"
 import { extractApiErrorMessage } from "@/lib/api-error"
@@ -128,8 +129,8 @@ export default function ChoosePlanPage() {
             router.push("/auth/signin")
             return
         }
-        if (phone.trim().length < 8) {
-            toast.error("Renseignez un numéro de téléphone pour payer via Paiement Pro.")
+        if (!telephoneValide(phone)) {
+            toast.error("Renseignez un numéro de téléphone complet pour payer via Paiement Pro.")
             return
         }
 
@@ -220,15 +221,14 @@ export default function ChoosePlanPage() {
                     >
                         Numéro Mobile Money (pour les forfaits payants)
                     </label>
-                    <input
+                    {/* Même composant que l'inscription et le profil : l'indicatif
+                        est choisi, pas tapé — Paiement Pro reçoit ainsi un numéro
+                        au format attendu quel que soit le pays. */}
+                    <PhoneInput
                         id="paiementpro-phone"
-                        type="tel"
-                        inputMode="tel"
-                        autoComplete="tel"
                         value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        placeholder="+225 07 00 00 00 00"
-                        className="w-full rounded-xl border border-black/10 bg-white px-4 py-2.5 text-sm text-[#0B1220] outline-none transition-colors placeholder:text-[#98a1b5] focus:border-[#2447FF] focus:ring-2 focus:ring-[#2447FF]/20"
+                        onChange={setPhone}
+                        placeholder="07 00 00 00 00"
                     />
                 </div>
             )}

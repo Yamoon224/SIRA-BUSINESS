@@ -8,6 +8,7 @@ export function SiteFooter() {
                 <GoriyaLogo showTagline={true} />
                 <nav className="flex items-center gap-6 text-sm text-[#5B6472]">
                     <Link href="/#comment-ca-marche" className="hover:text-[#0B1220] transition-colors">Comment ça marche</Link>
+                    <Link href="/#services-rh" className="hover:text-[#0B1220] transition-colors">Services RH</Link>
                     <Link href="/tarification" className="hover:text-[#0B1220] transition-colors">Tarifs</Link>
                     <Link href="/assistance" className="hover:text-[#0B1220] transition-colors">Assistance</Link>
                 </nav>

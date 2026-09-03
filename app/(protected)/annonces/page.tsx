@@ -12,7 +12,10 @@ export default async function Page() {
     if (!session?.user?.access_token) return <p>Vous devez être connecté</p>
 
     const token = session.user.access_token
-    const filters = { page: 1, limit: 10 }
+    // Filtrer sur l'entreprise connectée : sans `companyId`, /job-offers/paginate
+    // renvoie les offres de toutes les entreprises — y compris, depuis l'ajout
+    // des brouillons, des annonces non publiées qui ne regardent que leur auteur.
+    const filters = { page: 1, limit: 10, companyId: session.user.companyId }
 
     let init: IPaginatedResponse<IOffer> = { data: [], meta: { total: 0, page: 1, limit: 10, totalPages: 0 } }
     try {

@@ -107,7 +107,7 @@ export default function AssistancePage() {
                     <p className="text-sm text-muted-foreground">Trouvez rapidement les reponses a vos questions</p>
                 </div>
 
-                <div className="overflow-hidden rounded-xl bg-blue-600 px-4 py-8 text-center text-white sm:px-8 sm:py-10">
+                <div className="overflow-hidden rounded-xl bg-brand-gradient px-4 py-8 text-center text-white sm:px-8 sm:py-10">
                     <h2 className="mb-1.5 text-xl font-bold">Comment pouvons-nous vous aider ?</h2>
                     <p className="mb-5 text-sm text-blue-200">Trouvez une reponse rapidement ou contactez notre equipe support</p>
                     <div className="relative mx-auto max-w-md">

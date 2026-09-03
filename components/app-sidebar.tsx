@@ -178,7 +178,7 @@ export function AppSidebar() {
                 </div>
 
                 {/* User */}
-                <UserMenu triggerOnly />
+                <UserMenu variant="sidebar" />
             </aside>
 
             {/* Overlay mobile */}

@@ -5,6 +5,11 @@ import { useSession } from "next-auth/react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { AutocompleteInput } from "@/components/autocomplete-input"
+import { PhoneInput, telephoneValide } from "@/components/phone-input"
+import { LOCALISATIONS } from "@/lib/data/afrique"
+import { COMPANY_SIZES } from "@/lib/data/entreprise"
 import { updateCompany } from "@/actions/companies"
 import { ProfilContentProps } from "@/@types/props"
 import { ICompany } from "@/@types/interface"
@@ -74,6 +79,15 @@ export default function Content({ company }: ProfilContentProps) {
     const [companyData, setCompanyData] = useState<ICompany>(company)
 
     const existingGallery = (companyData.gallery ?? []).filter((url) => !removedGallery.includes(url))
+
+    /**
+     * Tranches d'effectif du sélecteur. Une fiche enregistrée avant le passage
+     * au Select peut porter une valeur libre (« 50-200 ») : on l'ajoute à la
+     * liste pour qu'elle reste visible et ne disparaisse pas silencieusement.
+     */
+    const taillesProposees = COMPANY_SIZES.includes(companyData.companySize as any) || !companyData.companySize
+        ? [...COMPANY_SIZES]
+        : [companyData.companySize, ...COMPANY_SIZES]
     const [benefits, setBenefits] = useState<string[]>([])
     const [newBenefit, setNewBenefit] = useState("")
     const [mission, setMission] = useState(company.about ?? "")
@@ -102,6 +116,12 @@ export default function Content({ company }: ProfilContentProps) {
             setLoading(true)
             const companyId = session?.user?.companyId
             if (!companyId) throw new Error("Non authentifié")
+
+            // Un numéro incomplet part sinon en base sans que rien ne le signale,
+            // et la seule voie de contact de l'entreprise devient inutilisable.
+            if (companyData.phone && !telephoneValide(companyData.phone)) {
+                throw new Error("Le numéro de téléphone semble incomplet.")
+            }
 
             // Garde-fou taille : évite un 413 opaque côté serveur.
             const MAX_BYTES = 8 * 1024 * 1024
@@ -157,7 +177,7 @@ export default function Content({ company }: ProfilContentProps) {
             {/* ── Section identité ── */}
             <div className="overflow-hidden rounded-xl border border-border bg-white">
                 {/* Bandeau de couverture éditable */}
-                <div className="relative h-40 w-full bg-gradient-to-r from-blue-600 to-blue-400">
+                <div className="relative h-40 w-full bg-brand-gradient">
                     {(cover || companyData.coverImage) && (
                         <img
                             src={cover ? URL.createObjectURL(cover) : (companyData.coverImage as string)}
@@ -235,12 +255,16 @@ export default function Content({ company }: ProfilContentProps) {
                             <p className="mb-1 text-xs text-muted-foreground">Adresse du siège</p>
                             <div className="flex items-center gap-1.5 border-b border-border pb-1">
                                 <MapPin className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                                <Input
-                                    value={companyData.location}
-                                    onChange={(e) => setCompanyData({ ...companyData, location: e.target.value })}
-                                    placeholder="Ville, Pays"
-                                    className="h-7 border-0 px-0 text-sm shadow-none focus-visible:ring-0"
-                                />
+                                <div className="flex-1">
+                                    <AutocompleteInput
+                                        value={companyData.location ?? ""}
+                                        onChange={(v) => setCompanyData({ ...companyData, location: v })}
+                                        options={LOCALISATIONS}
+                                        placeholder="Ville, Pays"
+                                        className="h-7 border-0 px-0 text-sm shadow-none focus-visible:ring-0"
+                                        aria-label="Adresse du siège"
+                                    />
+                                </div>
                             </div>
                         </div>
                         <div>
@@ -267,13 +291,25 @@ export default function Content({ company }: ProfilContentProps) {
                     <div>
                         <p className="mb-1 text-xs text-muted-foreground">Taille de l&apos;entreprise</p>
                         <div className="flex items-center gap-2 text-sm text-foreground">
-                            <Users className="h-4 w-4 text-muted-foreground" />
-                            <Input
-                                value={companyData.companySize}
-                                onChange={(e) => setCompanyData({ ...companyData, companySize: e.target.value })}
-                                placeholder="ex: 50-200 employés"
-                                className="h-8 border-0 border-b border-border rounded-none px-0 text-sm shadow-none focus-visible:ring-0"
-                            />
+                            <Users className="h-4 w-4 shrink-0 text-muted-foreground" />
+                            {/* Tranches fixes plutôt que saisie libre : la même liste
+                                qu'à l'inscription, sinon deux fiches identiques
+                                s'écrivaient « 50-200 » et « 51-200 employés ». */}
+                            <Select
+                                value={companyData.companySize || undefined}
+                                onValueChange={(value) => setCompanyData({ ...companyData, companySize: value })}
+                            >
+                                <SelectTrigger className="h-8 w-full rounded-none border-0 border-b border-border px-0 text-sm shadow-none focus-visible:ring-0">
+                                    <SelectValue placeholder="Sélectionner une tranche d'effectif" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {taillesProposees.map((size) => (
+                                        <SelectItem key={size} value={size}>
+                                            {size}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
                     <div>
@@ -432,11 +468,9 @@ export default function Content({ company }: ProfilContentProps) {
                     </div>
                     <div>
                         <p className="mb-1 text-xs text-muted-foreground">Téléphone</p>
-                        <Input
-                            value={companyData.phone}
-                            onChange={(e) => setCompanyData({ ...companyData, phone: e.target.value })}
-                            placeholder="+33 6 00 00 00 00"
-                            className="h-8 border-0 border-b border-border rounded-none px-0 text-sm shadow-none focus-visible:ring-0"
+                        <PhoneInput
+                            value={companyData.phone ?? ""}
+                            onChange={(v) => setCompanyData({ ...companyData, phone: v })}
                         />
                     </div>
                     <div>

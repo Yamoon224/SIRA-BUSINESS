@@ -11,6 +11,10 @@ import { createCompany } from "@/actions/companies"
 import { requestOtp, verifyOtp } from "@/actions/auth"
 import { CompanyCreateDto } from "@/@types/interface"
 import { Field, FieldLabel } from "@/components/ui/field"
+import { AutocompleteInput } from "@/components/autocomplete-input"
+import { PhoneInput, telephoneValide } from "@/components/phone-input"
+import { LOCALISATIONS, PAYS, VILLES } from "@/lib/data/afrique"
+import { COMPANY_SIZES, SECTORS } from "@/lib/data/entreprise"
 import { SignupStepper } from "@/components/signup-stepper"
 import { OTPVerificationModal } from "@/components/otp-verification-modal"
 import { beginSignupFlow } from "@/lib/signup-flow"
@@ -44,24 +48,10 @@ const fieldLabels: Record<string, string> = {
 const MIN_PASSWORD_LENGTH = 8
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-const sectors = [
-    "Technologie",
-    "Finance",
-    "Santé",
-    "Éducation",
-    "Commerce",
-    "Marketing",
-    "Industrie",
-    "Services",
-]
-
-const companySizes = [
-    "1-10 employés",
-    "11-50 employés",
-    "51-200 employés",
-    "201-500 employés",
-    "500+ employés",
-]
+// Secteurs et tranches d'effectif viennent de `lib/data/entreprise` : le profil
+// entreprise propose les mêmes valeurs pour les mêmes colonnes.
+const sectors = SECTORS
+const companySizes = COMPANY_SIZES
 
 export default function Page() {
     const router = useRouter()
@@ -124,6 +114,9 @@ export default function Page() {
         if (step === 2) {
             if (!EMAIL_PATTERN.test(formData.email.trim())) {
                 return "Saisissez une adresse email professionnelle valide (ex. contact@entreprise.com)."
+            }
+            if (!telephoneValide(formData.phone)) {
+                return "Saisissez un numéro de téléphone complet (indicatif + numéro)."
             }
             if (formData.password.length < MIN_PASSWORD_LENGTH) {
                 return `Le mot de passe doit contenir au moins ${MIN_PASSWORD_LENGTH} caractères.`
@@ -418,14 +411,26 @@ export default function Page() {
                         <div className="col-span-12 md:col-span-6">
                             <Field>
                                 <FieldLabel>Pays <span className="text-destructive">*</span></FieldLabel>
-                                <Input value={formData.country} onChange={(e) => updateFormData("country", e.target.value)} placeholder="France" />
+                                <AutocompleteInput
+                                    value={formData.country}
+                                    onChange={(v) => updateFormData("country", v)}
+                                    options={PAYS}
+                                    placeholder="Côte d'Ivoire"
+                                    aria-label="Pays"
+                                />
                             </Field>
                         </div>
 
                         <div className="col-span-12 md:col-span-6">
                             <Field>
                                 <FieldLabel>Siège <span className="text-destructive">*</span></FieldLabel>
-                                <Input value={formData.headquarters} onChange={(e) => updateFormData("headquarters", e.target.value)} placeholder="Paris" />
+                                <AutocompleteInput
+                                    value={formData.headquarters}
+                                    onChange={(v) => updateFormData("headquarters", v)}
+                                    options={VILLES}
+                                    placeholder="Abidjan"
+                                    aria-label="Ville du siège"
+                                />
                             </Field>
                         </div>
                     </div>
@@ -434,14 +439,23 @@ export default function Page() {
                         <div className="col-span-12 md:col-span-6">
                             <Field>
                                 <FieldLabel>Localisation <span className="text-destructive">*</span></FieldLabel>
-                                <Input value={formData.location} onChange={(e) => updateFormData("location", e.target.value)} placeholder="Ville, Pays" />
+                                <AutocompleteInput
+                                    value={formData.location}
+                                    onChange={(v) => updateFormData("location", v)}
+                                    options={LOCALISATIONS}
+                                    placeholder="Ville, Pays"
+                                    aria-label="Localisation"
+                                />
                             </Field>
                         </div>
 
                         <div className="col-span-12 md:col-span-6">
                             <Field>
                                 <FieldLabel>Téléphone <span className="text-destructive">*</span></FieldLabel>
-                                <Input type="tel" value={formData.phone} onChange={(e) => updateFormData("phone", e.target.value)} placeholder="+33 6 00 00 00 00" />
+                                <PhoneInput
+                                    value={formData.phone}
+                                    onChange={(v) => updateFormData("phone", v)}
+                                />
                             </Field>
                         </div>
                     </div>

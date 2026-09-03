@@ -127,19 +127,24 @@ export interface ICandidate {
     jobOfferId?: string    // ID du JobOffer lié
 }
 
+/**
+ * Offre d'emploi. Tous les champs de détail sont nullables : une offre
+ * enregistrée en brouillon (status "DRAFT") n'est complète qu'au moment d'être
+ * publiée — le backend ne les exige qu'à ce moment-là.
+ */
 export interface IOffer {
     id: string
     title: string
-    location: string
-    type: "CDI" | "CDD" | "STAGE" | "ALTERNANCE" | "FREELANCE" | "TEMPS_PARTIEL" // map à JobType
-    experience: "JUNIOR" | "INTERMEDIAIRE" | "SENIOR" | "EXPERT" // map à JobExperienceType
-    salary: string
-    description: string
-    benefits: string
-    requirements: string[]
+    location: string | null
+    type: "CDI" | "CDD" | "STAGE" | "ALTERNANCE" | "FREELANCE" | "TEMPS_PARTIEL" | null // map à JobType
+    experience: "JUNIOR" | "INTERMEDIAIRE" | "SENIOR" | "EXPERT" | null // map à JobExperienceType
+    salary: string | null
+    description: string | null
+    benefits: string | null
+    requirements: string[] | null
     status: "ACTIVE" | "CLOSED" | "DRAFT"  // JobStatus
-    publishDate: string
-    endDate: string
+    publishDate: string | null
+    endDate: string | null
     applicants: number
     candidatures: any[]
     company?: ICompany

@@ -14,6 +14,15 @@ export const createJobOffer = (payload: any, token?: string) => {
     })
 }
 
+/** Détail d'une offre — sert à rouvrir un brouillon dans le formulaire. */
+export const getJobOffer = (id: string, token?: string) => {
+    return apiRequest<IOffer>({
+        endpoint: `/job-offers/${id}`,
+        method: "GET",
+        token,
+    })
+}
+
 export const getJobOffers = (filters: any = {}, token?: string) => {
     return apiRequest<IPaginatedResponse<IOffer>>({
         endpoint: `/job-offers/paginate`,

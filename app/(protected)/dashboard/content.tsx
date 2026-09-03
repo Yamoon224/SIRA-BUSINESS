@@ -86,7 +86,15 @@ export default function Content(props: DashboardContentProps) {
           title: o.title,
           status: s.label,
           statusClass: s.cls,
-          meta: `${o.location} • ${o.type} • Publié le ${new Date(o.publishDate).toLocaleDateString("fr-FR")}`,
+          // Un brouillon n'a pas forcément de localisation, de type ni de date :
+          // on n'assemble que les fragments réellement renseignés.
+          meta: [
+            o.location,
+            o.type,
+            o.publishDate ? `Publié le ${new Date(o.publishDate).toLocaleDateString("fr-FR")}` : null,
+          ]
+            .filter(Boolean)
+            .join(" • "),
           apps: o.applicants > 0 ? `${o.applicants} candidatures` : "",
           buttons: offerButtons(o.status),
         }
@@ -132,7 +140,7 @@ export default function Content(props: DashboardContentProps) {
         </Card>
       </div>
 
-      <Card className="overflow-hidden border-0 bg-gradient-to-r from-blue-500 to-blue-700 text-white">
+      <Card className="overflow-hidden border-0 bg-brand-gradient text-white">
         <CardContent className="relative p-4">
           <button className="absolute right-2 top-2 text-blue-100"><X className="h-4 w-4" /></button>
           <div className="mb-2 flex items-center gap-2"><Sparkles className="h-4 w-4" /><p className="text-lg sm:text-xl font-semibold">Recommandations IA du jour</p></div>

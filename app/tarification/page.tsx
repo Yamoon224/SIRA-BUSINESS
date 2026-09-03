@@ -87,7 +87,7 @@ export default function TarificationPage() {
             <SiteHeader page="tarification" />
 
             {/* Hero */}
-            <section className="relative overflow-hidden bg-[#1e7df2]">
+            <section className="relative overflow-hidden bg-brand-gradient">
                 <div
                     className="pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-soft-light"
                     style={{
@@ -256,7 +256,7 @@ export default function TarificationPage() {
             </section>
 
             {/* Final CTA */}
-            <section className="relative overflow-hidden bg-[#1e7df2] py-24">
+            <section className="relative overflow-hidden bg-brand-gradient py-24">
                 <div className="orb-drift-1 pointer-events-none absolute left-1/2 top-0 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-[#2447FF]/20 blur-[130px]" />
                 <BlueCircles />
                 <Reveal className="container relative z-10 mx-auto px-4 text-center md:px-6">

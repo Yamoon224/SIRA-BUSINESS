@@ -22,12 +22,19 @@ export function SiteHeader({ page = "home" }: { page?: "home" | "tarification" }
             }`}
         >
             <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
-                <GoriyaLogo variant={scrolled ? "default" : "white"} />
-                <nav className="hidden md:flex items-center gap-7">
+                {/* Toujours le logo dégradé : au-dessus du hero bleu, c'est la
+                    pastille claire de "onDark" qui lui rend son contraste. */}
+                <GoriyaLogo variant={scrolled ? "default" : "onDark"} className="transition-all duration-300" />
+                <nav className="hidden md:flex items-center gap-5 lg:gap-7">
                     {page === "home" ? (
-                        <a href="#comment-ca-marche" className={linkClass()}>
-                            Comment ça marche
-                        </a>
+                        <>
+                            <a href="#comment-ca-marche" className={linkClass()}>
+                                Comment ça marche
+                            </a>
+                            <a href="#services-rh" className={linkClass()}>
+                                Services RH
+                            </a>
+                        </>
                     ) : (
                         <Link href="/" className={linkClass()}>
                             Accueil

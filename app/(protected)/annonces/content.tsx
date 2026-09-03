@@ -6,20 +6,16 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Search, Filter, MapPin, Users, Eye, TrendingUp, Calendar, Edit, MoreHorizontal, Trash2, ListOrdered } from "lucide-react"
+import { toast } from "sonner"
+import { Search, Filter, MapPin, Users, Calendar, Edit, Trash2, ListOrdered, Plus } from "lucide-react"
+import { extractApiErrorMessage } from "@/lib/api-error"
 import { AnnonceContentProps } from "@/@types/props"
 import type { IOffer } from "@/@types/interface"
 import { deleteJobOffer, updateJobStatus } from "@/actions/offers"
+import { JOB_STATUS_META, jobTypeLabel } from "@/lib/data/offres"
 import { candidateAssessmentService, type ICandidateRanking } from "@/lib/api/candidate-assessment.service"
 
 type JobStatus = "ACTIVE" | "CLOSED" | "DRAFT"
-
-const statusMap: Record<string, { label: string; className: string }> = {
-    ACTIVE: { label: "Active", className: "bg-green-500 text-white" },
-    DRAFT: { label: "Brouillon", className: "bg-gray-200 text-gray-700" },
-    CLOSED: { label: "Fermee", className: "bg-red-500 text-white" },
-    PAUSED: { label: "En pause", className: "bg-gray-200 text-gray-700" },
-}
 
 export function Content({ init }: AnnonceContentProps) {
     const [jobs, setJobs] = useState<IOffer[]>(init?.data ?? [])
@@ -29,7 +25,10 @@ export function Content({ init }: AnnonceContentProps) {
     const filtered = useMemo(() => {
         const q = query.toLowerCase().trim()
         return jobs.filter((j) => {
-            const inQ = q.length === 0 || j.title.toLowerCase().includes(q) || j.type.toLowerCase().includes(q) || j.location.toLowerCase().includes(q)
+            // Un brouillon peut n'avoir encore ni type ni localisation : la
+            // recherche ne doit pas s'effondrer dessus.
+            const champs = [j.title, j.type, j.location].filter(Boolean).join(" ").toLowerCase()
+            const inQ = q.length === 0 || champs.includes(q)
             const inS = status === "all" || j.status === status
             return inQ && inS
         })
@@ -41,8 +40,10 @@ export function Content({ init }: AnnonceContentProps) {
             // attaché à partir de la session NextAuth côté serveur, jamais exposé au client.
             await deleteJobOffer(id)
             setJobs((prev) => prev.filter((j) => j.id !== id))
+            toast.success("Annonce supprimée.")
         } catch (err) {
             console.error("[annonces] delete error:", err)
+            toast.error(extractApiErrorMessage(err, "La suppression de l'annonce a échoué."))
         }
     }
 
@@ -51,8 +52,10 @@ export function Content({ init }: AnnonceContentProps) {
         try {
             await updateJobStatus(job.id, nextStatus)
             setJobs((prev) => prev.map((j) => j.id === job.id ? { ...j, status: nextStatus } : j))
+            toast.success(nextStatus === "ACTIVE" ? "Annonce réactivée." : "Annonce désactivée.")
         } catch (err) {
             console.error("[annonces] status update error:", err)
+            toast.error(extractApiErrorMessage(err, "Le changement de statut a échoué."))
         }
     }
 
@@ -77,9 +80,17 @@ export function Content({ init }: AnnonceContentProps) {
 
     return (
         <div className="space-y-4">
-            <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Mes annonces</h1>
-                <p className="mt-2 text-sm sm:text-base font-medium text-foreground">Gere et analyse toutes les candidatures recues</p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Mes annonces</h1>
+                    <p className="mt-2 text-sm sm:text-base font-medium text-foreground">Gère et analyse toutes les candidatures reçues</p>
+                </div>
+                <Button className="gap-1.5 rounded-full px-5" asChild>
+                    <Link href="/poster-offre">
+                        <Plus className="h-4 w-4" />
+                        Nouvelle offre
+                    </Link>
+                </Button>
             </div>
 
             <div className="rounded-xl border border-border bg-white p-3">
@@ -89,12 +100,12 @@ export function Content({ init }: AnnonceContentProps) {
                         <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Rechercher une annonce..." className="h-10 pl-9" />
                     </div>
                     <Select value={status} onValueChange={setStatus}>
-                        <SelectTrigger className="h-10 w-full md:w-[170px]"><SelectValue placeholder="Tous les status" /></SelectTrigger>
+                        <SelectTrigger className="h-10 w-full md:w-[190px]"><SelectValue placeholder="Tous les statuts" /></SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">Tous les status</SelectItem>
-                            <SelectItem value="ACTIVE">Active</SelectItem>
+                            <SelectItem value="all">Tous les statuts</SelectItem>
+                            <SelectItem value="ACTIVE">Publiée</SelectItem>
                             <SelectItem value="DRAFT">Brouillon</SelectItem>
-                            <SelectItem value="CLOSED">Fermee</SelectItem>
+                            <SelectItem value="CLOSED">Fermée</SelectItem>
                         </SelectContent>
                     </Select>
                     <Button variant="outline" size="icon" className="h-10 w-10 self-end md:self-auto"><Filter className="h-4 w-4" /></Button>
@@ -106,36 +117,60 @@ export function Content({ init }: AnnonceContentProps) {
             ) : (
                 <div className="space-y-3">
                     {filtered.map((job) => {
-                        const badge = statusMap[job.status] ?? { label: job.status, className: "bg-gray-200 text-gray-700" }
+                        const badge = JOB_STATUS_META[job.status] ?? { label: job.status, className: "bg-gray-200 text-gray-700" }
+                        const estBrouillon = job.status === "DRAFT"
                         return (
                             <div key={job.id} className="rounded-xl border border-border bg-white px-4 py-4">
                                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
                                     <div className="min-w-0 flex-1">
                                         <h2 className="text-xl sm:text-2xl font-bold leading-tight">{job.title}</h2>
                                         <div className="mt-1 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                                            <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" />{job.location}</span>
-                                            <span>{job.type}</span>
-                                            <span>{job.salary}</span>
+                                            {/* Un brouillon peut n'avoir aucun de ces champs :
+                                                on n'affiche que ce qui est renseigné. */}
+                                            {job.location && (
+                                                <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" />{job.location}</span>
+                                            )}
+                                            {job.type && <span>{jobTypeLabel(job.type)}</span>}
+                                            {job.salary && <span>{job.salary}</span>}
+                                            {estBrouillon && !job.location && !job.type && !job.salary && (
+                                                <span className="italic">Brouillon à compléter</span>
+                                            )}
                                         </div>
                                         <div className="mt-3 flex flex-wrap items-center gap-5 text-sm">
-                                            <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4 text-blue-500" />{job.applicants} candidatures</span>
-                                            <span className="inline-flex items-center gap-1.5"><Calendar className="h-4 w-4 text-muted-foreground" />Publié le {new Date(job.publishDate).toLocaleDateString("fr-FR")}</span>
+                                            <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4 text-blue-500" />{job.applicants ?? 0} candidatures</span>
+                                            {job.publishDate && (
+                                                <span className="inline-flex items-center gap-1.5">
+                                                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                                                    {estBrouillon ? "Publication prévue le " : "Publié le "}
+                                                    {new Date(job.publishDate).toLocaleDateString("fr-FR")}
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
 
-                                    <div className="flex flex-row lg:flex-col lg:items-end items-center justify-between gap-3 lg:gap-5">
+                                    <div className="flex flex-col items-start gap-3 lg:items-end lg:gap-5">
                                         <span className={`rounded-full px-3 py-1 text-xs font-semibold ${badge.className}`}>{badge.label}</span>
-                                        <div className="flex items-center gap-2">
-                                            <Button variant="outline" size="sm" className="h-9 gap-1.5 rounded-md text-sm" onClick={() => handleStatusToggle(job)}>
-                                                {job.status === "ACTIVE" ? "Désactiver" : "Activer"}
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            {/* Un brouillon ne s'active pas d'un clic : il lui
+                                                manque en général des champs exigés à la
+                                                publication, on repasse donc par le formulaire. */}
+                                            {!estBrouillon && (
+                                                <>
+                                                    <Button variant="outline" size="sm" className="h-9 gap-1.5 rounded-md text-sm" onClick={() => handleStatusToggle(job)}>
+                                                        {job.status === "ACTIVE" ? "Désactiver" : "Activer"}
+                                                    </Button>
+                                                    <Button variant="outline" size="sm" className="h-9 gap-1.5 rounded-md text-sm" onClick={() => handleCompare(job)}>
+                                                        <ListOrdered className="h-4 w-4" />Comparer
+                                                    </Button>
+                                                </>
+                                            )}
+                                            <Button variant="outline" size="sm" className="h-9 gap-1.5 rounded-md text-sm" asChild>
+                                                <Link href={`/poster-offre?id=${job.id}`}>
+                                                    <Edit className="h-4 w-4" />
+                                                    {estBrouillon ? "Reprendre" : "Modifier"}
+                                                </Link>
                                             </Button>
-                                            <Button variant="outline" size="sm" className="h-9 gap-1.5 rounded-md text-sm" onClick={() => handleCompare(job)}>
-                                                <ListOrdered className="h-4 w-4" />Comparer
-                                            </Button>
-                                            <Button variant="outline" size="sm" className="h-9 gap-1.5 rounded-md text-sm">
-                                                <Edit className="h-4 w-4" />Modifier
-                                            </Button>
-                                            <Button variant="ghost" size="icon" className="h-9 w-9 text-red-500 hover:bg-red-50" onClick={() => handleDelete(job.id)}>
+                                            <Button variant="ghost" size="icon" className="h-9 w-9 text-red-500 hover:bg-red-50" aria-label="Supprimer l'annonce" onClick={() => handleDelete(job.id)}>
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
                                         </div>
@@ -146,8 +181,6 @@ export function Content({ init }: AnnonceContentProps) {
                     })}
                 </div>
             )}
-
-            <div className="hidden"><Link href="/poster-offre">Publier une annonce</Link></div>
 
             <Dialog open={!!compareFor} onOpenChange={(open) => !open && setCompareFor(null)}>
                 <DialogContent className="max-w-lg">

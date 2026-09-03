@@ -5,12 +5,13 @@ import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Progress } from "@/components/ui/progress"
 import { Textarea } from "@/components/ui/textarea"
-import { Search, User, MapPin, Calendar, Star, FileText, MessageSquare, Plus, Check, X, Sparkles, Download } from "lucide-react"
+import { Search, User, Calendar, Star, FileText, MessageSquare, Check, X, Sparkles, Download, Loader2, Send } from "lucide-react"
 import { apiRequest } from "@/lib/api-client-http"
-import { createConversation } from "@/actions/messages"
+import { createConversation, sendMessage } from "@/actions/messages"
+import { extractApiErrorMessage } from "@/lib/api-error"
 import type { ICandidate } from "@/@types/interface"
 import { SubscriptionGate } from "@/components/subscription-gate"
 import { candidateAssessmentService, type ICandidateAssessment } from "@/lib/api/candidate-assessment.service"
@@ -50,7 +51,16 @@ function CandidaturesContent() {
     const [query, setQuery] = useState("")
     const [jobFilter, setJobFilter] = useState("all")
     const [tab, setTab] = useState<(typeof TAB_LABELS)[number]["key"]>("all")
-    const [messaging, setMessaging] = useState<string | null>(null)
+
+    // Modale de message : la conversation est créée à l'ouverture, l'envoi et
+    // ses erreurs restent dans la modale.
+    const [messageFor, setMessageFor] = useState<ICandidate | null>(null)
+    const [conversationId, setConversationId] = useState<string | null>(null)
+    const [messageText, setMessageText] = useState("")
+    const [messaging, setMessaging] = useState(false)
+    const [sending, setSending] = useState(false)
+    const [messageSent, setMessageSent] = useState(false)
+    const [messageError, setMessageError] = useState<string | null>(null)
 
     useEffect(() => {
         const load = async () => {
@@ -88,16 +98,53 @@ function CandidaturesContent() {
         }
     }
 
-    const handleMessage = async (candidatureId: string) => {
-        setMessaging(candidatureId)
+    /**
+     * Ouvre la modale de message pour une candidature et prépare la
+     * conversation en arrière-plan. Auparavant, l'action « Message » quittait
+     * la page pour /messages : on perdait le tri et les filtres en cours pour
+     * écrire deux lignes.
+     */
+    const openMessage = async (candidate: ICandidate) => {
+        setMessageFor(candidate)
+        setMessageText("")
+        setMessageError(null)
+        setMessageSent(false)
+        setConversationId(null)
+        setMessaging(true)
         try {
-            const res = await createConversation(candidatureId)
+            const res = await createConversation(candidate.id)
             const conversation = (res as any)?.data ?? res
-            router.push(`/messages?conversation=${conversation.id}`)
+            if (!conversation?.id) throw new Error("Conversation introuvable")
+            setConversationId(String(conversation.id))
         } catch (err) {
             console.error("[candidatures] createConversation error:", err)
+            setMessageError(
+                extractApiErrorMessage(err, "Impossible d'ouvrir la conversation avec ce candidat."),
+            )
         } finally {
-            setMessaging(null)
+            setMessaging(false)
+        }
+    }
+
+    const handleSendMessage = async () => {
+        const contenu = messageText.trim()
+        if (!contenu) {
+            setMessageError("Écrivez un message avant de l'envoyer.")
+            return
+        }
+        if (!conversationId) return
+
+        setSending(true)
+        setMessageError(null)
+        try {
+            await sendMessage(conversationId, contenu)
+            setMessageSent(true)
+            setMessageText("")
+        } catch (err) {
+            console.error("[candidatures] sendMessage error:", err)
+            setMessageError(extractApiErrorMessage(err, "L'envoi du message a échoué."))
+        } finally {
+            setSending(false)
         }
     }
 
@@ -196,83 +243,149 @@ function CandidaturesContent() {
             {filtered.length === 0 ? (
                 <p className="text-center text-sm text-muted-foreground py-8">Aucune candidature trouvée.</p>
             ) : (
-                <div className="space-y-3">
+                /* Deux candidatures par ligne dès le desktop ; une seule en
+                   dessous, la carte n'ayant plus la largeur d'afficher ses
+                   actions côte à côte. `items-stretch` (défaut de la grille) +
+                   `h-full` gardent des cartes de hauteur égale sur une ligne. */
+                <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                     {filtered.map((candidate) => {
                         const us = uiStatus(candidate)
                         const meta = STATUS_META[us]
                         return (
-                            <div key={candidate.id} className="rounded-xl border border-border bg-white px-4 py-4">
-                                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                            <div key={candidate.id} className="flex h-full flex-col rounded-xl border border-border bg-white px-4 py-4">
+                                <div className="flex items-start gap-3">
+                                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-500">
+                                        <User className="h-4 w-4 text-white" />
+                                    </div>
                                     <div className="min-w-0 flex-1">
-                                        <div className="flex items-start gap-3">
-                                            <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-500">
-                                                <User className="h-4 w-4 text-white" />
-                                            </div>
-                                            <div className="min-w-0 flex-1">
-                                                <div className="mb-1 flex items-center gap-2 flex-wrap">
-                                                    <h3 className="text-lg font-semibold text-foreground">{candidate.name}</h3>
-                                                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${meta.statusClass}`}>{meta.label}</span>
-                                                </div>
-                                                <p className="text-sm text-muted-foreground">{candidate.email}</p>
-                                                <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                                                    <span className="inline-flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{new Date(candidate.appliedDate).toLocaleDateString("fr-FR")}</span>
-                                                </div>
-                                            </div>
+                                        <div className="mb-1 flex flex-wrap items-center gap-2">
+                                            <h3 className="truncate text-base font-semibold text-foreground sm:text-lg">{candidate.name}</h3>
+                                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${meta.statusClass}`}>{meta.label}</span>
                                         </div>
-
-                                        <div className="mt-2.5 text-xs text-blue-500">Compatibilite IA</div>
-                                        <div className="mt-1 flex items-center gap-3">
-                                            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-blue-100">
-                                                <div className="h-full rounded-full bg-blue-500" style={{ width: `${candidate.score}%` }} />
-                                            </div>
-                                            <span className={`w-8 text-right text-xs font-semibold ${candidate.score >= 90 ? "text-green-500" : candidate.score >= 80 ? "text-blue-500" : "text-muted-foreground"}`}>{candidate.score}%</span>
+                                        <p className="truncate text-sm text-muted-foreground">{candidate.email}</p>
+                                        <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                                            <span className="inline-flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{new Date(candidate.appliedDate).toLocaleDateString("fr-FR")}</span>
                                         </div>
                                     </div>
-
-                                    <div className="w-full lg:w-[165px] shrink-0">
-                                        <div className="mb-2 flex items-center lg:justify-end gap-1 text-sm font-semibold text-foreground">
-                                            <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-                                            <span>{candidate.score}</span>
-                                            <span className="text-muted-foreground">/100</span>
-                                        </div>
-                                        <p className="-mt-1 mb-2 lg:text-right text-[10px] text-muted-foreground">Score IA</p>
-                                        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-2">
-                                            <Button size="sm" className="h-8 w-full justify-center gap-1 rounded-md bg-blue-500 text-xs hover:bg-blue-600"><FileText className="h-3.5 w-3.5" />Voir CV</Button>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="h-8 w-full justify-center gap-1 rounded-md text-xs"
-                                                disabled={messaging === candidate.id}
-                                                onClick={() => handleMessage(candidate.id)}
-                                            >
-                                                <MessageSquare className="h-3.5 w-3.5" />Message
-                                            </Button>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="h-8 w-full justify-center gap-1 rounded-md text-xs"
-                                                onClick={() => openAssessment(candidate)}
-                                            >
-                                                <Sparkles className="h-3.5 w-3.5" />Évaluation IA
-                                            </Button>
-                                        </div>
-                                        {us === "pending" && (
-                                            <div className="mt-2 overflow-hidden rounded-md border border-border bg-white shadow-sm">
-                                                <button className="flex w-full items-center gap-1.5 px-3 py-1.5 text-xs text-green-600 hover:bg-green-50" onClick={() => handleAccept(candidate.id)}>
-                                                    <Check className="h-3.5 w-3.5" /> Accepter
-                                                </button>
-                                                <button className="flex w-full items-center gap-1.5 border-t border-border px-3 py-1.5 text-xs text-red-500 hover:bg-red-50" onClick={() => handleReject(candidate.id)}>
-                                                    <X className="h-3.5 w-3.5" /> Refuser
-                                                </button>
-                                            </div>
-                                        )}
+                                    <div className="flex shrink-0 items-center gap-1 text-sm font-semibold text-foreground">
+                                        <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                                        <span>{candidate.score}</span>
+                                        <span className="text-muted-foreground">/100</span>
                                     </div>
+                                </div>
+
+                                <div className="mt-3 text-xs text-blue-500">Compatibilite IA</div>
+                                <div className="mt-1 flex items-center gap-3">
+                                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-blue-100">
+                                        <div className="h-full rounded-full bg-blue-500" style={{ width: `${candidate.score}%` }} />
+                                    </div>
+                                    <span className={`w-8 text-right text-xs font-semibold ${candidate.score >= 90 ? "text-green-500" : candidate.score >= 80 ? "text-blue-500" : "text-muted-foreground"}`}>{candidate.score}%</span>
+                                </div>
+
+                                {/* `mt-auto` colle le bloc d'actions en bas : les
+                                    cartes d'une même ligne alignent leurs boutons. */}
+                                <div className="mt-auto pt-4">
+                                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                                        <Button size="sm" className="h-8 w-full justify-center gap-1 rounded-md bg-blue-500 text-xs hover:bg-blue-600"><FileText className="h-3.5 w-3.5" />Voir CV</Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-8 w-full justify-center gap-1 rounded-md text-xs"
+                                            onClick={() => openMessage(candidate)}
+                                        >
+                                            <MessageSquare className="h-3.5 w-3.5" />Message
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-8 w-full justify-center gap-1 rounded-md text-xs"
+                                            onClick={() => openAssessment(candidate)}
+                                        >
+                                            <Sparkles className="h-3.5 w-3.5" />Évaluation IA
+                                        </Button>
+                                    </div>
+                                    {us === "pending" && (
+                                        <div className="mt-2 grid grid-cols-2 overflow-hidden rounded-md border border-border bg-white shadow-sm">
+                                            <button className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-green-600 hover:bg-green-50" onClick={() => handleAccept(candidate.id)}>
+                                                <Check className="h-3.5 w-3.5" /> Accepter
+                                            </button>
+                                            <button className="flex items-center justify-center gap-1.5 border-l border-border px-3 py-1.5 text-xs text-red-500 hover:bg-red-50" onClick={() => handleReject(candidate.id)}>
+                                                <X className="h-3.5 w-3.5" /> Refuser
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )
                     })}
                 </div>
             )}
+
+            <Dialog open={!!messageFor} onOpenChange={(open) => !open && setMessageFor(null)}>
+                <DialogContent className="max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Message à {messageFor?.name}</DialogTitle>
+                        <DialogDescription>{messageFor?.email}</DialogDescription>
+                    </DialogHeader>
+
+                    {messaging ? (
+                        <div className="flex items-center justify-center gap-3 py-10 text-sm text-muted-foreground">
+                            <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+                            Ouverture de la conversation…
+                        </div>
+                    ) : messageSent ? (
+                        <div className="space-y-4 py-2">
+                            <p className="flex items-center gap-2 text-sm text-green-600">
+                                <Check className="h-4 w-4" />
+                                Message envoyé à {messageFor?.name}.
+                            </p>
+                            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+                                <Button variant="outline" size="sm" onClick={() => setMessageFor(null)}>
+                                    Fermer
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    className="bg-blue-500 hover:bg-blue-600"
+                                    onClick={() => router.push(`/messages?conversation=${conversationId}`)}
+                                >
+                                    Ouvrir la conversation
+                                </Button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            <Textarea
+                                value={messageText}
+                                onChange={(e) => {
+                                    setMessageText(e.target.value)
+                                    if (messageError) setMessageError(null)
+                                }}
+                                placeholder="Bonjour, votre candidature a retenu notre attention…"
+                                aria-invalid={!!messageError}
+                                aria-label="Votre message"
+                                disabled={!conversationId || sending}
+                                className="min-h-[140px] text-sm"
+                            />
+                            {messageError && <p className="text-xs text-destructive">{messageError}</p>}
+
+                            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+                                <Button variant="outline" size="sm" disabled={sending} onClick={() => setMessageFor(null)}>
+                                    Annuler
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    className="gap-1.5 bg-blue-500 hover:bg-blue-600"
+                                    disabled={sending || !conversationId || messageText.trim().length === 0}
+                                    onClick={handleSendMessage}
+                                >
+                                    {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                                    Envoyer
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
 
             <Dialog open={!!assessmentFor} onOpenChange={(open) => !open && setAssessmentFor(null)}>
                 <DialogContent className="max-w-lg">
