@@ -3,15 +3,10 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { SessionProvider } from "next-auth/react"
-import { ChevronLeft, Sparkles, Video, Wallet } from "lucide-react"
+import { ChevronLeft } from "lucide-react"
 import { GoriyaLogo } from "@/components/goriya-logo"
+import { BlueCircles } from "@/components/marketing/blue-circles"
 import { MarketingMotionStyles } from "@/components/marketing/reveal"
-
-const pitchPoints = [
-    { icon: Sparkles, label: "Scoring IA des candidatures" },
-    { icon: Video, label: "Entretiens vidéo intégrés" },
-    { icon: Wallet, label: "Abonnement en Mobile Money" },
-]
 
 /**
  * Pages qui prennent toute la largeur : le panneau de marque latéral et le
@@ -86,6 +81,7 @@ function SplitShell({ children }: { children: React.ReactNode }) {
                 />
                 <div className="orb-drift-1 pointer-events-none absolute -top-24 right-[-30%] h-[420px] w-[420px] rounded-full bg-[#2447FF]/25 blur-[110px]" />
                 <div className="orb-drift-2 pointer-events-none absolute bottom-[-20%] left-[-20%] h-[320px] w-[320px] rounded-full bg-[#FF6B4A]/15 blur-[100px]" />
+                <BlueCircles variant="panel" />
 
                 <Link href="/" className="relative z-10 inline-flex w-fit items-center gap-2 text-sm font-medium text-white/70 transition-colors hover:text-white">
                     <ChevronLeft className="h-4 w-4" />
@@ -95,26 +91,17 @@ function SplitShell({ children }: { children: React.ReactNode }) {
                 <div className="relative z-10">
                     <GoriyaLogo variant="white" />
                     <h2 className="mt-8 max-w-xs text-3xl leading-[1.15] text-white">
-                        Le bon candidat,{" "}
-                        <span className="bg-gradient-to-r from-[#FF6B4A] via-[#c9a2ff] to-[#9db4ff] bg-clip-text text-transparent">
-                            sans le tri de CV.
-                        </span>
+                        Le bon candidat, sans le tri de CV.
                     </h2>
                     <p className="mt-4 max-w-xs text-sm leading-relaxed text-[#e6f1ff]">
                         Rejoignez les entreprises qui recrutent avec Goriya en Côte d&apos;Ivoire et dans la zone UEMOA.
                     </p>
                 </div>
 
-                <ul className="relative z-10 space-y-3">
-                    {pitchPoints.map((point) => (
-                        <li key={point.label} className="flex items-center gap-3 text-sm text-[#e6f1ff]">
-                            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10">
-                                <point.icon className="h-4 w-4 text-white" />
-                            </span>
-                            {point.label}
-                        </li>
-                    ))}
-                </ul>
+                {/* Le panneau garde 3 zones (retour / marque / bas) pour que
+                    `justify-between` conserve sa répartition verticale : le bas
+                    est désormais laissé au motif. */}
+                <div aria-hidden="true" />
             </aside>
 
             {/* Content */}

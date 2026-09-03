@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Reveal, ScrollProgress, MarketingMotionStyles } from "@/components/marketing/reveal"
 import { SiteHeader } from "@/components/marketing/site-header"
 import { SiteFooter } from "@/components/marketing/site-footer"
+import { BlueCircles } from "@/components/marketing/blue-circles"
 import {
     ArrowRight,
     ArrowUpRight,
@@ -134,6 +135,7 @@ export default function HomePage() {
                 />
                 <div className="orb-drift-1 pointer-events-none absolute -top-24 right-[-10%] h-[520px] w-[520px] rounded-full bg-[#2447FF]/25 blur-[120px]" />
                 <div className="orb-drift-2 pointer-events-none absolute bottom-[-15%] left-[-5%] h-[380px] w-[380px] rounded-full bg-[#FF6B4A]/15 blur-[110px]" />
+                <BlueCircles />
 
                 <div className="container relative z-10 mx-auto grid grid-cols-1 gap-16 px-4 pb-20 pt-32 md:px-6 md:pb-28 md:pt-36 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pb-32 lg:pt-40">
                     <div>
@@ -142,9 +144,7 @@ export default function HomePage() {
                         >
                             Le bon candidat,
                             <br />
-                            <span className="bg-gradient-to-r from-[#FF6B4A] via-[#c9a2ff] to-[#9db4ff] bg-clip-text text-transparent">
-                                sans le tri de CV.
-                            </span>
+                            sans le tri de CV.
                         </h1>
 
                         <p className="mt-6 max-w-lg text-base leading-relaxed text-[#e6f1ff] sm:text-lg">
@@ -391,6 +391,7 @@ export default function HomePage() {
             {/* Final CTA */}
             <section className="relative overflow-hidden bg-[#1e7df2] py-24">
                 <div className="orb-drift-1 pointer-events-none absolute left-1/2 top-0 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-[#2447FF]/20 blur-[130px]" />
+                <BlueCircles />
                 <Reveal className="container relative z-10 mx-auto px-4 text-center md:px-6">
                     <h2 className="mx-auto max-w-xl text-3xl text-white sm:text-4xl">
                         Donnez à votre équipe RH une longueur d&apos;avance
