@@ -89,7 +89,7 @@ function MatchCard({
 
     return (
         <div
-            className={`match-card-hover flex items-center gap-4 rounded-3xl px-5 py-4 transition-transform duration-300 ${surface} ${className}`}
+            className={`match-card-hover flex items-center gap-4 rounded-md px-5 py-4 transition-transform duration-300 ${surface} ${className}`}
         >
             <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${colors.bg} ${colors.text}`}>
                 {initials}
@@ -200,8 +200,8 @@ export default function HomePage() {
             <section className="border-b border-black/[0.06] bg-white py-16">
                 <div className="container mx-auto px-4 md:px-6">
                     <Reveal className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-2">
-                        <div className="tilt-card rounded-3xl border border-black/[0.06] bg-white p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:col-span-2 lg:col-span-2 lg:row-span-2">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#1e7df2]">
+                        <div className="tilt-card rounded-md border border-black/[0.06] bg-white p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:col-span-2 lg:col-span-2 lg:row-span-2">
+                            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#1e7df2]">
                                 <Sparkles className="h-5 w-5 text-white" />
                             </div>
                             <h3 className="mt-5 text-lg font-semibold text-[#0B1220]">Scoring IA des CV</h3>
@@ -214,8 +214,8 @@ export default function HomePage() {
                             </div>
                         </div>
 
-                        <div className="tilt-card rounded-3xl bg-[#1e7df2] p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10">
+                        <div className="tilt-card rounded-md bg-[#1e7df2] p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-white/10">
                                 <Video className="h-5 w-5 text-white" />
                             </div>
                             <h3 className="mt-5 text-base font-semibold text-white">Goriya Call</h3>
@@ -224,8 +224,8 @@ export default function HomePage() {
                             </p>
                         </div>
 
-                        <div className="tilt-card rounded-3xl bg-[#FFF4F0] p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FF6B4A]">
+                        <div className="tilt-card rounded-md bg-[#FFF4F0] p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#FF6B4A]">
                                 <Wallet className="h-5 w-5 text-white" />
                             </div>
                             <h3 className="mt-5 text-base font-semibold text-[#0B1220]">Mobile Money</h3>
@@ -234,9 +234,9 @@ export default function HomePage() {
                             </p>
                         </div>
 
-                        <div className="tilt-card flex flex-col justify-center rounded-3xl border border-black/[0.06] bg-white p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:col-span-2 lg:col-span-2">
+                        <div className="tilt-card flex flex-col justify-center rounded-md border border-black/[0.06] bg-white p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:col-span-2 lg:col-span-2">
                             <div className="flex items-center gap-4">
-                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#1e7df2]">
+                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#1e7df2]">
                                     <Languages className="h-5 w-5 text-white" />
                                 </div>
                                 <div>
@@ -296,7 +296,7 @@ export default function HomePage() {
                                 Vous ouvrez votre tableau de bord et voyez d&apos;emblée qui mérite votre attention.
                             </p>
                         </Reveal>
-                        <Reveal delay={120} className="rounded-3xl bg-[#F7F8FC] p-8">
+                        <Reveal delay={120} className="rounded-md bg-[#F7F8FC] p-8">
                             <div className="flex flex-col gap-3">
                                 {candidates.map((c) => (
                                     <MatchCard key={c.name} candidate={c} />
@@ -306,8 +306,8 @@ export default function HomePage() {
                     </div>
 
                     <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
-                        <Reveal className="order-2 rounded-3xl bg-[#1e7df2] p-8 lg:order-1">
-                            <div className="flex items-center justify-between rounded-2xl bg-white/5 px-5 py-4">
+                        <Reveal className="order-2 rounded-md bg-[#1e7df2] p-8 lg:order-1">
+                            <div className="flex items-center justify-between rounded-md bg-white/5 px-5 py-4">
                                 <div className="flex items-center gap-3">
                                     <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#2447FF]/20">
                                         <Video className="h-4 w-4 text-[#e6f1ff]" />
@@ -322,7 +322,7 @@ export default function HomePage() {
                                     En direct
                                 </span>
                             </div>
-                            <div className="mt-3 flex h-24 items-end gap-1.5 rounded-2xl bg-white/5 px-5 py-4">
+                            <div className="mt-3 flex h-24 items-end gap-1.5 rounded-md bg-white/5 px-5 py-4">
                                 {[40, 70, 45, 90, 60, 35, 75, 50, 65, 30].map((h, i) => (
                                     <span
                                         key={i}
@@ -361,7 +361,7 @@ export default function HomePage() {
                             <Reveal
                                 key={point.title}
                                 delay={i * 90}
-                                className="rounded-3xl bg-white/70 p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-white"
+                                className="rounded-md bg-white/70 p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-white"
                             >
                                 <h3 className="text-[15px] font-semibold text-[#0B1220]">{point.title}</h3>
                                 <p className="mt-2 text-sm leading-relaxed text-[#5B6472]">{point.description}</p>

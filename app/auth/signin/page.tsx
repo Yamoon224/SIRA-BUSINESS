@@ -133,7 +133,7 @@ function SignInForm() {
     }
 
     return (
-        <div className="mx-auto mt-6 w-full max-w-md rounded-3xl border border-black/[0.06] bg-white p-8 shadow-[0_20px_60px_-30px_rgba(11,18,32,0.25)] sm:p-10">
+        <div className="mx-auto mt-6 w-full max-w-md rounded-md border border-black/[0.06] bg-white p-8 shadow-[0_20px_60px_-30px_rgba(11,18,32,0.25)] sm:p-10">
             <h2 className="text-center text-3xl text-[#0B1220]">Bon retour.</h2>
             <p className="mt-2 text-center text-sm text-[#5B6472]">Connectez-vous à votre espace entreprise.</p>
 
@@ -236,7 +236,7 @@ export default function Page() {
     return (
         <Suspense
             fallback={
-                <div className="mx-auto mt-6 flex w-full max-w-md items-center justify-center rounded-3xl border border-black/[0.06] bg-white p-16 shadow-[0_20px_60px_-30px_rgba(11,18,32,0.25)]">
+                <div className="mx-auto mt-6 flex w-full max-w-md items-center justify-center rounded-md border border-black/[0.06] bg-white p-16 shadow-[0_20px_60px_-30px_rgba(11,18,32,0.25)]">
                     <Loader2 className="h-6 w-6 animate-spin text-[#2447FF]" />
                 </div>
             }

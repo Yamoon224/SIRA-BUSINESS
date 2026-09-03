@@ -119,9 +119,9 @@ export default function TarificationPage() {
                 <div className="container mx-auto px-4 md:px-6">
                     {loading ? (
                         <div className="mx-auto flex max-w-[1100px] flex-wrap justify-center gap-6">
-                            <Skeleton className="h-[440px] w-full max-w-sm rounded-3xl sm:w-[calc(50%-0.75rem)] lg:w-[330px]" />
-                            <Skeleton className="h-[440px] w-full max-w-sm rounded-3xl sm:w-[calc(50%-0.75rem)] lg:w-[330px]" />
-                            <Skeleton className="h-[440px] w-full max-w-sm rounded-3xl sm:w-[calc(50%-0.75rem)] lg:w-[330px]" />
+                            <Skeleton className="h-[440px] w-full max-w-sm rounded-md sm:w-[calc(50%-0.75rem)] lg:w-[330px]" />
+                            <Skeleton className="h-[440px] w-full max-w-sm rounded-md sm:w-[calc(50%-0.75rem)] lg:w-[330px]" />
+                            <Skeleton className="h-[440px] w-full max-w-sm rounded-md sm:w-[calc(50%-0.75rem)] lg:w-[330px]" />
                         </div>
                     ) : sortedPlans.length === 0 ? (
                         <p className="text-center text-sm text-[#5B6472]">
@@ -138,7 +138,7 @@ export default function TarificationPage() {
                                 return (
                                     <div
                                         key={plan.id}
-                                        className={`relative flex w-full max-w-sm flex-col overflow-hidden rounded-[26px] bg-white transition-transform duration-300 hover:-translate-y-1 sm:w-[calc(50%-0.75rem)] lg:w-[330px] ${
+                                        className={`relative flex w-full max-w-sm flex-col overflow-hidden rounded-md bg-white transition-transform duration-300 hover:-translate-y-1 sm:w-[calc(50%-0.75rem)] lg:w-[330px] ${
                                             isPopular
                                                 ? "border-2 border-[#2447FF] shadow-[0_25px_60px_-30px_rgba(36,71,255,0.5)]"
                                                 : "border border-black/[0.06] shadow-sm"
@@ -239,7 +239,7 @@ export default function TarificationPage() {
                     </Reveal>
 
                     <Reveal delay={100} className="mx-auto mt-12 max-w-2xl">
-                        <Accordion type="single" collapsible className="rounded-3xl border border-black/[0.06] bg-[#F7F8FC] px-6">
+                        <Accordion type="single" collapsible className="rounded-md border border-black/[0.06] bg-[#F7F8FC] px-6">
                             {faqs.map((faq) => (
                                 <AccordionItem key={faq.question} value={faq.question} className="border-black/[0.06]">
                                     <AccordionTrigger className="py-5 text-[15px] font-semibold text-[#0B1220] hover:no-underline">

@@ -70,7 +70,7 @@ export default function SignupSuccessPage() {
 
     return (
         <div className="mx-auto w-full max-w-xl py-6 sm:py-10">
-            <div className="overflow-hidden rounded-2xl border border-black/[0.08] bg-white shadow-sm">
+            <div className="overflow-hidden rounded-md border border-black/[0.08] bg-white shadow-sm">
                 {/* En-tête de confirmation */}
                 <div className="flex flex-col items-center border-b border-black/[0.06] px-6 py-8 text-center sm:px-8">
                     <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#E8F5EC]">

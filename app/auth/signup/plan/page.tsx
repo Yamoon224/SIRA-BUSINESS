@@ -245,7 +245,7 @@ export default function ChoosePlanPage() {
                     return (
                         <div
                             key={plan.id}
-                            className={`relative flex w-full max-w-sm flex-col rounded-2xl bg-white transition-shadow sm:w-[calc(50%-0.75rem)] lg:w-[330px] ${
+                            className={`relative flex w-full max-w-sm flex-col rounded-md bg-white transition-shadow sm:w-[calc(50%-0.75rem)] lg:w-[330px] ${
                                 isPopular
                                     ? "border-2 border-[#2447FF] shadow-[0_18px_45px_-25px_rgba(36,71,255,0.55)]"
                                     : "border border-black/[0.08] shadow-sm hover:shadow-md"

@@ -266,7 +266,7 @@ export default function Page() {
                         <h3 className="text-sm font-medium text-foreground mb-4">Logo et bannières</h3>
                         <div className="grid gap-4 md:grid-cols-2">
                             {/* Logo Upload */}
-                            <label className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#2447FF]/25 bg-[#2447FF]/5 p-8 text-center cursor-pointer transition-colors hover:border-[#2447FF]/50 hover:bg-[#2447FF]/10">
+                            <label className="flex flex-col items-center justify-center rounded-md border-2 border-dashed border-[#2447FF]/25 bg-[#2447FF]/5 p-8 text-center cursor-pointer transition-colors hover:border-[#2447FF]/50 hover:bg-[#2447FF]/10">
                                 {formData.logo ? (
                                     <img
                                         src={URL.createObjectURL(formData.logo as File)}
@@ -291,7 +291,7 @@ export default function Page() {
                             </label>
 
                             {/* Cover Image Upload */}
-                            <label className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#FF6B4A]/30 bg-[#FF6B4A]/5 p-8 text-center cursor-pointer transition-colors hover:border-[#FF6B4A]/50 hover:bg-[#FF6B4A]/10">
+                            <label className="flex flex-col items-center justify-center rounded-md border-2 border-dashed border-[#FF6B4A]/30 bg-[#FF6B4A]/5 p-8 text-center cursor-pointer transition-colors hover:border-[#FF6B4A]/50 hover:bg-[#FF6B4A]/10">
                                 {formData.coverImage ? (
                                     <img
                                         src={URL.createObjectURL(formData.coverImage as File)}
