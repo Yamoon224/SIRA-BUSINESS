@@ -130,4 +130,15 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Les contrôles natifs n'héritent pas de la police du document : sans cette
+     règle, champs, listes déroulantes et boutons s'affichent dans la police
+     d'interface du système au lieu d'Inter. Même règle que dans l'app
+     standard, pour que les deux espaces aient exactement la même typographie. */
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
 }

@@ -14,7 +14,7 @@ export function SignupStepper({ currentStep, steps }: SignupStepperProps) {
                                 className={cn(
                                     "flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-colors",
                                     index <= currentStep
-                                        ? "bg-[#0B1220] text-white"
+                                        ? "bg-[#1e7df2] text-white"
                                         : "bg-black/[0.06] text-[#5B6472]"
                                 )}
                             >
@@ -39,7 +39,7 @@ export function SignupStepper({ currentStep, steps }: SignupStepperProps) {
                             <div
                                 className={cn(
                                     "mx-2 md:mx-4 h-0.5 w-12 md:w-24",
-                                    index < currentStep ? "bg-[#0B1220]" : "bg-black/[0.08]"
+                                    index < currentStep ? "bg-[#1e7df2]" : "bg-black/[0.08]"
                                 )}
                             />
                         )}

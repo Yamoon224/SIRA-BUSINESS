@@ -76,7 +76,7 @@ function SplitShell({ children }: { children: React.ReactNode }) {
     return (
         <div className="min-h-screen bg-[#F7F8FC] lg:grid lg:grid-cols-[440px_1fr]">
             {/* Brand panel - desktop only */}
-            <aside className="relative hidden overflow-hidden bg-[#0B1220] lg:flex lg:flex-col lg:justify-between lg:p-10">
+            <aside className="relative hidden overflow-hidden bg-[#1e7df2] lg:flex lg:flex-col lg:justify-between lg:p-10">
                 <div
                     className="pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-soft-light"
                     style={{
@@ -96,21 +96,18 @@ function SplitShell({ children }: { children: React.ReactNode }) {
                     <GoriyaLogo variant="white" />
                     <h2 className="mt-8 max-w-xs text-3xl leading-[1.15] text-white">
                         Le bon candidat,{" "}
-                        <span
-                            className="bg-gradient-to-r from-[#FF6B4A] via-[#c9a2ff] to-[#9db4ff] bg-clip-text italic text-transparent"
-                            style={{ fontWeight: 400 }}
-                        >
+                        <span className="bg-gradient-to-r from-[#FF6B4A] via-[#c9a2ff] to-[#9db4ff] bg-clip-text text-transparent">
                             sans le tri de CV.
                         </span>
                     </h2>
-                    <p className="mt-4 max-w-xs text-sm leading-relaxed text-[#B7C0DB]">
+                    <p className="mt-4 max-w-xs text-sm leading-relaxed text-[#e6f1ff]">
                         Rejoignez les entreprises qui recrutent avec Goriya en Côte d&apos;Ivoire et dans la zone UEMOA.
                     </p>
                 </div>
 
                 <ul className="relative z-10 space-y-3">
                     {pitchPoints.map((point) => (
-                        <li key={point.label} className="flex items-center gap-3 text-sm text-[#B7C0DB]">
+                        <li key={point.label} className="flex items-center gap-3 text-sm text-[#e6f1ff]">
                             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10">
                                 <point.icon className="h-4 w-4 text-white" />
                             </span>

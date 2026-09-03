@@ -124,7 +124,7 @@ export default function HomePage() {
             <SiteHeader page="home" />
 
             {/* Hero */}
-            <section className="relative overflow-hidden bg-[#0B1220]">
+            <section className="relative overflow-hidden bg-[#1e7df2]">
                 <div
                     className="pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-soft-light"
                     style={{
@@ -142,15 +142,12 @@ export default function HomePage() {
                         >
                             Le bon candidat,
                             <br />
-                            <span
-                                className="bg-gradient-to-r from-[#FF6B4A] via-[#c9a2ff] to-[#9db4ff] bg-clip-text italic text-transparent"
-                                style={{ fontWeight: 400 }}
-                            >
+                            <span className="bg-gradient-to-r from-[#FF6B4A] via-[#c9a2ff] to-[#9db4ff] bg-clip-text text-transparent">
                                 sans le tri de CV.
                             </span>
                         </h1>
 
-                        <p className="mt-6 max-w-lg text-base leading-relaxed text-[#B7C0DB] sm:text-lg">
+                        <p className="mt-6 max-w-lg text-base leading-relaxed text-[#e6f1ff] sm:text-lg">
                             Goriya note et classe vos candidatures avec l&apos;IA, organise vos entretiens vidéo,
                             et vous laisse le temps de choisir - pas de trier.
                         </p>
@@ -204,7 +201,7 @@ export default function HomePage() {
                 <div className="container mx-auto px-4 md:px-6">
                     <Reveal className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-2">
                         <div className="tilt-card rounded-3xl border border-black/[0.06] bg-white p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:col-span-2 lg:col-span-2 lg:row-span-2">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0B1220]">
+                            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#1e7df2]">
                                 <Sparkles className="h-5 w-5 text-white" />
                             </div>
                             <h3 className="mt-5 text-lg font-semibold text-[#0B1220]">Scoring IA des CV</h3>
@@ -217,12 +214,12 @@ export default function HomePage() {
                             </div>
                         </div>
 
-                        <div className="tilt-card rounded-3xl bg-[#0B1220] p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                        <div className="tilt-card rounded-3xl bg-[#1e7df2] p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10">
                                 <Video className="h-5 w-5 text-white" />
                             </div>
                             <h3 className="mt-5 text-base font-semibold text-white">Goriya Call</h3>
-                            <p className="mt-2 text-sm leading-relaxed text-[#B7C0DB]">
+                            <p className="mt-2 text-sm leading-relaxed text-[#e6f1ff]">
                                 Entretiens vidéo intégrés, sans lien tiers à partager.
                             </p>
                         </div>
@@ -239,7 +236,7 @@ export default function HomePage() {
 
                         <div className="tilt-card flex flex-col justify-center rounded-3xl border border-black/[0.06] bg-white p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:col-span-2 lg:col-span-2">
                             <div className="flex items-center gap-4">
-                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#0B1220]">
+                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#1e7df2]">
                                     <Languages className="h-5 w-5 text-white" />
                                 </div>
                                 <div>
@@ -271,7 +268,7 @@ export default function HomePage() {
                         {steps.map((step, i) => (
                             <Reveal key={step.n} delay={i * 90} className="relative flex flex-col items-start">
                                 <span
-                                    className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-[#0B1220] text-sm text-white transition-transform duration-300 hover:scale-110"
+                                    className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-[#1e7df2] text-sm text-white transition-transform duration-300 hover:scale-110"
                                 >
                                     {step.n}
                                 </span>
@@ -309,11 +306,11 @@ export default function HomePage() {
                     </div>
 
                     <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
-                        <Reveal className="order-2 rounded-3xl bg-[#0B1220] p-8 lg:order-1">
+                        <Reveal className="order-2 rounded-3xl bg-[#1e7df2] p-8 lg:order-1">
                             <div className="flex items-center justify-between rounded-2xl bg-white/5 px-5 py-4">
                                 <div className="flex items-center gap-3">
                                     <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#2447FF]/20">
-                                        <Video className="h-4 w-4 text-[#9db4ff]" />
+                                        <Video className="h-4 w-4 text-[#e6f1ff]" />
                                     </span>
                                     <div>
                                         <p className="text-sm font-semibold text-white">Entretien - Aïcha Koné</p>
@@ -392,13 +389,13 @@ export default function HomePage() {
             </section>
 
             {/* Final CTA */}
-            <section className="relative overflow-hidden bg-[#0B1220] py-24">
+            <section className="relative overflow-hidden bg-[#1e7df2] py-24">
                 <div className="orb-drift-1 pointer-events-none absolute left-1/2 top-0 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-[#2447FF]/20 blur-[130px]" />
                 <Reveal className="container relative z-10 mx-auto px-4 text-center md:px-6">
                     <h2 className="mx-auto max-w-xl text-3xl text-white sm:text-4xl">
                         Donnez à votre équipe RH une longueur d&apos;avance
                     </h2>
-                    <p className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-[#B7C0DB]">
+                    <p className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-[#e6f1ff]">
                         Goriya est disponible dès aujourd&apos;hui pour les entreprises basées en
                         Côte d&apos;Ivoire et dans la zone UEMOA.
                     </p>

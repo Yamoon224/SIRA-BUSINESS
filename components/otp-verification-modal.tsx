@@ -65,7 +65,7 @@ export function OTPVerificationModal({ isOpen, onClose, onVerify, onResend }: OT
           <Button
             onClick={handleVerify}
             disabled={otpCode.length !== 6 || isLoading}
-            className="w-full h-12 rounded-full bg-[#0B1220] transition-transform duration-200 hover:scale-[1.01] hover:bg-[#0B1220]/90"
+            className="w-full h-12 rounded-full bg-[#1e7df2] transition-transform duration-200 hover:scale-[1.01] hover:bg-[#1668d6]"
           >
             {isLoading ? "Vérification..." : "Vérifier"}
           </Button>

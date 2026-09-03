@@ -125,7 +125,7 @@ export default function SignupSuccessPage() {
                 <div className="flex flex-col gap-2.5 border-t border-black/[0.06] bg-[#F7F8FC] px-6 py-5 sm:flex-row sm:px-8">
                     <Button
                         asChild
-                        className="h-10 flex-1 rounded-full bg-[#0B1220] text-sm font-semibold text-white hover:bg-[#0B1220]/90"
+                        className="h-10 flex-1 rounded-full bg-[#1e7df2] text-sm font-semibold text-white hover:bg-[#1668d6]"
                     >
                         <Link href="/poster-offre" onClick={clearSignupFlow}>
                             Poster une offre

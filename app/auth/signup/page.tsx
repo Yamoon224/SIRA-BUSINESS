@@ -489,7 +489,7 @@ export default function Page() {
                 <Button
                     onClick={handleNext}
                     disabled={loading}
-                    className="w-30 rounded-full bg-[#0B1220] transition-transform duration-200 hover:scale-[1.02] hover:bg-[#0B1220]/90 disabled:opacity-70"
+                    className="w-30 rounded-full bg-[#1e7df2] transition-transform duration-200 hover:scale-[1.02] hover:bg-[#1668d6] disabled:opacity-70"
                     size="lg"
                 >
                     {loading ? (

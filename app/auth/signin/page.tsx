@@ -179,7 +179,7 @@ function SignInForm() {
 
                 <Button
                     type="submit"
-                    className="w-full rounded-full bg-[#0B1220] transition-transform duration-200 hover:scale-[1.01] hover:bg-[#0B1220]/90"
+                    className="w-full rounded-full bg-[#1e7df2] transition-transform duration-200 hover:scale-[1.01] hover:bg-[#1668d6]"
                     disabled={loading}
                 >
                     {loading ? "Connexion..." : "Se connecter"}

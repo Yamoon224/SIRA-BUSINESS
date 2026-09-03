@@ -292,7 +292,7 @@ export default function ChoosePlanPage() {
                                         isPopular
                                             ? "bg-[#2447FF] text-white hover:bg-[#1d3ce0]"
                                             : isFree
-                                              ? "bg-[#0B1220] text-white hover:bg-[#0B1220]/90"
+                                              ? "bg-[#1e7df2] text-white hover:bg-[#1668d6]"
                                               : "border border-black/10 bg-white text-[#0B1220] hover:bg-[#F7F8FC]"
                                     }`}
                                 >

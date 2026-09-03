@@ -86,7 +86,7 @@ export default function TarificationPage() {
             <SiteHeader page="tarification" />
 
             {/* Hero */}
-            <section className="relative overflow-hidden bg-[#0B1220]">
+            <section className="relative overflow-hidden bg-[#1e7df2]">
                 <div
                     className="pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-soft-light"
                     style={{
@@ -98,20 +98,17 @@ export default function TarificationPage() {
                 <div className="orb-drift-2 pointer-events-none absolute bottom-[-25%] left-[-10%] h-[360px] w-[360px] rounded-full bg-[#FF6B4A]/15 blur-[110px]" />
 
                 <div className="container relative z-10 mx-auto px-4 pb-20 pt-32 text-center md:px-6 md:pb-24 md:pt-40">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9db4ff]">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#e6f1ff]">
                         <span className="h-1.5 w-1.5 rounded-full bg-[#FF6B4A]" />
                         Tarification
                     </div>
                     <h1 className="mx-auto mt-6 max-w-2xl text-4xl leading-[1.1] tracking-tight text-white sm:text-5xl">
                         Un tarif simple,{" "}
-                        <span
-                            className="bg-gradient-to-r from-[#FF6B4A] via-[#c9a2ff] to-[#9db4ff] bg-clip-text italic text-transparent"
-                            style={{ fontWeight: 400 }}
-                        >
+                        <span className="bg-gradient-to-r from-[#FF6B4A] via-[#c9a2ff] to-[#9db4ff] bg-clip-text text-transparent">
                             qui grandit avec vous.
                         </span>
                     </h1>
-                    <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-[#B7C0DB] sm:text-lg">
+                    <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-[#e6f1ff] sm:text-lg">
                         Du premier poste publié à la croissance de votre équipe RH - sans surprise sur la facture,
                         réglable en Mobile Money.
                     </p>
@@ -149,7 +146,7 @@ export default function TarificationPage() {
                                         }`}
                                     >
                                         {isPopular && (
-                                            <span className="absolute right-5 top-5 whitespace-nowrap rounded-full bg-[#0B1220] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-white">
+                                            <span className="absolute right-5 top-5 whitespace-nowrap rounded-full bg-[#1e7df2] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-white">
                                                 Choix populaire
                                             </span>
                                         )}
@@ -188,7 +185,7 @@ export default function TarificationPage() {
                                                     isPopular
                                                         ? "bg-[#2447FF] text-white hover:bg-[#1d3ce0]"
                                                         : isFree
-                                                          ? "bg-[#0B1220] text-white hover:bg-[#0B1220]/90"
+                                                          ? "bg-[#1e7df2] text-white hover:bg-[#1668d6]"
                                                           : "border-black/10"
                                                 }`}
                                             >
@@ -260,13 +257,13 @@ export default function TarificationPage() {
             </section>
 
             {/* Final CTA */}
-            <section className="relative overflow-hidden bg-[#0B1220] py-24">
+            <section className="relative overflow-hidden bg-[#1e7df2] py-24">
                 <div className="orb-drift-1 pointer-events-none absolute left-1/2 top-0 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-[#2447FF]/20 blur-[130px]" />
                 <Reveal className="container relative z-10 mx-auto px-4 text-center md:px-6">
                     <h2 className="mx-auto max-w-xl text-3xl text-white sm:text-4xl">
                         Prêt à recruter avec Goriya ?
                     </h2>
-                    <p className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-[#B7C0DB]">
+                    <p className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-[#e6f1ff]">
                         Sans engagement caché, sans carte bancaire internationale - commencez dès aujourd&apos;hui.
                     </p>
                     <div className="mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row">
