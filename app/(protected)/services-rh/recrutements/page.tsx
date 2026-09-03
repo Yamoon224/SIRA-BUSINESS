@@ -20,7 +20,7 @@ function RecrutementsContent() {
 
 export default function Page() {
   return (
-    <SubscriptionGate featureLabel="la gestion des recrutements">
+    <SubscriptionGate requiredTier="PAID" featureLabel="la gestion des recrutements">
       <RecrutementsContent />
     </SubscriptionGate>
   )

@@ -1,4 +1,5 @@
 import { apiRequest } from "@/lib/api-client-http"
+import type { PlanTier } from "@/lib/plan-access"
 
 export interface CreateCheckoutData {
     userId: string
@@ -48,7 +49,15 @@ export const subscriptionService = {
         apiRequest({ endpoint: `/subscriptions/me/${userId}`, method: "DELETE" }),
 
     checkSubscription: (userId: string) =>
-        apiRequest<{ hasSubscription: boolean; planName: string | null; status: string | null }>({
+        apiRequest<{
+            hasSubscription: boolean
+            planName: string | null
+            status: string | null
+            planId?: string | null
+            planPrice?: number | null
+            /** "NONE" | "FREE" | "PAID" — voir lib/plan-access.ts */
+            tier?: PlanTier
+        }>({
             endpoint: `/subscriptions/check/${userId}`,
             method: "GET",
         }),

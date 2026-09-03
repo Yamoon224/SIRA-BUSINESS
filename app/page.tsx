@@ -45,7 +45,7 @@ const steps = [
 
 const regionPoints = [
     { title: "Français natif", description: "Interface et support pensés pour vos équipes, pas traduits à la va-vite." },
-    { title: "Mobile Money", description: "Payez votre abonnement via Kkiapay, sans carte bancaire internationale." },
+    { title: "Mobile Money", description: "Payez votre abonnement via Paiement Pro, sans carte bancaire internationale." },
     { title: "Support local", description: "Une équipe basée en Côte d'Ivoire, aux fuseaux et usages qui sont les vôtres." },
 ]
 
@@ -233,7 +233,7 @@ export default function HomePage() {
                             </div>
                             <h3 className="mt-5 text-base font-semibold text-[#0B1220]">Mobile Money</h3>
                             <p className="mt-2 text-sm leading-relaxed text-[#5B6472]">
-                                Abonnement réglé via Kkiapay, comme vos autres services du quotidien.
+                                Abonnement réglé via Paiement Pro, comme vos autres services du quotidien.
                             </p>
                         </div>
 

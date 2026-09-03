@@ -1,4 +1,8 @@
+"use client"
+
 import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { SessionProvider } from "next-auth/react"
 import { ChevronLeft, Sparkles, Video, Wallet } from "lucide-react"
 import { GoriyaLogo } from "@/components/goriya-logo"
 import { MarketingMotionStyles } from "@/components/marketing/reveal"
@@ -9,11 +13,66 @@ const pitchPoints = [
     { icon: Wallet, label: "Abonnement en Mobile Money" },
 ]
 
+/**
+ * Pages qui prennent toute la largeur : le panneau de marque latéral et le
+ * `max-w-2xl` du contenu écrasaient la grille de forfaits (3 cards) sur un
+ * écran de 1440px. Ces pages portent leur propre en-tête et centrent
+ * elles-mêmes leur contenu.
+ */
+const FULL_WIDTH_ROUTES = ["/auth/signup/plan"]
+
 export default function AuthLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
+    const pathname = usePathname()
+    const isFullWidth = FULL_WIDTH_ROUTES.includes(pathname)
+
+    // SessionProvider : les pages /auth/* peuvent être atteintes par une
+    // entreprise déjà connectée (consultation/changement de forfait), et ont
+    // alors besoin de useSession pour adapter leurs redirections.
+    return (
+        <SessionProvider>
+            {isFullWidth ? (
+                <FullWidthShell>{children}</FullWidthShell>
+            ) : (
+                <SplitShell>{children}</SplitShell>
+            )}
+            <MarketingMotionStyles />
+        </SessionProvider>
+    )
+}
+
+/** Coquille pleine largeur, sans barre latérale. */
+function FullWidthShell({ children }: { children: React.ReactNode }) {
+    return (
+        <div className="flex min-h-screen flex-col bg-[#F7F8FC]">
+            <header className="flex items-center justify-between gap-4 px-4 py-5 md:px-8">
+                <GoriyaLogo />
+                <div className="flex items-center gap-4">
+                    <Link
+                        href="/tarification"
+                        className="hidden text-sm font-medium text-[#5B6472] transition-colors hover:text-[#0B1220] sm:block"
+                    >
+                        Comparer les tarifs
+                    </Link>
+                    <Link
+                        href="/assistance"
+                        className="text-sm font-medium text-[#5B6472] transition-colors hover:text-[#0B1220]"
+                    >
+                        Besoin d&apos;aide ?
+                    </Link>
+                </div>
+            </header>
+
+            <main className="w-full flex-1 pb-16">{children}</main>
+        </div>
+    )
+}
+
+/** Coquille par défaut : panneau de marque + formulaire (connexion, inscription…). */
+function SplitShell({ children }: { children: React.ReactNode }) {
     return (
         <div className="min-h-screen bg-[#F7F8FC] lg:grid lg:grid-cols-[440px_1fr]">
             {/* Brand panel - desktop only */}
@@ -84,8 +143,6 @@ export default function AuthLayout({
                     {children}
                 </main>
             </div>
-
-            <MarketingMotionStyles />
         </div>
     )
 }

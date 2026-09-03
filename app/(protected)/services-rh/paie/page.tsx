@@ -20,7 +20,7 @@ function PaieContent() {
 
 export default function Page() {
   return (
-    <SubscriptionGate featureLabel="la gestion de la paie">
+    <SubscriptionGate requiredTier="PAID" featureLabel="la gestion de la paie">
       <PaieContent />
     </SubscriptionGate>
   )

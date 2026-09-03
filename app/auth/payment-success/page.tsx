@@ -5,6 +5,13 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { CheckCircle, Loader2, XCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { subscriptionService } from "@/lib/api/subscription.service"
+import { extractApiErrorMessage } from "@/lib/api-error"
+import {
+    clearSignupFlow,
+    completeSignupFlow,
+    getSignupUserId,
+    isInSignupFlow,
+} from "@/lib/signup-flow"
 
 type State = "loading" | "success" | "error"
 
@@ -14,8 +21,15 @@ function PaymentSuccessContent() {
     const [state, setState] = useState<State>("loading")
     const [errorMsg, setErrorMsg] = useState("")
 
+    // Un paiement peut finaliser une inscription OU un simple changement
+    // d'offre depuis l'espace entreprise : seul le premier cas justifie la page
+    // de félicitations. `flow=signup` est posé par la page des forfaits ; on
+    // retombe sur le marqueur de session s'il a été perdu en route.
+    const isSignupFlow = params.get("flow") === "signup" || isInSignupFlow()
+    const doneHref = isSignupFlow ? "/auth/signup/success" : "/dashboard"
+
     useEffect(() => {
-        const userId = params.get("userId") || sessionStorage.getItem("entreprise_signup_userId")
+        const userId = params.get("userId") || getSignupUserId()
         const planId = params.get("planId")
         const gateway = params.get("gateway") ?? undefined
         const transactionId = gateway === "paiementpro"
@@ -38,7 +52,14 @@ function PaymentSuccessContent() {
                 .then(() => {
                     if (cancelled) return
                     sessionStorage.removeItem("kkiapay_transaction_id")
-                    sessionStorage.removeItem("entreprise_signup_userId")
+                    // Un paiement confirmé est une action réellement aboutie :
+                    // on n'ouvre la page de félicitations que si l'on finalisait
+                    // une inscription.
+                    if (isSignupFlow) {
+                        completeSignupFlow()
+                    } else {
+                        clearSignupFlow()
+                    }
                     setState("success")
                 })
                 .catch((err: any) => {
@@ -49,7 +70,7 @@ function PaymentSuccessContent() {
                     }
                     const msg = gateway === "paiementpro"
                         ? "Paiement en cours de confirmation. Réessayez dans un instant."
-                        : err?.response?.data?.message ?? err?.message ?? "Paiement non confirmé."
+                        : extractApiErrorMessage(err, "Paiement non confirmé.")
                     setErrorMsg(msg)
                     setState("error")
                 })
@@ -57,14 +78,14 @@ function PaymentSuccessContent() {
         attempt(1)
 
         return () => { cancelled = true }
-    }, [params])
+    }, [params, isSignupFlow])
 
     useEffect(() => {
         if (state === "success") {
-            const t = setTimeout(() => router.push("/auth/signup/success"), 3000)
+            const t = setTimeout(() => router.push(doneHref), 3000)
             return () => clearTimeout(t)
         }
-    }, [state, router])
+    }, [state, router, doneHref])
 
     return (
         <div className="w-full max-w-md text-center space-y-6">
@@ -84,11 +105,13 @@ function PaymentSuccessContent() {
                     <div>
                         <h1 className="text-2xl font-bold text-foreground">Paiement réussi !</h1>
                         <p className="text-muted-foreground text-sm mt-1">
-                            Votre abonnement est actif. Finalisation de l'inscription…
+                            {isSignupFlow
+                                ? "Votre abonnement est actif. Finalisation de l'inscription…"
+                                : "Votre nouvelle offre est active. Retour à votre espace…"}
                         </p>
                     </div>
                     <Button
-                        onClick={() => router.push("/auth/signup/success")}
+                        onClick={() => router.push(doneHref)}
                         className="rounded-full bg-blue-600 hover:bg-blue-700 text-white px-8"
                     >
                         Continuer
@@ -108,7 +131,13 @@ function PaymentSuccessContent() {
                             Réessayer
                         </Button>
                         <Button
-                            onClick={() => router.push("/auth/signup/success")}
+                            onClick={() => {
+                                // Aucun abonnement activé : ce n'est pas une action
+                                // aboutie — on ouvre l'espace entreprise, pas la
+                                // page de félicitations.
+                                clearSignupFlow()
+                                router.push("/dashboard")
+                            }}
                             className="bg-blue-600 text-white"
                         >
                             Continuer sans abonnement

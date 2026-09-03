@@ -189,7 +189,7 @@ function AppelsContent() {
 
 export default function Page() {
     return (
-        <SubscriptionGate featureLabel="les appels vidéo">
+        <SubscriptionGate requiredTier="PAID" featureLabel="les appels vidéo">
             <AppelsContent />
         </SubscriptionGate>
     )

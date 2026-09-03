@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation"
 import { XCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { clearSignupFlow } from "@/lib/signup-flow"
 
 export default function PaymentErrorPage() {
     const router = useRouter()
@@ -24,7 +25,13 @@ export default function PaymentErrorPage() {
                         Réessayer
                     </Button>
                     <Button
-                        onClick={() => router.push("/auth/signup/success")}
+                        onClick={() => {
+                            // Paiement annulé : rien n'a abouti, la page de
+                            // félicitations n'a pas lieu d'être. On ouvre
+                            // directement l'espace entreprise.
+                            clearSignupFlow()
+                            router.push("/dashboard")
+                        }}
                         className="bg-blue-600 hover:bg-blue-700 text-white"
                     >
                         Continuer sans abonnement

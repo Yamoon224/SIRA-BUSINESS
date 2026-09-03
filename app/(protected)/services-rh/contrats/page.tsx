@@ -20,7 +20,7 @@ function ContratsContent() {
 
 export default function Page() {
   return (
-    <SubscriptionGate featureLabel="la gestion des contrats">
+    <SubscriptionGate requiredTier="PAID" featureLabel="la gestion des contrats">
       <ContratsContent />
     </SubscriptionGate>
   )

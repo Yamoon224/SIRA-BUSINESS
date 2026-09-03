@@ -1,10 +1,19 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-import { Check } from "lucide-react"
+import { Check, Gift, Loader2, Sparkles, Star } from "lucide-react"
 import { subscriptionService } from "@/lib/api/subscription.service"
+import { extractApiErrorMessage } from "@/lib/api-error"
+import {
+    beginSignupFlow,
+    clearSignupFlow,
+    completeSignupFlow,
+    getSignupUserId,
+    isInSignupFlow,
+} from "@/lib/signup-flow"
 import { toast } from "sonner"
 
 interface Plan {
@@ -15,16 +24,42 @@ interface Plan {
     features: string[]
 }
 
+/**
+ * Forfait mis en avant. On cible le premier forfait payant mensuel (« Business »),
+ * qui joue le rôle de plan standard entre l'offre gratuite et l'annuel.
+ */
+function findPopularPlanId(plans: Plan[]): string | null {
+    const paidMonthly = plans.filter((p) => Number(p.price) > 0 && p.billingPeriod === "MONTHLY")
+    if (paidMonthly.length > 0) return paidMonthly[0].id
+    const paid = plans.filter((p) => Number(p.price) > 0)
+    return paid.length > 0 ? paid[0].id : null
+}
+
+/** Gratuit d'abord, puis du moins cher au plus cher. */
+function sortPlans(plans: Plan[]): Plan[] {
+    return [...plans].sort((a, b) => Number(a.price) - Number(b.price))
+}
+
 export default function ChoosePlanPage() {
     const router = useRouter()
+    const { data: session, status: sessionStatus } = useSession()
+
     const [plans, setPlans] = useState<Plan[]>([])
     const [loading, setLoading] = useState(true)
     const [subscribing, setSubscribing] = useState<string | null>(null)
     const [loadError, setLoadError] = useState(false)
     const [phone, setPhone] = useState("")
 
+    // Une entreprise déjà connectée qui consulte les forfaits n'est PAS en
+    // train de s'inscrire : elle ne doit pas finir sur la page de félicitations.
+    // Le parcours d'inscription, lui, est marqué en sessionStorage juste après
+    // la vérification OTP (voir lib/signup-flow.ts).
+    const [signupFlow, setSignupFlow] = useState(false)
+    useEffect(() => setSignupFlow(isInSignupFlow()), [])
+
     useEffect(() => {
-        subscriptionService.getPlans("ENTREPRISE")
+        subscriptionService
+            .getPlans("ENTREPRISE")
             .then((res) => {
                 const data = (res as any)?.data ?? res ?? []
                 setPlans(Array.isArray(data) ? data : [])
@@ -37,196 +72,273 @@ export default function ChoosePlanPage() {
             .finally(() => setLoading(false))
     }, [])
 
-    const handleSelectPlan = async (planId: string) => {
-        const userId = sessionStorage.getItem("entreprise_signup_userId")
+    const sortedPlans = useMemo(() => sortPlans(plans), [plans])
+    const popularPlanId = useMemo(() => findPopularPlanId(sortedPlans), [sortedPlans])
+
+    /** userId utilisable : session établie, ou celui capturé à l'inscription. */
+    const resolveUserId = () => session?.user?.id ?? getSignupUserId()
+
+    /** Où repartir quand aucune action n'a abouti (pas de félicitations). */
+    const exitWithoutSubscribing = () => {
+        clearSignupFlow()
+        router.push(sessionStatus === "authenticated" ? "/dashboard" : "/auth/signin")
+    }
+
+    /** Où atterrir après une souscription réellement aboutie. */
+    const goToSuccess = () => {
+        completeSignupFlow()
+        router.push("/auth/signup/success")
+    }
+
+    const handleSelectFreePlan = async (plan: Plan) => {
+        const userId = resolveUserId()
         if (!userId) {
-            router.push("/auth/signup/success")
+            toast.error("Connectez-vous pour activer l'offre gratuite.")
+            router.push("/auth/signin")
+            return
+        }
+
+        setSubscribing(plan.id)
+        try {
+            // Activation sans paiement : le backend n'accepte cet endpoint que
+            // pour les plans à 0 (voir SubscriptionService::subscribe).
+            await subscriptionService.subscribe({ userId, planId: plan.id })
+            toast.success("Offre gratuite activée. Bon test !")
+
+            if (signupFlow) {
+                goToSuccess()
+                return
+            }
+            // Simple changement d'offre depuis l'app : on retourne dans l'espace.
+            clearSignupFlow()
+            router.push("/dashboard")
+        } catch (error: any) {
+            toast.error(
+                extractApiErrorMessage(error, "Impossible d'activer l'offre gratuite pour le moment.")
+            )
+        } finally {
+            setSubscribing(null)
+        }
+    }
+
+    const handleSelectPaidPlan = async (plan: Plan) => {
+        const userId = resolveUserId()
+        if (!userId) {
+            toast.error("Connectez-vous pour souscrire à un forfait.")
+            router.push("/auth/signin")
             return
         }
         if (phone.trim().length < 8) {
             toast.error("Renseignez un numéro de téléphone pour payer via Paiement Pro.")
             return
         }
-        setSubscribing(planId)
+
+        setSubscribing(plan.id)
         try {
-            // Paiement Pro en session hébergée : on redirige le navigateur vers
-            // la page de paiement. C'est l'unique moyen de paiement proposé.
+            // Le retour de paiement doit savoir si l'on finalise une inscription
+            // ou si l'on change simplement d'offre — d'où `flow` dans l'URL.
             const origin = window.location.origin
+            const flow = signupFlow ? "signup" : "upgrade"
             const res = await subscriptionService.createCheckout({
                 userId,
-                planId,
+                planId: plan.id,
                 gateway: "paiementpro",
                 customerPhone: phone.trim(),
-                successUrl: `${origin}/auth/payment-success?userId=${userId}&planId=${planId}&gateway=paiementpro`,
-                errorUrl: `${origin}/auth/payment-error?planId=${planId}`,
+                successUrl: `${origin}/auth/payment-success?userId=${userId}&planId=${plan.id}&gateway=paiementpro&flow=${flow}`,
+                errorUrl: `${origin}/auth/payment-error?planId=${plan.id}&flow=${flow}`,
             })
             const data = (res as any)?.data ?? res
             if (!data?.checkoutUrl) throw new Error("checkoutUrl manquante")
+
+            // La redirection externe fait perdre l'état React : on réécrit le
+            // marqueur de parcours pour que le retour de paiement le retrouve.
+            if (signupFlow) beginSignupFlow(userId)
+
             window.location.href = data.checkoutUrl
-        } catch {
-            toast.error("Erreur lors de l'initialisation du paiement. Vous pourrez vous abonner depuis vos paramètres.")
-            sessionStorage.removeItem("entreprise_signup_userId")
-            router.push("/auth/signup/success")
+        } catch (error: any) {
+            toast.error(
+                extractApiErrorMessage(
+                    error,
+                    "Erreur lors de l'initialisation du paiement. Vous pourrez vous abonner depuis vos paramètres."
+                )
+            )
             setSubscribing(null)
         }
     }
 
-    const handleSkip = () => {
-        sessionStorage.removeItem("entreprise_signup_userId")
-        router.push("/auth/signup/success")
-    }
+    const handleSelectPlan = (plan: Plan) =>
+        Number(plan.price) === 0 ? handleSelectFreePlan(plan) : handleSelectPaidPlan(plan)
 
     if (loading) {
         return (
-            <div className="flex justify-center py-16">
-                <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+            <div className="flex justify-center py-24">
+                <Loader2 className="h-8 w-8 animate-spin text-[#2447FF]" />
             </div>
         )
     }
 
-    if (loadError && plans.length === 0) {
+    if (loadError && sortedPlans.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="flex flex-col items-center justify-center py-24 text-center">
                 <p className="mb-4 text-sm text-destructive">
                     Impossible de charger les forfaits disponibles pour le moment.
                 </p>
-                <button onClick={handleSkip} className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground">
+                <button
+                    onClick={exitWithoutSubscribing}
+                    className="rounded-full px-4 py-2 text-sm text-[#5B6472] underline underline-offset-4 transition-colors hover:text-[#0B1220] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2447FF]/40"
+                >
                     Passer cette étape
                 </button>
             </div>
         )
     }
 
-    const business = plans.find((p) => p.billingPeriod === "MONTHLY")
-    const businessPlus = plans.find((p) => p.billingPeriod === "ANNUAL")
+    const hasPaidPlan = sortedPlans.some((p) => Number(p.price) > 0)
 
     return (
-        <div className="py-4 sm:py-6">
-            <h1 className="mb-2 text-center text-2xl font-black text-foreground sm:text-4xl">
-                Choisissez votre forfait
-            </h1>
-
-            <p className="mb-8 text-center text-base tracking-[0.4em] text-muted-foreground sm:mb-10">
-                + + +
-            </p>
-
-            <div className="mx-auto mb-8 max-w-md">
-                <input
-                    type="tel"
-                    inputMode="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Numéro de téléphone (Mobile Money)"
-                    className="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm outline-none focus:border-blue-600"
-                />
+        <div className="w-full py-8 sm:py-12">
+            {/* En-tête */}
+            <div className="mx-auto max-w-2xl px-4 text-center">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#FF6B4A]">
+                    {signupFlow ? "Dernière étape" : "Vos forfaits"}
+                </p>
+                <h1 className="mt-3 text-2xl font-semibold tracking-tight text-[#0B1220] sm:text-3xl">
+                    Choisissez votre formule
+                </h1>
+                <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-[#5B6472]">
+                    Commencez gratuitement pour tester l&apos;espace recrutement, ou passez directement à un
+                    forfait complet - réglable en Mobile Money.
+                </p>
             </div>
 
-            <div className="flex flex-col items-stretch justify-center gap-4 lg:flex-row lg:items-start">
-                {/* Business (monthly) */}
-                {business && (
-                    <div className="relative w-full max-w-[360px] self-center lg:w-[280px] lg:max-w-none">
-                        <div className="absolute -top-3 left-1/2 z-10 -translate-x-1/2">
-                            <span className="whitespace-nowrap rounded-full border border-gray-200 bg-white px-4 py-1 text-xs text-gray-500 shadow-sm">
-                                Plan populaire
-                            </span>
-                        </div>
+            {/* Téléphone : requis uniquement pour un forfait payant */}
+            {hasPaidPlan && (
+                <div className="mx-auto mt-8 max-w-sm px-4">
+                    <label
+                        htmlFor="paiementpro-phone"
+                        className="mb-1.5 block text-xs font-medium text-[#5B6472]"
+                    >
+                        Numéro Mobile Money (pour les forfaits payants)
+                    </label>
+                    <input
+                        id="paiementpro-phone"
+                        type="tel"
+                        inputMode="tel"
+                        autoComplete="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="+225 07 00 00 00 00"
+                        className="w-full rounded-xl border border-black/10 bg-white px-4 py-2.5 text-sm text-[#0B1220] outline-none transition-colors placeholder:text-[#98a1b5] focus:border-[#2447FF] focus:ring-2 focus:ring-[#2447FF]/20"
+                    />
+                </div>
+            )}
 
-                        <div className="rounded-2xl bg-gradient-to-br from-cyan-300 via-blue-400 to-blue-600 p-[3px] shadow-xl">
-                            <div className="overflow-hidden rounded-2xl bg-white">
-                                <div className="p-5">
-                                    <div className="mb-2 text-3xl">🔥</div>
-                                    <h3 className="text-[22px] font-bold text-foreground">{business.name}</h3>
-                                    <p className="mb-4 text-[11px] text-muted-foreground">
-                                        Pour les entreprises en croissance
-                                    </p>
-                                    <div className="flex items-center gap-3">
-                                        <Button
-                                            onClick={() => handleSelectPlan(business.id)}
-                                            disabled={subscribing === business.id}
-                                            className="rounded-full bg-blue-600 px-5 text-sm font-semibold text-white hover:bg-blue-700"
-                                        >
-                                            {subscribing === business.id ? (
-                                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                                            ) : "Opter pour ça"}
-                                        </Button>
-                                        <div className="leading-tight">
-                                            <div className="flex items-baseline gap-0.5">
-                                                <span className="text-lg font-bold text-foreground">
-                                                    {Number(business.price).toLocaleString("fr-FR")}
-                                                </span>
-                                                <span className="ml-0.5 text-[10px] font-semibold text-muted-foreground">FCFA</span>
-                                            </div>
-                                            <p className="text-[10px] text-muted-foreground">Mensuel</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="bg-gray-50 px-5 py-4">
-                                    <ul className="space-y-2">
-                                        {business.features.map((f, i) => (
-                                            <li key={i} className="flex items-center gap-2 text-[12px] text-muted-foreground">
-                                                <Check className="h-3.5 w-3.5 shrink-0 text-blue-500" />
-                                                {f}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
+            {/* Forfaits : pleine largeur, centrés, cards bornées.
+                flex-wrap plutôt qu'une grille — avec 3 offres sur 2 colonnes
+                (tablette), une grille laisserait la 3e collée à gauche. */}
+            <div className="mx-auto mt-10 flex w-full max-w-[1100px] flex-wrap items-stretch justify-center gap-6 px-4">
+                {sortedPlans.map((plan) => {
+                    const isFree = Number(plan.price) === 0
+                    const isPopular = plan.id === popularPlanId
+                    const isBusy = subscribing === plan.id
 
-                {/* Business+ (annual) */}
-                {businessPlus && (
-                    <div className="w-full max-w-[360px] self-center lg:mt-7 lg:w-[260px] lg:max-w-none">
-                        <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-                            <div className="p-5">
-                                <div className="mb-2 text-3xl grayscale">💎</div>
-                                <h3 className="text-[22px] font-bold text-blue-600">{businessPlus.name}</h3>
-                                <p className="mb-4 text-[11px] text-muted-foreground">
-                                    Pour les grandes entreprises
+                    return (
+                        <div
+                            key={plan.id}
+                            className={`relative flex w-full max-w-sm flex-col rounded-2xl bg-white transition-shadow sm:w-[calc(50%-0.75rem)] lg:w-[330px] ${
+                                isPopular
+                                    ? "border-2 border-[#2447FF] shadow-[0_18px_45px_-25px_rgba(36,71,255,0.55)]"
+                                    : "border border-black/[0.08] shadow-sm hover:shadow-md"
+                            }`}
+                        >
+                            {isPopular && (
+                                <span className="absolute -top-3 left-1/2 z-10 inline-flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-full bg-[#2447FF] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-white shadow-md">
+                                    <Star className="h-3 w-3" fill="currentColor" />
+                                    Choix populaire
+                                </span>
+                            )}
+
+                            <div className="flex flex-1 flex-col p-6">
+                                <div className="flex items-center gap-2">
+                                    {isFree ? (
+                                        <Gift className="h-4 w-4 text-[#16a34a]" />
+                                    ) : (
+                                        <Sparkles className="h-4 w-4 text-[#2447FF]" />
+                                    )}
+                                    <h2 className="text-base font-semibold text-[#0B1220]">{plan.name}</h2>
+                                </div>
+
+                                <p className="mt-1 text-xs text-[#5B6472]">
+                                    {isFree
+                                        ? "Pour tester l'essentiel sans payer"
+                                        : plan.billingPeriod === "ANNUAL"
+                                          ? "Pour les grandes entreprises"
+                                          : "Pour les entreprises en croissance"}
                                 </p>
-                                <div className="flex items-center gap-3">
-                                    <Button
-                                        onClick={() => handleSelectPlan(businessPlus.id)}
-                                        disabled={subscribing === businessPlus.id}
-                                        className="rounded-full bg-blue-600 px-5 text-sm font-semibold text-white hover:bg-blue-700"
-                                    >
-                                        {subscribing === businessPlus.id ? (
-                                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                                        ) : "Opter pour ça"}
-                                    </Button>
-                                    <div className="leading-tight">
-                                        <div className="flex items-baseline gap-0.5">
-                                            <span className="text-lg font-bold text-foreground">
-                                                {Number(businessPlus.price).toLocaleString("fr-FR")}
-                                            </span>
-                                            <span className="ml-0.5 text-[10px] font-semibold text-muted-foreground">FCFA</span>
-                                        </div>
-                                        <p className="text-[10px] text-muted-foreground">Annuel</p>
-                                    </div>
+
+                                <div className="mt-5 flex items-baseline gap-1.5">
+                                    <span className="text-3xl font-semibold tracking-tight text-[#0B1220]">
+                                        {isFree ? "0" : Number(plan.price).toLocaleString("fr-FR")}
+                                    </span>
+                                    <span className="text-xs font-medium text-[#5B6472]">
+                                        FCFA / {plan.billingPeriod === "ANNUAL" ? "an" : "mois"}
+                                    </span>
                                 </div>
-                            </div>
-                            <div className="bg-gray-50 px-5 py-4">
-                                <ul className="space-y-2">
-                                    {businessPlus.features.map((f, i) => (
-                                        <li key={i} className="flex items-center gap-2 text-[12px] text-muted-foreground">
-                                            <Check className="h-3.5 w-3.5 shrink-0 text-gray-400" />
-                                            {f}
+
+                                <Button
+                                    onClick={() => handleSelectPlan(plan)}
+                                    disabled={isBusy || subscribing !== null}
+                                    className={`mt-5 w-full rounded-full text-sm font-semibold ${
+                                        isPopular
+                                            ? "bg-[#2447FF] text-white hover:bg-[#1d3ce0]"
+                                            : isFree
+                                              ? "bg-[#0B1220] text-white hover:bg-[#0B1220]/90"
+                                              : "border border-black/10 bg-white text-[#0B1220] hover:bg-[#F7F8FC]"
+                                    }`}
+                                >
+                                    {isBusy ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : isFree ? (
+                                        "Activer gratuitement"
+                                    ) : (
+                                        "Choisir ce forfait"
+                                    )}
+                                </Button>
+
+                                <ul className="mt-6 space-y-2.5 border-t border-black/[0.06] pt-5">
+                                    {(plan.features ?? []).map((feature, i) => (
+                                        <li
+                                            key={i}
+                                            className="flex items-start gap-2 text-[13px] leading-snug text-[#5B6472]"
+                                        >
+                                            <Check
+                                                className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${
+                                                    isFree ? "text-[#16a34a]" : "text-[#2447FF]"
+                                                }`}
+                                            />
+                                            {feature}
                                         </li>
                                     ))}
                                 </ul>
+
+                                {isFree && (
+                                    <p className="mt-4 rounded-lg bg-[#F7F8FC] p-3 text-[11px] leading-relaxed text-[#5B6472]">
+                                        Services RH, appels vidéo et intégrations API restent réservés aux
+                                        forfaits payants.
+                                    </p>
+                                )}
                             </div>
                         </div>
-                    </div>
-                )}
+                    )
+                })}
             </div>
 
-            <div className="mt-8 text-center">
+            <div className="mt-10 text-center">
                 <button
-                    onClick={handleSkip}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4"
+                    onClick={exitWithoutSubscribing}
+                    className="rounded-full px-4 py-2 text-sm text-[#5B6472] underline underline-offset-4 transition-colors hover:text-[#0B1220] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2447FF]/40"
                 >
-                    Passer cette étape
+                    {signupFlow ? "Décider plus tard" : "Retour à mon espace"}
                 </button>
             </div>
         </div>

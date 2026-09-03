@@ -4,16 +4,33 @@
 import Link from "next/link"
 import { toast } from "sonner"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { Suspense, useEffect, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Field, FieldLabel, FieldGroup } from "@/components/ui/field"
 import { getSession, signIn, signOut } from "next-auth/react"
 import { initializeGoogleAuth, signInWithGoogle, GOOGLE_CLIENT_ID } from "@/lib/google-auth"
 
-export default function Page() {
+/**
+ * Destination post-connexion : on honore `callbackUrl` (posé par proxy.ts et
+ * par les pages protégées, ex. /profil) pour renvoyer l'utilisateur là où il
+ * allait, au lieu de le déposer systématiquement sur le tableau de bord.
+ * Seuls les chemins internes sont acceptés — jamais une URL absolue, qui
+ * ouvrirait une redirection non contrôlée.
+ */
+function safeCallbackUrl(raw: string | null): string {
+    if (!raw) return "/dashboard"
+    if (!raw.startsWith("/") || raw.startsWith("//")) return "/dashboard"
+    // On ne renvoie pas vers les pages d'authentification elles-mêmes.
+    if (raw.startsWith("/auth")) return "/dashboard"
+    return raw
+}
+
+function SignInForm() {
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const callbackUrl = safeCallbackUrl(searchParams.get("callbackUrl"))
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [loading, setLoading] = useState(false)
@@ -26,10 +43,10 @@ export default function Page() {
     useEffect(() => {
         getSession().then((session) => {
             if (session?.user) {
-                router.replace("/dashboard")
+                router.replace(callbackUrl)
             }
         })
-    }, [router])
+    }, [router, callbackUrl])
 
     useEffect(() => {
         initializeGoogleAuth().catch((e) => console.error("[signin] init Google:", e))
@@ -44,7 +61,7 @@ export default function Page() {
             return
         }
         toast.success("Connexion réussie")
-        router.replace("/dashboard")
+        router.replace(callbackUrl)
         router.refresh()
     }
 
@@ -104,7 +121,7 @@ export default function Page() {
             // dépendre uniquement de son fetch initial (même correctif que
             // standard/app/auth/signin/page.tsx).
             toast.success("Connexion réussie")
-            router.replace("/dashboard")
+            router.replace(callbackUrl)
             router.refresh()
 
         } catch (err: any) {
@@ -208,5 +225,23 @@ export default function Page() {
                 </Link>
             </div>
         </div>
+    )
+}
+
+/**
+ * useSearchParams impose une frontière Suspense côté App Router : sans elle,
+ * le build échoue sur cette page (« should be wrapped in a suspense boundary »).
+ */
+export default function Page() {
+    return (
+        <Suspense
+            fallback={
+                <div className="mx-auto mt-6 flex w-full max-w-md items-center justify-center rounded-3xl border border-black/[0.06] bg-white p-16 shadow-[0_20px_60px_-30px_rgba(11,18,32,0.25)]">
+                    <Loader2 className="h-6 w-6 animate-spin text-[#2447FF]" />
+                </div>
+            }
+        >
+            <SignInForm />
+        </Suspense>
     )
 }

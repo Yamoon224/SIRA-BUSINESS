@@ -13,10 +13,36 @@ import { CompanyCreateDto } from "@/@types/interface"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { SignupStepper } from "@/components/signup-stepper"
 import { OTPVerificationModal } from "@/components/otp-verification-modal"
-import { Upload, Plus, ArrowRight, ArrowLeft, EyeOff, Eye } from "lucide-react"
+import { beginSignupFlow } from "@/lib/signup-flow"
+import { extractApiErrorMessage } from "@/lib/api-error"
+import { Upload, Plus, ArrowRight, ArrowLeft, EyeOff, Eye, Loader2 } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const steps = ["Entreprise", "Détails", "Contact"]
+
+// Libellés lisibles pour nommer précisément le(s) champ(s) manquant(s) dans le
+// message d'erreur — « Remplissez tous les champs obligatoires » n'aidait pas
+// à trouver lequel, surtout sur l'étape Contact qui en compte six.
+const fieldLabels: Record<string, string> = {
+    logo: "Logo",
+    coverImage: "Image de couverture",
+    companyName: "Nom de l'entreprise",
+    about: "À propos",
+    sector: "Secteur d'activité",
+    creationDate: "Date de création",
+    companySize: "Taille de l'entreprise",
+    country: "Pays",
+    headquarters: "Siège",
+    location: "Localisation",
+    phone: "Téléphone",
+    email: "Email professionnel",
+    password: "Mot de passe",
+}
+
+// Doit rester aligné sur CreateCompanyRequest côté backend (email:filter,
+// password min:8), pour que l'erreur remonte avant l'appel réseau.
+const MIN_PASSWORD_LENGTH = 8
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const sectors = [
     "Technologie",
@@ -69,26 +95,53 @@ export default function Page() {
         }
     }
 
-    const handleNext = async () => {
-        // Définir les champs obligatoires par étape
+    /**
+     * Valide l'étape courante et retourne le premier message d'erreur, ou null.
+     * Les règles reflètent celles de CreateCompanyRequest : mieux vaut refuser
+     * ici que laisser le backend répondre 400 après l'upload des images.
+     */
+    const validateStep = (step: number): string | null => {
         const requiredFieldsByStep: Record<number, (keyof CompanyCreateDto)[]> = {
             0: ["logo", "coverImage", "companyName", "about", "sector"],
             1: ["creationDate", "companySize"],
             2: ["country", "headquarters", "location", "phone", "email", "password"],
         }
-    
-        const requiredFields = requiredFieldsByStep[currentStep] || []
-        const missingFields = requiredFields.filter(field => {
+
+        const missingFields = (requiredFieldsByStep[step] || []).filter((field) => {
             const value = formData[field]
             if (Array.isArray(value)) return value.filter(Boolean).length === 0
+            if (typeof value === "string") return value.trim() === ""
             return !value
         })
-    
+
         if (missingFields.length > 0) {
-            toast.error("Remplissez tous les champs obligatoires avant de continuer")
+            const names = missingFields.map((f) => fieldLabels[f] ?? f)
+            return names.length === 1
+                ? `Le champ « ${names[0]} » est obligatoire.`
+                : `Champs obligatoires à renseigner : ${names.join(", ")}.`
+        }
+
+        if (step === 2) {
+            if (!EMAIL_PATTERN.test(formData.email.trim())) {
+                return "Saisissez une adresse email professionnelle valide (ex. contact@entreprise.com)."
+            }
+            if (formData.password.length < MIN_PASSWORD_LENGTH) {
+                return `Le mot de passe doit contenir au moins ${MIN_PASSWORD_LENGTH} caractères.`
+            }
+        }
+
+        return null
+    }
+
+    const handleNext = async () => {
+        if (loading) return
+
+        const validationError = validateStep(currentStep)
+        if (validationError) {
+            toast.error(validationError)
             return
         }
-    
+
         if (currentStep < steps.length - 1) {
             setCurrentStep(currentStep + 1)
             return
@@ -96,6 +149,10 @@ export default function Page() {
     
         // Si c'est la dernière étape, soumettre le formulaire
         setLoading(true)
+        // L'email sert de clé de compte : on le normalise une fois pour que
+        // l'inscription, la vérification OTP et la connexion utilisent bien la
+        // même valeur (un « Contact@… » saisi au clavier échouait au login).
+        const normalizedEmail = formData.email.trim().toLowerCase()
         try {
             const body = new FormData()
             if (formData.logo) body.append("logo", formData.logo as File)
@@ -111,20 +168,30 @@ export default function Page() {
             body.append("headquarters", formData.headquarters)
             body.append("location", formData.location)
             body.append("phone", formData.phone)
-            body.append("email", formData.email)
+            body.append("email", normalizedEmail)
             body.append("password", formData.password)
             body.append("partnershipDate", new Date().toISOString().split("T")[0])
             body.append("status", "ACTIVE")
     
             const res = await createCompany(body)
+
+            // On aligne l'état local sur la valeur réellement envoyée, sinon la
+            // vérification OTP repartirait de la saisie brute.
+            updateFormData("email", normalizedEmail)
+
             if (res.user?.id) {
-                sessionStorage.setItem("entreprise_signup_userId", res.user.id)
+                beginSignupFlow(res.user.id)
             }
 
             toast.success("Vérifiez votre boîte mail pour le code de vérification")
             setShowOTPModal(true)
         } catch (error: any) {
-            toast.error(error?.message || "Une erreur est survenue")
+            toast.error(
+                extractApiErrorMessage(
+                    error,
+                    "La création du compte a échoué. Vérifiez les informations saisies et réessayez."
+                )
+            )
         } finally {
             setLoading(false)
         }
@@ -142,13 +209,21 @@ export default function Page() {
                 redirect: false,
             })
 
-            if (signInResult?.error) throw new Error("Erreur lors de la connexion")
+            if (signInResult?.error) {
+                // Le compte EST créé et vérifié : on ne renvoie pas l'utilisateur
+                // au formulaire (il retomberait sur « email déjà utilisé »), on
+                // l'envoie se connecter.
+                toast.error("Compte vérifié, mais la connexion automatique a échoué. Connectez-vous.")
+                setShowOTPModal(false)
+                router.push("/auth/signin")
+                return
+            }
 
             setShowOTPModal(false)
             toast.success("Entreprise créée avec succès !")
             router.push("/auth/signup/plan")
         } catch (error: any) {
-            toast.error(error?.message || "Code de vérification invalide. Réessayez.")
+            toast.error(extractApiErrorMessage(error, "Code de vérification invalide. Réessayez."))
         }
     }
 
@@ -157,7 +232,7 @@ export default function Page() {
             await requestOtp(formData.email)
             toast.success("Un nouveau code a été envoyé")
         } catch (error: any) {
-            toast.error(error?.message || "Impossible d'envoyer le code pour le moment")
+            toast.error(extractApiErrorMessage(error, "Impossible d'envoyer le code pour le moment"))
         }
     }
 
@@ -413,10 +488,20 @@ export default function Page() {
                 ) : ''}
                 <Button
                     onClick={handleNext}
-                    className="w-30 rounded-full bg-[#0B1220] transition-transform duration-200 hover:scale-[1.02] hover:bg-[#0B1220]/90"
+                    disabled={loading}
+                    className="w-30 rounded-full bg-[#0B1220] transition-transform duration-200 hover:scale-[1.02] hover:bg-[#0B1220]/90 disabled:opacity-70"
                     size="lg"
                 >
-                    {currentStep === steps.length - 1 ? "Terminer" : (<ArrowRight />)}
+                    {loading ? (
+                        <span className="flex items-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Création…
+                        </span>
+                    ) : currentStep === steps.length - 1 ? (
+                        "Terminer"
+                    ) : (
+                        <ArrowRight />
+                    )}
                 </Button>
             </div>
 

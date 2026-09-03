@@ -13,7 +13,7 @@ import {
 import { Reveal, ScrollProgress, MarketingMotionStyles } from "@/components/marketing/reveal"
 import { SiteHeader } from "@/components/marketing/site-header"
 import { SiteFooter } from "@/components/marketing/site-footer"
-import { Check } from "lucide-react"
+import { Check, Gift, Sparkles } from "lucide-react"
 import { subscriptionService } from "@/lib/api/subscription.service"
 
 interface Plan {
@@ -25,6 +25,11 @@ interface Plan {
 }
 
 const faqs = [
+    {
+        question: "Que comprend l'offre gratuite ?",
+        answer:
+            "L'offre gratuite s'active sans paiement et donne accès au tableau de bord, à la publication d'offres, à la gestion de vos annonces, au suivi des candidatures, à la messagerie et au profil entreprise. Les Services RH, les appels vidéo et les intégrations API restent réservés aux forfaits Business et Business+.",
+    },
     {
         question: "Puis-je changer de forfait à tout moment ?",
         answer: "Oui, vous pouvez upgrader ou downgrader votre forfait à tout moment depuis vos paramètres. Les changements prennent effet immédiatement.",
@@ -39,9 +44,20 @@ const faqs = [
     },
     {
         question: "Le paiement est-il sécurisé ?",
-        answer: "Oui, tous les paiements sont traités via Kkiapay, notre partenaire de paiement sécurisé.",
+        answer: "Oui, tous les paiements sont traités via Paiement Pro, notre partenaire de paiement sécurisé.",
     },
 ]
+
+/**
+ * Forfait mis en avant : le premier payant mensuel (« Business »), plan standard
+ * entre l'offre gratuite et l'annuel.
+ */
+function findPopularPlanId(plans: Plan[]): string | null {
+    const paidMonthly = plans.filter((p) => Number(p.price) > 0 && p.billingPeriod === "MONTHLY")
+    if (paidMonthly.length > 0) return paidMonthly[0].id
+    const paid = plans.filter((p) => Number(p.price) > 0)
+    return paid.length > 0 ? paid[0].id : null
+}
 
 export default function TarificationPage() {
     const [plans, setPlans] = useState<Plan[]>([])
@@ -57,8 +73,12 @@ export default function TarificationPage() {
             .finally(() => setLoading(false))
     }, [])
 
-    const business = plans.find((p) => p.billingPeriod === "MONTHLY")
-    const businessPlus = plans.find((p) => p.billingPeriod === "ANNUAL")
+    // Les forfaits étaient sélectionnés par période de facturation
+    // (`find(MONTHLY)` / `find(ANNUAL)`), ce qui masquait tout plan
+    // supplémentaire — l'« Offre gratuite » (mensuelle) n'apparaissait jamais.
+    // On rend maintenant la liste renvoyée par l'API, du moins cher au plus cher.
+    const sortedPlans = [...plans].sort((a, b) => Number(a.price) - Number(b.price))
+    const popularPlanId = findPopularPlanId(sortedPlans)
 
     return (
         <div className="min-h-screen bg-[#F7F8FC]">
@@ -102,93 +122,109 @@ export default function TarificationPage() {
             <section className="bg-[#F7F8FC] py-20">
                 <div className="container mx-auto px-4 md:px-6">
                     {loading ? (
-                        <div className="mx-auto flex max-w-3xl flex-col items-stretch justify-center gap-6 lg:flex-row">
-                            <Skeleton className="h-[420px] w-full rounded-3xl lg:w-[320px]" />
-                            <Skeleton className="h-[420px] w-full rounded-3xl lg:mt-7 lg:w-[300px]" />
+                        <div className="mx-auto flex max-w-[1100px] flex-wrap justify-center gap-6">
+                            <Skeleton className="h-[440px] w-full max-w-sm rounded-3xl sm:w-[calc(50%-0.75rem)] lg:w-[330px]" />
+                            <Skeleton className="h-[440px] w-full max-w-sm rounded-3xl sm:w-[calc(50%-0.75rem)] lg:w-[330px]" />
+                            <Skeleton className="h-[440px] w-full max-w-sm rounded-3xl sm:w-[calc(50%-0.75rem)] lg:w-[330px]" />
                         </div>
+                    ) : sortedPlans.length === 0 ? (
+                        <p className="text-center text-sm text-[#5B6472]">
+                            Les forfaits ne sont pas disponibles pour le moment. Réessayez plus tard.
+                        </p>
                     ) : (
-                        <Reveal className="flex flex-col items-stretch justify-center gap-6 lg:flex-row lg:items-start">
-                            {business && (
-                                <div className="relative w-full max-w-[400px] self-center lg:w-[320px] lg:max-w-none">
-                                    <div className="absolute -top-3 left-1/2 z-10 -translate-x-1/2">
-                                        <span
-                                            className="whitespace-nowrap rounded-full bg-[#0B1220] px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-white shadow-lg"
-                                        >
-                                            Forfait populaire
-                                        </span>
-                                    </div>
-                                    <div className="rounded-[28px] bg-gradient-to-br from-[#2447FF] via-[#8f7bff] to-[#FF6B4A] p-[2.5px] shadow-[0_25px_60px_-25px_rgba(36,71,255,0.55)] transition-transform duration-300 hover:-translate-y-1">
-                                        <div className="overflow-hidden rounded-[26px] bg-white">
-                                            <div className="p-7">
-                                                <h3 className="text-2xl font-semibold text-[#0B1220]">{business.name}</h3>
-                                                <p className="mt-1 text-sm text-[#5B6472]">Pour les entreprises en croissance</p>
-                                                <div className="mt-5 flex items-baseline gap-1.5">
-                                                    <span className="text-4xl text-[#0B1220]">
-                                                        {Number(business.price).toLocaleString("fr-FR")}
-                                                    </span>
-                                                    <span className="text-sm font-medium text-[#5B6472]">FCFA / mois</span>
-                                                </div>
-                                                <Button
-                                                    asChild
-                                                    className="mt-6 w-full rounded-full bg-[#0B1220] text-white transition-transform duration-200 hover:scale-[1.02] hover:bg-[#0B1220]/90"
-                                                >
-                                                    <Link href="/auth/signup">Commencer</Link>
-                                                </Button>
-                                            </div>
-                                            <div className="border-t border-black/[0.06] bg-[#F7F8FC] px-7 py-6">
-                                                <ul className="space-y-3">
-                                                    {business.features.map((f, i) => (
-                                                        <li key={i} className="flex items-start gap-2.5 text-sm text-[#5B6472]">
-                                                            <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#2447FF]" />
-                                                            {f}
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
+                        // flex-wrap plutôt qu'une grille : avec 3 offres sur 2 colonnes
+                        // (tablette), une grille laisserait la 3e collée à gauche.
+                        <Reveal className="mx-auto flex w-full max-w-[1100px] flex-wrap items-stretch justify-center gap-6">
+                            {sortedPlans.map((plan) => {
+                                const isFree = Number(plan.price) === 0
+                                const isPopular = plan.id === popularPlanId
 
-                            {businessPlus && (
-                                <div className="w-full max-w-[400px] self-center lg:mt-7 lg:w-[300px] lg:max-w-none">
-                                    <div className="overflow-hidden rounded-[26px] border border-black/[0.06] bg-white shadow-sm transition-transform duration-300 hover:-translate-y-1">
+                                return (
+                                    <div
+                                        key={plan.id}
+                                        className={`relative flex w-full max-w-sm flex-col overflow-hidden rounded-[26px] bg-white transition-transform duration-300 hover:-translate-y-1 sm:w-[calc(50%-0.75rem)] lg:w-[330px] ${
+                                            isPopular
+                                                ? "border-2 border-[#2447FF] shadow-[0_25px_60px_-30px_rgba(36,71,255,0.5)]"
+                                                : "border border-black/[0.06] shadow-sm"
+                                        }`}
+                                    >
+                                        {isPopular && (
+                                            <span className="absolute right-5 top-5 whitespace-nowrap rounded-full bg-[#0B1220] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-white">
+                                                Choix populaire
+                                            </span>
+                                        )}
+
                                         <div className="p-7">
-                                            <h3 className="text-2xl font-semibold text-[#0B1220]">{businessPlus.name}</h3>
-                                            <p className="mt-1 text-sm text-[#5B6472]">Pour les grandes entreprises</p>
+                                            <div className="flex items-center gap-2">
+                                                {isFree ? (
+                                                    <Gift className="h-4 w-4 text-[#16a34a]" />
+                                                ) : (
+                                                    <Sparkles className="h-4 w-4 text-[#2447FF]" />
+                                                )}
+                                                <h3 className="text-xl font-semibold text-[#0B1220]">{plan.name}</h3>
+                                            </div>
+
+                                            <p className="mt-1 text-sm text-[#5B6472]">
+                                                {isFree
+                                                    ? "Testez l'espace recrutement sans payer"
+                                                    : plan.billingPeriod === "ANNUAL"
+                                                      ? "Pour les grandes entreprises"
+                                                      : "Pour les entreprises en croissance"}
+                                            </p>
+
                                             <div className="mt-5 flex items-baseline gap-1.5">
                                                 <span className="text-4xl text-[#0B1220]">
-                                                    {Number(businessPlus.price).toLocaleString("fr-FR")}
+                                                    {isFree ? "0" : Number(plan.price).toLocaleString("fr-FR")}
                                                 </span>
-                                                <span className="text-sm font-medium text-[#5B6472]">FCFA / an</span>
+                                                <span className="text-sm font-medium text-[#5B6472]">
+                                                    FCFA / {plan.billingPeriod === "ANNUAL" ? "an" : "mois"}
+                                                </span>
                                             </div>
+
                                             <Button
                                                 asChild
-                                                variant="outline"
-                                                className="mt-6 w-full rounded-full border-black/10 transition-transform duration-200 hover:scale-[1.02]"
+                                                variant={isPopular || isFree ? "default" : "outline"}
+                                                className={`mt-6 w-full rounded-full transition-transform duration-200 hover:scale-[1.02] ${
+                                                    isPopular
+                                                        ? "bg-[#2447FF] text-white hover:bg-[#1d3ce0]"
+                                                        : isFree
+                                                          ? "bg-[#0B1220] text-white hover:bg-[#0B1220]/90"
+                                                          : "border-black/10"
+                                                }`}
                                             >
-                                                <Link href="/auth/signup">Commencer</Link>
+                                                <Link href="/auth/signup">
+                                                    {isFree ? "Commencer gratuitement" : "Commencer"}
+                                                </Link>
                                             </Button>
                                         </div>
-                                        <div className="border-t border-black/[0.06] bg-[#F7F8FC] px-7 py-6">
+
+                                        <div className="flex-1 border-t border-black/[0.06] bg-[#F7F8FC] px-7 py-6">
                                             <ul className="space-y-3">
-                                                {businessPlus.features.map((f, i) => (
-                                                    <li key={i} className="flex items-start gap-2.5 text-sm text-[#5B6472]">
-                                                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#5B6472]" />
+                                                {(plan.features ?? []).map((f, i) => (
+                                                    <li
+                                                        key={i}
+                                                        className="flex items-start gap-2.5 text-sm text-[#5B6472]"
+                                                    >
+                                                        <Check
+                                                            className={`mt-0.5 h-4 w-4 shrink-0 ${
+                                                                isFree ? "text-[#16a34a]" : "text-[#2447FF]"
+                                                            }`}
+                                                        />
                                                         {f}
                                                     </li>
                                                 ))}
                                             </ul>
+
+                                            {isFree && (
+                                                <p className="mt-4 text-xs leading-relaxed text-[#8891ab]">
+                                                    Services RH, appels vidéo et intégrations API restent réservés
+                                                    aux forfaits payants.
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
-                                </div>
-                            )}
-
-                            {!business && !businessPlus && (
-                                <p className="text-center text-sm text-[#5B6472]">
-                                    Les forfaits ne sont pas disponibles pour le moment. Réessayez plus tard.
-                                </p>
-                            )}
+                                )
+                            })}
                         </Reveal>
                     )}
                 </div>

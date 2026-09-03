@@ -4,8 +4,10 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { MessageSquare, Mail, Phone, Search, ChevronDown, ChevronRight, Star, ExternalLink, Zap, FileText, Users, CreditCard, BookOpen, Video, FileCode, Check } from "lucide-react"
+import { MessageSquare, Mail, Phone, Search, ChevronDown, ChevronRight, Star, ExternalLink, Zap, FileText, Users, CreditCard, BookOpen, Video, FileCode, Check, UserCog, X } from "lucide-react"
 import { subscriptionService } from "@/lib/api/subscription.service"
+import { SUPPORT_EMAIL, SUPPORT_EMAIL_HREF, SUPPORT_PHONE, SUPPORT_PHONE_HREF } from "@/lib/contact"
+import { AssistanceNav, AssistanceFooterActions, AssistanceFooterLinks } from "@/components/assistance-nav"
 
 interface Plan {
     id: string
@@ -15,19 +17,31 @@ interface Plan {
     features: string[]
 }
 
+/**
+ * Catégories du centre d'assistance. `id` est la clé de filtrage : elle doit
+ * correspondre au `tag` des FAQ ci-dessous, c'est ce lien qui rend les cards
+ * cliquables (voir `visibleFaqs`).
+ */
 const categories = [
-    { label: "IA", count: 8, Icon: Zap, bg: "bg-blue-500" },
-    { label: "Offres", count: 12, Icon: FileText, bg: "bg-green-500" },
-    { label: "Candidatures", count: 6, Icon: Users, bg: "bg-orange-400" },
-    { label: "Facturation", count: 4, Icon: CreditCard, bg: "bg-red-500" },
-]
+    { id: "IA", label: "IA", Icon: Zap, bg: "bg-blue-500" },
+    { id: "Offres", label: "Offres", Icon: FileText, bg: "bg-green-500" },
+    { id: "Candidatures", label: "Candidatures", Icon: Users, bg: "bg-orange-400" },
+    { id: "RH", label: "RH", Icon: UserCog, bg: "bg-violet-500" },
+    { id: "Facturation", label: "Facturation", Icon: CreditCard, bg: "bg-red-500" },
+] as const
 
-const faqs = [
+type CategoryId = (typeof categories)[number]["id"]
+
+const faqs: { question: string; tag: CategoryId; tagColor: string; answer: string }[] = [
     { question: "Comment optimiser mes offres d'emploi avec l'IA ?", tag: "IA", tagColor: "bg-blue-100 text-blue-600", answer: "L'IA de Goriya analyse automatiquement vos offres et suggere des ameliorations pour attirer les meilleurs candidats." },
     { question: "Comment interpreter le score IA des candidats ?", tag: "IA", tagColor: "bg-blue-100 text-blue-600", answer: "Le score IA represente la compatibilite entre le profil du candidat et votre offre. Au-dessus de 80, le match est excellent." },
     { question: "Puis-je modifier une offre apres publication ?", tag: "Offres", tagColor: "bg-green-100 text-green-600", answer: "Oui. Depuis Mes annonces, ouvrez l'offre et cliquez sur Modifier." },
     { question: "Comment contacter un candidat ?", tag: "Candidatures", tagColor: "bg-orange-100 text-orange-600", answer: "Depuis Candidatures, cliquez sur Message dans la fiche du candidat." },
+    { question: "Que contiennent les Services RH ?", tag: "RH", tagColor: "bg-violet-100 text-violet-600", answer: "Les Services RH regroupent la gestion des employes, des recrutements, des evaluations, des contrats, des conges, de la paie et des documents RH. Ils sont accessibles depuis la rubrique Services RH de votre espace." },
+    { question: "Les Services RH sont-ils inclus dans l'offre gratuite ?", tag: "RH", tagColor: "bg-violet-100 text-violet-600", answer: "Non. L'offre gratuite couvre le tableau de bord, la publication d'offres, les annonces, les candidatures, la messagerie et le profil entreprise. Les Services RH, les appels video et les integrations API necessitent un forfait Business ou Business+." },
+    { question: "Comment ajouter un employe a mon equipe ?", tag: "RH", tagColor: "bg-violet-100 text-violet-600", answer: "Ouvrez Services RH puis Employes, et utilisez le bouton d'ajout pour creer la fiche de l'employe." },
     { question: "Combien coutent les abonnements Goriya ?", tag: "Facturation", tagColor: "bg-red-100 text-red-600", answer: "Consultez la section \"Plans d'abonnement\" ci-dessus pour les tarifs a jour, ou la page Tarification pour le detail complet des forfaits." },
+    { question: "L'offre gratuite est-elle vraiment sans paiement ?", tag: "Facturation", tagColor: "bg-red-100 text-red-600", answer: "Oui. Elle s'active directement depuis la page des forfaits, sans carte ni Mobile Money, et vous pouvez passer a un forfait payant a tout moment." },
 ]
 
 const resources = [
@@ -38,9 +52,13 @@ const resources = [
 ]
 
 export default function AssistancePage() {
-    const [openFaq, setOpenFaq] = useState<number | null>(null)
+    const [openFaq, setOpenFaq] = useState<string | null>(null)
     const [plans, setPlans] = useState<Plan[]>([])
     const [plansLoading, setPlansLoading] = useState(true)
+    // Filtre par catégorie : les cards « Parcourir par categorie » n'étaient
+    // que décoratives. Elles pilotent maintenant la liste des questions.
+    const [activeCategory, setActiveCategory] = useState<CategoryId | null>(null)
+    const [search, setSearch] = useState("")
 
     useEffect(() => {
         subscriptionService.getPlans("ENTREPRISE")
@@ -52,32 +70,36 @@ export default function AssistancePage() {
             .finally(() => setPlansLoading(false))
     }, [])
 
+    // Compteurs réels, au lieu de nombres d'articles écrits en dur qui ne
+    // correspondaient pas au contenu affiché.
+    const countByCategory = faqs.reduce<Record<string, number>>((acc, faq) => {
+        acc[faq.tag] = (acc[faq.tag] ?? 0) + 1
+        return acc
+    }, {})
+
+    // Offre gratuite en premier, comme sur la page des forfaits.
+    const sortedPlans = [...plans].sort((a, b) => Number(a.price) - Number(b.price))
+
+    const normalizedSearch = search.trim().toLowerCase()
+    const visibleFaqs = faqs.filter((faq) => {
+        if (activeCategory && faq.tag !== activeCategory) return false
+        if (!normalizedSearch) return true
+        return (
+            faq.question.toLowerCase().includes(normalizedSearch) ||
+            faq.answer.toLowerCase().includes(normalizedSearch)
+        )
+    })
+
+    const selectCategory = (id: CategoryId) => {
+        // Re-cliquer sur la catégorie active la désélectionne.
+        setActiveCategory((current) => (current === id ? null : id))
+        setOpenFaq(null)
+        document.getElementById("faq")?.scrollIntoView({ behavior: "smooth", block: "start" })
+    }
+
     return (
         <div className="min-h-screen bg-[#f4f5f7] font-sans">
-            <header className="sticky top-0 z-50 bg-white border-b border-[#e8edf6]">
-                <div className="mx-auto max-w-[1180px] px-4 h-[64px] flex items-center justify-between">
-                    <Link href="/">
-                        <img src="/images/logo.png" alt="Goriya" className="h-8 w-auto" />
-                    </Link>
-                    <nav className="hidden md:flex items-center gap-8 text-[13px] text-[#7a8495] font-medium">
-                        <Link href="/" className="hover:text-[#2f6de6]">Accueil</Link>
-                        <Link href="/assistance" className="text-[#2f6de6]">Centre d'assistance</Link>
-                        <Link href="/auth/signup" className="hover:text-[#2f6de6]">Créer un compte</Link>
-                    </nav>
-                    <div className="flex items-center gap-2">
-                        <Link href="/auth/signin">
-                            <Button variant="outline" className="h-8 px-4 rounded-full text-[12px] border-[#b9c8ec] text-[#2f6de6] bg-white">
-                                Connexion
-                            </Button>
-                        </Link>
-                        <Link href="https://goriya.net">
-                            <Button className="h-8 px-4 rounded-full text-[12px] bg-[#2157d3] hover:bg-[#1d4cb9]">
-                                Espace candidat
-                            </Button>
-                        </Link>
-                    </div>
-                </div>
-            </header>
+            <AssistanceNav />
 
             <main className="mx-auto max-w-[900px] px-4 py-10 space-y-5">
                 <div>
@@ -89,8 +111,17 @@ export default function AssistancePage() {
                     <h2 className="mb-1.5 text-xl font-bold">Comment pouvons-nous vous aider ?</h2>
                     <p className="mb-5 text-sm text-blue-200">Trouvez une reponse rapidement ou contactez notre equipe support</p>
                     <div className="relative mx-auto max-w-md">
-                        <Input placeholder="Rechercher..." className="h-9 bg-white pl-4 pr-10 text-sm text-foreground" />
-                        <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <label htmlFor="assistance-search" className="sr-only">
+                            Rechercher dans les questions frequentes
+                        </label>
+                        <Input
+                            id="assistance-search"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Rechercher une question..."
+                            className="h-9 bg-white pl-4 pr-10 text-sm text-foreground"
+                        />
+                        <Search className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     </div>
                 </div>
 
@@ -98,19 +129,74 @@ export default function AssistancePage() {
                     <Channel icon={<MessageSquare className="h-5 w-5 text-blue-500" />} title="Chat en direct" subtitle="Discutez avec notre equipe support">
                         <Button size="sm" className="rounded-full text-xs">Demarrer une conversation</Button>
                     </Channel>
-                    <Channel icon={<Mail className="h-5 w-5 text-green-500" />} title="Email support" subtitle="Contacte-nous par email">support@goriya.com</Channel>
-                    <Channel icon={<Phone className="h-5 w-5 text-orange-400" />} title="Telephone" subtitle="Appelez notre support">+33 1 23 45 67 89</Channel>
+                    <Channel icon={<Mail className="h-5 w-5 text-green-500" />} title="Email support" subtitle="Contactez-nous par email">
+                        <a
+                            href={SUPPORT_EMAIL_HREF}
+                            className="font-medium text-blue-600 underline underline-offset-2 transition-colors hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+                        >
+                            {SUPPORT_EMAIL}
+                        </a>
+                    </Channel>
+                    <Channel icon={<Phone className="h-5 w-5 text-orange-400" />} title="Telephone" subtitle="Appelez notre support">
+                        <a
+                            href={SUPPORT_PHONE_HREF}
+                            className="font-medium text-blue-600 underline underline-offset-2 transition-colors hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+                        >
+                            {SUPPORT_PHONE}
+                        </a>
+                    </Channel>
                 </div>
 
                 <div className="rounded-xl border border-border bg-white p-4 sm:p-5">
-                    <h3 className="mb-4 text-sm font-semibold text-foreground">Parcourir par categorie</h3>
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                        {categories.map(({ label, count, Icon, bg }) => (
-                            <button key={label} className="flex items-center gap-3 rounded-lg bg-muted/40 px-4 py-3 text-left hover:bg-muted/70 transition-colors">
-                                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${bg}`}><Icon className="h-4 w-4 text-white" /></div>
-                                <div><p className="text-sm font-medium text-foreground">{label}</p><p className="text-xs text-muted-foreground">{count} articles</p></div>
+                    <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                        <h3 className="text-sm font-semibold text-foreground">Parcourir par categorie</h3>
+                        {activeCategory && (
+                            <button
+                                onClick={() => setActiveCategory(null)}
+                                className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+                            >
+                                <X className="h-3 w-3" />
+                                Tout afficher
                             </button>
-                        ))}
+                        )}
+                    </div>
+
+                    <div
+                        role="group"
+                        aria-label="Filtrer les questions par categorie"
+                        className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"
+                    >
+                        {categories.map(({ id, label, Icon, bg }) => {
+                            const isActive = activeCategory === id
+                            const count = countByCategory[id] ?? 0
+
+                            return (
+                                <button
+                                    key={id}
+                                    type="button"
+                                    onClick={() => selectCategory(id)}
+                                    aria-pressed={isActive}
+                                    aria-label={`Categorie ${label}, ${count} question${count > 1 ? "s" : ""}`}
+                                    className={`flex items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 active:scale-[0.99] ${
+                                        isActive
+                                            ? "bg-blue-50 ring-1 ring-blue-500"
+                                            : "bg-muted/40 hover:bg-muted/70"
+                                    }`}
+                                >
+                                    <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${bg}`}>
+                                        <Icon className="h-4 w-4 text-white" />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className={`text-sm font-medium ${isActive ? "text-blue-700" : "text-foreground"}`}>
+                                            {label}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {count} question{count > 1 ? "s" : ""}
+                                        </p>
+                                    </div>
+                                </button>
+                            )
+                        })}
                     </div>
                 </div>
 
@@ -127,7 +213,7 @@ export default function AssistancePage() {
                         <p className="py-2 text-sm text-muted-foreground">Les forfaits ne sont pas disponibles pour le moment.</p>
                     ) : (
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                            {plans.map((plan) => (
+                            {sortedPlans.map((plan) => (
                                 <div key={plan.id} className="rounded-lg border border-border bg-muted/20 p-4">
                                     <p className="text-sm font-semibold text-foreground">{plan.name}</p>
                                     <p className="mt-1 mb-3">
@@ -147,22 +233,64 @@ export default function AssistancePage() {
                     )}
                 </div>
 
-                <div className="rounded-xl border border-border bg-white p-4 sm:p-5">
-                    <h3 className="mb-2 text-sm font-semibold text-foreground">Questions frequentes</h3>
-                    <div className="divide-y divide-border">
-                        {faqs.map((faq, i) => (
-                            <div key={faq.question}>
-                                <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="flex w-full items-center justify-between py-3.5 text-left">
-                                    <div className="flex items-center gap-3 pr-4 flex-wrap">
-                                        <span className="text-sm text-foreground">{faq.question}</span>
-                                        <span className={`rounded px-2 py-0.5 text-[11px] font-medium ${faq.tagColor}`}>{faq.tag}</span>
-                                    </div>
-                                    <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${openFaq === i ? "rotate-180" : ""}`} />
-                                </button>
-                                {openFaq === i && <p className="pb-3.5 text-sm text-muted-foreground">{faq.answer}</p>}
-                            </div>
-                        ))}
+                <div id="faq" className="scroll-mt-20 rounded-xl border border-border bg-white p-4 sm:p-5">
+                    <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                        <h3 className="text-sm font-semibold text-foreground">
+                            {activeCategory ? `Questions - ${activeCategory}` : "Questions frequentes"}
+                        </h3>
+                        <p className="text-xs text-muted-foreground">
+                            {visibleFaqs.length} question{visibleFaqs.length > 1 ? "s" : ""}
+                        </p>
                     </div>
+
+                    {visibleFaqs.length === 0 ? (
+                        <p className="py-6 text-center text-sm text-muted-foreground">
+                            Aucune question ne correspond a votre recherche.{" "}
+                            <button
+                                onClick={() => {
+                                    setActiveCategory(null)
+                                    setSearch("")
+                                }}
+                                className="font-medium text-blue-600 underline underline-offset-2 hover:text-blue-700"
+                            >
+                                Reinitialiser les filtres
+                            </button>
+                        </p>
+                    ) : (
+                        <div className="divide-y divide-border">
+                            {visibleFaqs.map((faq) => {
+                                const isOpen = openFaq === faq.question
+                                const panelId = `faq-panel-${faq.question.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}`
+
+                                return (
+                                    <div key={faq.question}>
+                                        <button
+                                            type="button"
+                                            onClick={() => setOpenFaq(isOpen ? null : faq.question)}
+                                            aria-expanded={isOpen}
+                                            aria-controls={panelId}
+                                            className="flex w-full items-center justify-between gap-3 rounded-md py-3.5 text-left transition-colors hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+                                        >
+                                            <div className="flex flex-wrap items-center gap-3 pr-4">
+                                                <span className="text-sm text-foreground">{faq.question}</span>
+                                                <span className={`rounded px-2 py-0.5 text-[11px] font-medium ${faq.tagColor}`}>
+                                                    {faq.tag}
+                                                </span>
+                                            </div>
+                                            <ChevronDown
+                                                className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`}
+                                            />
+                                        </button>
+                                        {isOpen && (
+                                            <p id={panelId} className="pb-3.5 text-sm leading-relaxed text-muted-foreground">
+                                                {faq.answer}
+                                            </p>
+                                        )}
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    )}
                 </div>
 
                 <div className="rounded-xl border border-border bg-white p-4 sm:p-5">
@@ -192,8 +320,18 @@ export default function AssistancePage() {
                     <p className="mb-1 text-sm font-semibold text-foreground">Besoin d'aide personnalisee ?</p>
                     <p className="mb-5 text-xs text-muted-foreground">Notre equipe est la pour vous accompagner dans l'utilisation de Goriya</p>
                     <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-                        <Button size="sm" className="gap-1.5 rounded-full text-xs"><MessageSquare className="h-3.5 w-3.5" />Contacter le support</Button>
-                        <Button size="sm" variant="ghost" className="gap-1.5 rounded-full text-xs text-muted-foreground"><ExternalLink className="h-3.5 w-3.5" />Documentation complete</Button>
+                        <Button asChild size="sm" className="gap-1.5 rounded-full text-xs">
+                            <a href={SUPPORT_EMAIL_HREF}>
+                                <MessageSquare className="h-3.5 w-3.5" />
+                                Ecrire au support
+                            </a>
+                        </Button>
+                        <Button asChild size="sm" variant="ghost" className="gap-1.5 rounded-full text-xs text-muted-foreground">
+                            <a href={SUPPORT_PHONE_HREF}>
+                                <Phone className="h-3.5 w-3.5" />
+                                {SUPPORT_PHONE}
+                            </a>
+                        </Button>
                     </div>
                 </div>
             </main>
@@ -209,29 +347,28 @@ export default function AssistancePage() {
                         </div>
                         <div>
                             <h4 className="font-semibold text-white mb-4">Navigation</h4>
-                            <ul className="space-y-2 text-[13px] text-[#9098a7]">
-                                <li><Link href="/" className="hover:text-white">Accueil</Link></li>
-                                <li><Link href="/assistance" className="hover:text-white">Centre d'assistance</Link></li>
-                                <li><Link href="/auth/signin" className="hover:text-white">Connexion</Link></li>
-                            </ul>
+                            <AssistanceFooterLinks />
                         </div>
                         <div>
                             <h4 className="font-semibold text-white mb-4">Contact</h4>
                             <ul className="space-y-2 text-[13px] text-[#9098a7]">
-                                <li>support@goriya.com</li>
-                                <li>+33 1 23 45 67 89</li>
+                                <li>
+                                    <a href={SUPPORT_EMAIL_HREF} className="hover:text-white">
+                                        {SUPPORT_EMAIL}
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href={SUPPORT_PHONE_HREF} className="hover:text-white">
+                                        {SUPPORT_PHONE}
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </div>
                     <div className="pt-6 border-t border-[#1c202a] flex flex-col md:flex-row items-center justify-between gap-4">
                         <p className="text-[12px] text-[#6f7887]">2026 © Goriya. Tous droits réservés.</p>
                         <div className="flex items-center gap-2">
-                            <Link href="/auth/signin">
-                                <Button variant="outline" className="h-8 rounded-full border-[#374153] text-[#d9e5ff] bg-transparent text-[12px]">Connexion</Button>
-                            </Link>
-                            <Link href="https://goriya.net">
-                                <Button className="h-8 rounded-full bg-[#2f6de6] hover:bg-[#2458ba] text-[12px]">Espace candidat</Button>
-                            </Link>
+                            <AssistanceFooterActions />
                         </div>
                     </div>
                 </div>

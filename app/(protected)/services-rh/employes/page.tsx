@@ -20,7 +20,7 @@ function EmployesContent() {
 
 export default function Page() {
   return (
-    <SubscriptionGate featureLabel="la gestion des employés">
+    <SubscriptionGate requiredTier="PAID" featureLabel="la gestion des employés">
       <EmployesContent />
     </SubscriptionGate>
   )

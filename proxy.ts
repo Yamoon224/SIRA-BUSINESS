@@ -13,14 +13,22 @@ export async function proxy(request: NextRequest) {
     }
 
     // ✅ récupérer le token JWT côté proxy (lit le cookie de session NextAuth httpOnly)
+    //
+    // Le secret DOIT être résolu exactement comme dans lib/auth.ts : le cookie
+    // est chiffré avec ce secret côté NextAuth. Un déploiement qui ne définit
+    // que NEXTAUTH_SECRET (nom conventionnel) laissait ce getToken lire avec un
+    // secret vide : le token revenait toujours null et toute route protégée
+    // (dont /profil) repartait en boucle vers /auth/signin.
     const token = await getToken({
         req: request,
-        secret: process.env.NEXT_AUTH_SECRET,
+        secret: process.env.NEXTAUTH_SECRET ?? process.env.NEXT_AUTH_SECRET,
     });
 
-    // ✅ si pas de token, redirige vers /auth/signin
+    // ✅ si pas de token, redirige vers /auth/signin en conservant la destination
+    // pour y revenir après connexion (ex. un lien direct vers /profil).
     if (!token) {
         const signInUrl = new URL('/auth/signin', request.url);
+        signInUrl.searchParams.set('callbackUrl', pathname + request.nextUrl.search);
         return NextResponse.redirect(signInUrl);
     }
 

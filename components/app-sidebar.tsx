@@ -22,6 +22,7 @@ import {
     FolderOpen,
     KeyRound,
     Video,
+    CreditCard,
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -54,6 +55,7 @@ const serviceRhItems = [
 
 const settingsNavItems = [
     { label: "Paramètres", href: "/parametres", icon: Settings },
+    { label: "Mon forfait", href: "/auth/signup/plan", icon: CreditCard },
     { label: "Intégrations API", href: "/integrations-api", icon: KeyRound },
     { label: "Centre d'assistance", href: "/assistance", icon: HelpCircle },
 ]
@@ -74,7 +76,9 @@ export function AppSidebar() {
                 )}>
                 {/* Logo */}
                 <div className="flex h-16 items-center px-6">
-                    <GoriyaLogo />
+                    {/* Dans l'espace connecté, le logo ramène au tableau de bord :
+                        renvoyer vers "/" faisait sortir de l'application. */}
+                    <GoriyaLogo href="/dashboard" />
                 </div>
 
                 {/* Main Navigation */}

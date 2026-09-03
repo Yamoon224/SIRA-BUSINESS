@@ -20,7 +20,7 @@ function CongesContent() {
 
 export default function Page() {
   return (
-    <SubscriptionGate featureLabel="la gestion des congés">
+    <SubscriptionGate requiredTier="PAID" featureLabel="la gestion des congés">
       <CongesContent />
     </SubscriptionGate>
   )

@@ -10,10 +10,15 @@ import { Search, Menu } from "lucide-react"
 import UserMenu from "./user-menu"
 import { NotificationBell } from "./notification-bell"
 
+// Navigation d'une entreprise CONNECTÉE : elle doit rester dans son espace.
+// « Accueil » pointait sur la landing publique (/) et « Tarifs d'abonnement »
+// sur la page marketing (/tarification) : deux sorties de l'application qui
+// obligeaient à revenir en arrière pour retrouver son tableau de bord.
 const navItems = [
-    { label: "Accueil", href: "/" },
-    { label: "Dashboard", href: "/dashboard" },
-    { label: "Tarifs d'abonnement", href: "/tarification" },
+    { label: "Tableau de bord", href: "/dashboard" },
+    { label: "Mes annonces", href: "/annonces" },
+    { label: "Candidatures", href: "/candidatures" },
+    { label: "Mon forfait", href: "/auth/signup/plan" },
 ]
 
 export function AppHeader() {
@@ -38,8 +43,7 @@ export function AppHeader() {
                 <nav className="hidden md:flex items-center gap-6">
                     {navItems.map((item) => {
                         const isActive =
-                            pathname === item.href ||
-                            (item.href !== "/" && pathname.startsWith(item.href))
+                            pathname === item.href || pathname.startsWith(`${item.href}/`)
 
                         return (
                             <Link

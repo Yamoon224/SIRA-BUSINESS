@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { User, LogOut } from "lucide-react";
+import { User, LogOut, Settings } from "lucide-react";
 
 interface UserMenuProps {
     triggerOnly?: boolean; // si true, n'affiche que le trigger, jamais le dropdown
@@ -67,16 +67,37 @@ export default function UserMenu({ triggerOnly = false }: UserMenuProps) {
 
             {/* Dropdown, uniquement si triggerOnly === false */}
             {!triggerOnly && open && (
-                <div className="absolute right-0 top-full mt-2 w-48 bg-background border rounded-lg shadow-lg z-50">
+                <div
+                    role="menu"
+                    className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-lg border bg-background py-1 shadow-lg">
+                    {/* La route est /profil (français), comme app/(protected)/profil :
+                        pousser "/profile" renvoyait un 404. */}
                     <button
-                        onClick={() => router.push("/profile")}
-                        className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-muted">
-                        <User className="h-4 w-4" /> Profile
+                        role="menuitem"
+                        onClick={() => {
+                            setOpen(false)
+                            router.push("/profil")
+                        }}
+                        className="flex w-full items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-muted focus-visible:bg-muted focus-visible:outline-none">
+                        <User className="h-4 w-4" /> Profil entreprise
                     </button>
 
                     <button
+                        role="menuitem"
+                        onClick={() => {
+                            setOpen(false)
+                            router.push("/parametres")
+                        }}
+                        className="flex w-full items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-muted focus-visible:bg-muted focus-visible:outline-none">
+                        <Settings className="h-4 w-4" /> Paramètres
+                    </button>
+
+                    <div className="my-1 border-t border-border" />
+
+                    <button
+                        role="menuitem"
                         onClick={handleLogout}
-                        className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-500 hover:bg-mute">
+                        className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-500 transition-colors hover:bg-muted focus-visible:bg-muted focus-visible:outline-none">
                         <LogOut className="h-4 w-4" /> Déconnexion
                     </button>
                 </div>

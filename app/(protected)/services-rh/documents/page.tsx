@@ -20,7 +20,7 @@ function DocumentsContent() {
 
 export default function Page() {
   return (
-    <SubscriptionGate featureLabel="la gestion des documents RH">
+    <SubscriptionGate requiredTier="PAID" featureLabel="la gestion des documents RH">
       <DocumentsContent />
     </SubscriptionGate>
   )
