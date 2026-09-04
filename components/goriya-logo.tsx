@@ -43,7 +43,7 @@ export function GoriyaLogo({
         <Link
             href={href}
             aria-label={ariaLabel ?? (href === "/" ? "Goriya - accueil" : "Goriya - mon espace")}
-            className={`flex w-fit items-center gap-2 ${surDark ? "logo-surface" : ""} ${className}`}
+            className={`flex w-fit items-center gap-2 ${className}`}
         >
             <Image
                 src="/images/logo.png"

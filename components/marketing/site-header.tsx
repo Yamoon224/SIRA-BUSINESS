@@ -34,18 +34,15 @@ export function SiteHeader({ page = "home" }: { page?: "home" | "tarification" }
                             <a href="#services-rh" className={linkClass()}>
                                 Services RH
                             </a>
+                            <a href="#tarification" className={linkClass()}>
+                                Tarifs
+                            </a>
                         </>
                     ) : (
                         <Link href="/" className={linkClass()}>
                             Accueil
                         </Link>
                     )}
-                    <Link
-                        href="/tarification"
-                        className={linkClass(page === "tarification" ? (scrolled ? "!text-[#0B1220]" : "!text-white") : "")}
-                    >
-                        Tarifs
-                    </Link>
                     <Link href="/auth/signin" className={linkClass()}>
                         Se connecter
                     </Link>

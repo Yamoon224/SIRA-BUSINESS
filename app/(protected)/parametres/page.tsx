@@ -170,7 +170,7 @@ export default function ParametresPage() {
             </div>
 
             <div className="flex justify-center pt-1">
-                <Button className="gap-2 rounded-full bg-primary px-6 text-white hover:bg-primary/90" onClick={handleSave} disabled={saving}>
+                <Button className="gap-2 rounded-full bg-brand-gradient px-6 text-white hover:bg-brand-gradient/90" onClick={handleSave} disabled={saving}>
                     <Save className="h-4 w-4" />
                     {saving ? "Enregistrement…" : "Enregistrer les modifications"}
                 </Button>

@@ -502,7 +502,7 @@ export default function Content({ company }: ProfilContentProps) {
                 <Button
                     onClick={handleSubmit}
                     disabled={loading}
-                    className="gap-2 rounded-full bg-primary px-8 text-sm font-semibold text-white hover:bg-primary/90"
+                    className="gap-2 rounded-full bg-brand-gradient px-8 text-sm font-semibold text-white hover:bg-brand-gradient/90"
                 >
                     <Save className="h-4 w-4" />
                     Enregistrer les modifications
