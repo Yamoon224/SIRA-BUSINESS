@@ -48,7 +48,7 @@ export function SiteHeader({ page = "home" }: { page?: "home" | "tarification" }
                     </Link>
                     <Button
                         className={`rounded-full px-5 transition-all duration-200 hover:scale-[1.04] ${
-                            scrolled ? "bg-[#1e7df2] text-white hover:bg-[#1668d6]" : "bg-white text-[#0B1220] hover:bg-white/90"
+                            scrolled ? "bg-brand-gradient text-white hover:bg-[#1668d6]" : "bg-white text-[#0B1220] hover:bg-white/90"
                         }`}
                         asChild
                     >
@@ -57,7 +57,7 @@ export function SiteHeader({ page = "home" }: { page?: "home" | "tarification" }
                 </nav>
                 <Button
                     size="sm"
-                    className={`rounded-full transition-colors md:hidden ${scrolled ? "bg-[#1e7df2] text-white" : "bg-white text-[#0B1220]"}`}
+                    className={`rounded-full transition-colors md:hidden ${scrolled ? "bg-brand-gradient text-white" : "bg-white text-[#0B1220]"}`}
                     asChild
                 >
                     <Link href="/auth/signup">Commencer</Link>
