@@ -8,13 +8,14 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Progress } from "@/components/ui/progress"
 import { Textarea } from "@/components/ui/textarea"
-import { Search, User, Calendar, Star, FileText, MessageSquare, Check, X, Sparkles, Download, Loader2, Send } from "lucide-react"
+import { Search, User, Calendar, Star, FileText, MessageSquare, Check, X, Sparkles, Download, Loader2, Send, ClipboardList, MapPin, Phone } from "lucide-react"
 import { apiRequest } from "@/lib/api-client-http"
 import { createConversation, sendMessage } from "@/actions/messages"
 import { extractApiErrorMessage } from "@/lib/api-error"
 import type { ICandidate } from "@/@types/interface"
 import { SubscriptionGate } from "@/components/subscription-gate"
 import { candidateAssessmentService, type ICandidateAssessment } from "@/lib/api/candidate-assessment.service"
+import { formatAnswerValue } from "@/lib/data/questions"
 
 type UIStatus = "pending" | "interview" | "accepted" | "rejected" | "analyzed"
 
@@ -44,6 +45,24 @@ const TAB_LABELS = [
     { key: "rejected" as const, label: "Refusees" },
 ]
 
+/**
+ * CandidatureResource renvoie `candidateName` / `candidateEmail` ; l'écran
+ * manipule `name` / `email`. La conversion se fait ici, une fois, plutôt que
+ * dans chaque accès (les noms s'affichaient vides sans elle).
+ */
+function normaliser(item: any): ICandidate {
+    return {
+        ...item,
+        name: item?.name ?? item?.candidateName ?? "",
+        email: item?.email ?? item?.candidateEmail ?? "",
+        phone: item?.candidatePhone ?? null,
+        location: item?.candidateLocation ?? null,
+        jobOfferId: item?.jobOffer?.id,
+        jobOfferTitle: item?.jobOffer?.title,
+        answers: Array.isArray(item?.answers) ? item.answers : [],
+    }
+}
+
 function CandidaturesContent() {
     const router = useRouter()
     const [candidates, setCandidates] = useState<ICandidate[]>([])
@@ -67,7 +86,7 @@ function CandidaturesContent() {
             try {
                 const res = await apiRequest<any>({ endpoint: "/candidatures/paginate", method: "GET", params: { page: 1, limit: 50 } })
                 const items = res?.data ?? res ?? []
-                setCandidates(Array.isArray(items) ? items : [])
+                setCandidates(Array.isArray(items) ? items.map(normaliser) : [])
             } catch (err) {
                 console.error("[candidatures] load error:", err)
             } finally {
@@ -147,6 +166,11 @@ function CandidaturesContent() {
             setSending(false)
         }
     }
+
+    // Détail complet d'une candidature : coordonnées, réponses aux questions
+    // de l'offre et CV joint. Les données sont déjà dans la liste, la modale
+    // ne fait que les présenter.
+    const [detailFor, setDetailFor] = useState<ICandidate | null>(null)
 
     const [assessmentFor, setAssessmentFor] = useState<ICandidate | null>(null)
     const [assessment, setAssessment] = useState<ICandidateAssessment | null>(null)
@@ -285,8 +309,32 @@ function CandidaturesContent() {
                                 {/* `mt-auto` colle le bloc d'actions en bas : les
                                     cartes d'une même ligne alignent leurs boutons. */}
                                 <div className="mt-auto pt-4">
-                                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                                        <Button size="sm" className="h-8 w-full justify-center gap-1 rounded-md bg-blue-500 text-xs hover:bg-blue-600"><FileText className="h-3.5 w-3.5" />Voir CV</Button>
+                                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+                                        {/* Sans CV joint, le bouton n'ouvrirait rien : il le dit
+                                            plutôt que de rester cliquable dans le vide. */}
+                                        <Button
+                                            size="sm"
+                                            className="h-8 w-full justify-center gap-1 rounded-md bg-blue-500 text-xs hover:bg-blue-600 disabled:opacity-50"
+                                            disabled={!candidate.resume?.url}
+                                            title={candidate.resume?.url ? candidate.resume.name : "Aucun CV joint à cette candidature"}
+                                            onClick={() => candidate.resume?.url && window.open(candidate.resume.url, "_blank", "noopener")}
+                                        >
+                                            <FileText className="h-3.5 w-3.5" />Voir CV
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-8 w-full justify-center gap-1 rounded-md text-xs"
+                                            onClick={() => setDetailFor(candidate)}
+                                        >
+                                            <ClipboardList className="h-3.5 w-3.5" />
+                                            Candidature
+                                            {(candidate.answers?.length ?? 0) > 0 && (
+                                                <span className="rounded-full bg-muted px-1.5 text-[10px] font-semibold">
+                                                    {candidate.answers?.length}
+                                                </span>
+                                            )}
+                                        </Button>
                                         <Button
                                             variant="outline"
                                             size="sm"
@@ -320,6 +368,87 @@ function CandidaturesContent() {
                     })}
                 </div>
             )}
+
+            <Dialog open={!!detailFor} onOpenChange={(open) => !open && setDetailFor(null)}>
+                <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>Candidature de {detailFor?.name}</DialogTitle>
+                        <DialogDescription>
+                            {detailFor?.jobOfferTitle ?? "Offre d'emploi"}
+                            {detailFor?.appliedDate
+                                ? ` · reçue le ${new Date(detailFor.appliedDate).toLocaleDateString("fr-FR")}`
+                                : ""}
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-4 text-sm">
+                        <div className="space-y-1.5 rounded-lg border border-border bg-muted/30 p-3">
+                            <p className="text-xs font-semibold text-foreground">Coordonnées</p>
+                            <p className="flex items-center gap-2 text-muted-foreground">
+                                <MessageSquare className="h-3.5 w-3.5 shrink-0" />
+                                {detailFor?.email || "—"}
+                            </p>
+                            <p className="flex items-center gap-2 text-muted-foreground">
+                                <Phone className="h-3.5 w-3.5 shrink-0" />
+                                {detailFor?.phone || "Non renseigné"}
+                            </p>
+                            <p className="flex items-center gap-2 text-muted-foreground">
+                                <MapPin className="h-3.5 w-3.5 shrink-0" />
+                                {detailFor?.location || "Non renseignée"}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="mb-2 text-xs font-semibold text-foreground">
+                                Réponses aux questions de l&apos;offre
+                            </p>
+                            {(detailFor?.answers?.length ?? 0) === 0 ? (
+                                <p className="text-xs text-muted-foreground">
+                                    Aucune question n&apos;était configurée sur cette offre.
+                                </p>
+                            ) : (
+                                <ul className="space-y-2">
+                                    {detailFor?.answers?.map((answer) => (
+                                        <li key={answer.id} className="rounded-lg border border-border p-3">
+                                            <p className="text-xs font-medium text-foreground">{answer.question}</p>
+                                            <p className="mt-1 text-sm text-muted-foreground">
+                                                {formatAnswerValue(answer.type, answer.value)}
+                                            </p>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+
+                        {detailFor?.coverLetter && (
+                            <div>
+                                <p className="mb-2 text-xs font-semibold text-foreground">Message du candidat</p>
+                                <p className="whitespace-pre-wrap rounded-lg border border-border p-3 text-sm text-muted-foreground">
+                                    {detailFor.coverLetter}
+                                </p>
+                            </div>
+                        )}
+
+                        <div>
+                            <p className="mb-2 text-xs font-semibold text-foreground">CV joint</p>
+                            {detailFor?.resume?.url ? (
+                                <Button
+                                    variant="outline"
+                                    className="w-full justify-center gap-2"
+                                    onClick={() => window.open(detailFor.resume!.url!, "_blank", "noopener")}
+                                >
+                                    <Download className="h-4 w-4" />
+                                    {detailFor.resume.name}
+                                </Button>
+                            ) : (
+                                <p className="text-xs text-muted-foreground">
+                                    Le candidat n&apos;a pas joint de CV à cette candidature.
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
 
             <Dialog open={!!messageFor} onOpenChange={(open) => !open && setMessageFor(null)}>
                 <DialogContent className="max-w-lg">

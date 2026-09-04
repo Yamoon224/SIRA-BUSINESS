@@ -14,6 +14,8 @@ import { createJobOffer, getJobOffer, updateJobOffer } from "@/actions/offers"
 import { extractApiErrorMessage } from "@/lib/api-error"
 import { LOCALISATIONS } from "@/lib/data/afrique"
 import { DEPARTMENTS, EXPERIENCE_LEVELS, JOB_TYPES } from "@/lib/data/offres"
+import { isChoiceType, type JobQuestion } from "@/lib/data/questions"
+import { JobQuestionsEditor } from "@/components/job-questions-editor"
 import { Calendar, FileText, Loader2, MapPin, Plus, Send, X } from "lucide-react"
 
 /** Champs du formulaire, tous en chaîne : la conversion se fait à l'envoi. */
@@ -94,6 +96,8 @@ export default function Content() {
     const [showCover, setShowCover] = useState(true)
     const [newSkill, setNewSkill] = useState("")
     const [skills, setSkills] = useState<string[]>([])
+    const [questions, setQuestions] = useState<JobQuestion[]>([])
+    const [questionErrors, setQuestionErrors] = useState<Record<number, string>>({})
     const [formData, setFormData] = useState<FormState>(FORM_VIDE)
     const [status, setStatus] = useState<string>("DRAFT")
     const [loading, setLoading] = useState(!!offerId)
@@ -121,6 +125,15 @@ export default function Content() {
                     ...separerSalaire(offre.salary),
                 })
                 setSkills(Array.isArray(offre.requirements) ? offre.requirements : [])
+                setQuestions(
+                    (Array.isArray(offre.questions) ? offre.questions : []).map((q: any) => ({
+                        id: q.id,
+                        label: q.label ?? "",
+                        type: q.type ?? "TEXT",
+                        required: !!q.required,
+                        options: Array.isArray(q.options) ? q.options : [],
+                    })),
+                )
                 setStatus(offre.status ?? "DRAFT")
             })
             .catch((err) => {
@@ -160,6 +173,26 @@ export default function Content() {
         if (min && max) return `${min} - ${max} FCFA`
         if (min || max) return `${min || max} FCFA`
         return ""
+    }
+
+    /**
+     * Questions mal formées : contrôlé même sur un brouillon, parce que le
+     * backend les refuse dans les deux cas (une question sans libellé est
+     * ignorée, une question à choix sans option renvoie un 422).
+     */
+    const validerQuestions = () => {
+        const manquants: Record<number, string> = {}
+
+        questions.forEach((question, index) => {
+            if (question.label.trim() === "") {
+                manquants[index] = "Saisissez le libellé de la question."
+            } else if (isChoiceType(question.type) && question.options.length === 0) {
+                manquants[index] = "Ajoutez au moins une réponse proposée."
+            }
+        })
+
+        setQuestionErrors(manquants)
+        return Object.keys(manquants).length === 0
     }
 
     /**
@@ -209,11 +242,24 @@ export default function Content() {
         publishDate: formData.publishDate || null,
         endDate: formData.endDate || null,
         requirements: skills.length > 0 ? skills : null,
+        // Toujours envoyé (même vide) : c'est ce qui permet de supprimer la
+        // dernière question d'une offre — omettre la clé les laisserait en place.
+        questions: questions.map((question) => ({
+            id: question.id,
+            label: question.label.trim(),
+            type: question.type,
+            required: question.required,
+            options: isChoiceType(question.type) ? question.options : null,
+        })),
         status: statutCible,
         companyId: session?.user?.companyId,
     })
 
     const enregistrer = async (statutCible: "DRAFT" | "ACTIVE") => {
+        if (!validerQuestions()) {
+            toast.error("Complétez les questions signalées.")
+            return
+        }
         if (statutCible === "ACTIVE" && !validerPourPublication()) {
             toast.error("Complétez les champs signalés avant de publier.")
             return
@@ -470,6 +516,12 @@ export default function Content() {
                             </div>
                         )}
                     </section>
+
+                    <JobQuestionsEditor
+                        questions={questions}
+                        onChange={setQuestions}
+                        errors={questionErrors}
+                    />
 
                     <section className="rounded-xl border border-primary/40 bg-secondary/60 p-4 sm:p-5">
                         <div className="mb-4 flex items-center justify-between gap-3">

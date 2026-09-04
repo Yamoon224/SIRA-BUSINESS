@@ -125,6 +125,15 @@ export interface ICandidate {
     appliedDate: string    // ISO date string
     avatar?: string        // optionnel, pour l'affichage UI
     jobOfferId?: string    // ID du JobOffer lié
+    jobOfferTitle?: string
+    /** Coordonnées confirmées par le candidat à l'étape 1 du wizard. */
+    phone?: string | null
+    location?: string | null
+    coverLetter?: string | null
+    /** CV joint à cette candidature (null si le candidat n'en a pas choisi). */
+    resume?: { id: string; name: string; url: string | null } | null
+    /** Réponses aux questions de présélection de l'offre. */
+    answers?: { id: string; question: string; type: string; value: string[] }[]
 }
 
 /**
@@ -148,6 +157,15 @@ export interface IOffer {
     applicants: number
     candidatures: any[]
     company?: ICompany
+    /** Questions de présélection posées au candidat (cf. lib/data/questions). */
+    questions?: {
+        id: string
+        label: string
+        type: string
+        options: string[] | null
+        required: boolean
+        position: number
+    }[]
     createdAt: string
     updatedAt: string
 }
