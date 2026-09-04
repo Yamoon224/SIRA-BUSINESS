@@ -9,7 +9,7 @@ import { LogOut } from "lucide-react";
 interface UserMenuProps {
     /**
      * "header"  : avatar seul, cliquable, avec le menu des actions de compte.
-     *             L'en-tête n'affiche plus ni nom ni e-mail — ils n'y servaient
+     *             L'en-tête n'affiche plus ni nom ni e-mail - ils n'y servaient
      *             qu'à répéter ce que la barre latérale montre déjà.
      * "sidebar" : identité affichée en bas de la barre latérale, sans menu.
      */

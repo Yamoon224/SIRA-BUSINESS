@@ -29,7 +29,7 @@ interface PhoneInputProps {
  * international + numéro local, sur une seule valeur texte.
  *
  * Format de stockage : « <indicatif> <numéro local> » (ex. « +225 07 39 47 82 »).
- * Un seul espace, entre l'indicatif et le reste — assez normalisé pour être
+ * Un seul espace, entre l'indicatif et le reste - assez normalisé pour être
  * comparé, assez lisible pour être réaffiché tel quel. Les numéros déjà en base
  * sont relus par `separerIndicatif`, y compris collés (« +2250739… ») ou avec un
  * indicatif hors Afrique (+33…) ; ceux dont l'indicatif est inconnu restent
@@ -104,7 +104,7 @@ export function PhoneInput({
 
 /**
  * Validation partagée : au moins 6 chiffres après l'indicatif. Volontairement
- * permissive, les plans de numérotation variant d'un pays à l'autre — il s'agit
+ * permissive, les plans de numérotation variant d'un pays à l'autre - il s'agit
  * d'attraper la saisie manifestement incomplète, pas de certifier le numéro.
  */
 export function telephoneValide(value: string): boolean {

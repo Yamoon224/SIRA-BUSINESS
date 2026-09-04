@@ -134,6 +134,10 @@ export interface ICandidate {
     resume?: { id: string; name: string; url: string | null } | null
     /** Réponses aux questions de présélection de l'offre. */
     answers?: { id: string; question: string; type: string; value: string[] }[]
+    /** Titre professionnel du candidat (User.title côté backend). */
+    title?: string | null
+    /** Compétences déclarées, agrégées du portfolio et du CV du candidat. */
+    skills?: string[]
 }
 
 /**

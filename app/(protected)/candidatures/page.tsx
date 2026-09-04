@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
+import { PageHeader } from "@/components/page-header"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Progress } from "@/components/ui/progress"
 import { Textarea } from "@/components/ui/textarea"
@@ -55,6 +56,8 @@ function normaliser(item: any): ICandidate {
         ...item,
         name: item?.name ?? item?.candidateName ?? "",
         email: item?.email ?? item?.candidateEmail ?? "",
+        title: item?.title ?? item?.candidateTitle ?? null,
+        skills: Array.isArray(item?.candidateSkills) ? item.candidateSkills : (Array.isArray(item?.skills) ? item.skills : []),
         phone: item?.candidatePhone ?? null,
         location: item?.candidateLocation ?? null,
         jobOfferId: item?.jobOffer?.id,
@@ -222,7 +225,13 @@ function CandidaturesContent() {
             const us = uiStatus(candidate)
             const inTab = tab === "all" || us === tab
             const q = query.toLowerCase().trim()
-            const inSearch = q.length === 0 || candidate.name.toLowerCase().includes(q) || candidate.email.toLowerCase().includes(q)
+            const inSearch =
+                q.length === 0 ||
+                candidate.name.toLowerCase().includes(q) ||
+                candidate.email.toLowerCase().includes(q) ||
+                (candidate.title ?? "").toLowerCase().includes(q) ||
+                (candidate.jobOfferTitle ?? "").toLowerCase().includes(q) ||
+                (candidate.skills ?? []).some((s) => s.toLowerCase().includes(q))
             return inTab && inSearch
         })
     }, [jobFilter, query, tab, candidates])
@@ -236,10 +245,13 @@ function CandidaturesContent() {
     }
 
     return (
-        <div className="space-y-4">
-            <h1 className="text-2xl sm:text-3xl font-semibold text-foreground">Candidatures</h1>
+        <div className="space-y-6">
+            <PageHeader
+                title="Candidatures"
+                description="Filtrez, comparez et traitez les candidatures reçues sur vos offres — profil, compétences et score de compatibilité IA."
+            />
 
-            <div className="rounded-xl border border-border bg-white p-3 space-y-3">
+            <div className="space-y-4 rounded-xl border border-border bg-white p-4">
                 <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -271,12 +283,12 @@ function CandidaturesContent() {
                    dessous, la carte n'ayant plus la largeur d'afficher ses
                    actions côte à côte. `items-stretch` (défaut de la grille) +
                    `h-full` gardent des cartes de hauteur égale sur une ligne. */
-                <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                     {filtered.map((candidate) => {
                         const us = uiStatus(candidate)
                         const meta = STATUS_META[us]
                         return (
-                            <div key={candidate.id} className="flex h-full flex-col rounded-xl border border-border bg-white px-4 py-4">
+                            <div key={candidate.id} className="flex h-full flex-col rounded-xl border border-border bg-white px-5 py-5">
                                 <div className="flex items-start gap-3">
                                     <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-500">
                                         <User className="h-4 w-4 text-white" />
@@ -286,7 +298,14 @@ function CandidaturesContent() {
                                             <h3 className="truncate text-base font-semibold text-foreground sm:text-lg">{candidate.name}</h3>
                                             <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${meta.statusClass}`}>{meta.label}</span>
                                         </div>
-                                        <p className="truncate text-sm text-muted-foreground">{candidate.email}</p>
+                                        {/* Le titre professionnel dit qui est le candidat ;
+                                            l'e-mail, lui, ne sert qu'au moment de le
+                                            contacter — il reste dans le détail et dans la
+                                            modale de message. Repli sur l'intitulé de
+                                            l'offre visée quand le profil n'en déclare pas. */}
+                                        <p className="truncate text-sm text-muted-foreground">
+                                            {candidate.title || candidate.jobOfferTitle || "Titre non renseigné"}
+                                        </p>
                                         <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                                             <span className="inline-flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{new Date(candidate.appliedDate).toLocaleDateString("fr-FR")}</span>
                                         </div>
@@ -298,7 +317,25 @@ function CandidaturesContent() {
                                     </div>
                                 </div>
 
-                                <div className="mt-3 text-xs text-blue-500">Compatibilite IA</div>
+                                {/* Compétences en étiquettes : de quoi juger un profil
+                                    d'un coup d'œil sans ouvrir le CV. Au-delà de six, on
+                                    compte le reste plutôt que de faire enfler la carte. */}
+                                {(candidate.skills?.length ?? 0) > 0 && (
+                                    <div className="mt-3 flex flex-wrap gap-1.5">
+                                        {candidate.skills!.slice(0, 6).map((skill) => (
+                                            <span key={skill} className="rounded-md bg-muted px-2 py-1 text-[11px] font-medium text-foreground">
+                                                {skill}
+                                            </span>
+                                        ))}
+                                        {candidate.skills!.length > 6 && (
+                                            <span className="rounded-md px-2 py-1 text-[11px] font-medium text-muted-foreground">
+                                                +{candidate.skills!.length - 6}
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
+
+                                <div className="mt-4 text-xs text-blue-500">Compatibilite IA</div>
                                 <div className="mt-1 flex items-center gap-3">
                                     <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-blue-100">
                                         <div className="h-full rounded-full bg-blue-500" style={{ width: `${candidate.score}%` }} />
@@ -386,7 +423,7 @@ function CandidaturesContent() {
                             <p className="text-xs font-semibold text-foreground">Coordonnées</p>
                             <p className="flex items-center gap-2 text-muted-foreground">
                                 <MessageSquare className="h-3.5 w-3.5 shrink-0" />
-                                {detailFor?.email || "—"}
+                                {detailFor?.email || "-"}
                             </p>
                             <p className="flex items-center gap-2 text-muted-foreground">
                                 <Phone className="h-3.5 w-3.5 shrink-0" />

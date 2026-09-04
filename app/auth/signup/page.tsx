@@ -25,7 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 const steps = ["Entreprise", "Détails", "Contact"]
 
 // Libellés lisibles pour nommer précisément le(s) champ(s) manquant(s) dans le
-// message d'erreur — « Remplissez tous les champs obligatoires » n'aidait pas
+// message d'erreur - « Remplissez tous les champs obligatoires » n'aidait pas
 // à trouver lequel, surtout sur l'étape Contact qui en compte six.
 const fieldLabels: Record<string, string> = {
     logo: "Logo",

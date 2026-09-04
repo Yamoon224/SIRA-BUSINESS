@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import { useSearchParams } from "next/navigation"
 import { Input } from "@/components/ui/input"
+import { PageHeader } from "@/components/page-header"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Search, Paperclip, Send, Star, Trash2, MoreHorizontal, User } from "lucide-react"
 import { getConversations, getMessages, sendMessage, markRead } from "@/actions/messages"
@@ -112,8 +113,11 @@ function MessagesContent() {
     }
 
     return (
-        <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">Communiquez directement avec vos candidats</p>
+        <div className="space-y-6">
+            <PageHeader
+                title="Messages"
+                description="Échangez directement avec les candidats qui ont postulé à vos offres."
+            />
 
             <div className="flex flex-col lg:flex-row overflow-hidden rounded-xl border border-border bg-white" style={{ minHeight: "70vh" }}>
                 <div className="flex w-full lg:w-[320px] shrink-0 flex-col border-b lg:border-b-0 lg:border-r border-border">

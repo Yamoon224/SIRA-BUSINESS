@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
+import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
@@ -243,7 +244,7 @@ export default function Content() {
         endDate: formData.endDate || null,
         requirements: skills.length > 0 ? skills : null,
         // Toujours envoyé (même vide) : c'est ce qui permet de supprimer la
-        // dernière question d'une offre — omettre la clé les laisserait en place.
+        // dernière question d'une offre - omettre la clé les laisserait en place.
         questions: questions.map((question) => ({
             id: question.id,
             label: question.label.trim(),
@@ -315,21 +316,26 @@ export default function Content() {
     const estBrouillon = status === "DRAFT"
 
     return (
-        <div className="space-y-4 pb-8">
-            <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-2xl font-semibold text-foreground md:text-3xl">
-                    {offerId ? "Modifier l'offre d'emploi" : "Publier une offre d'emploi"}
-                </h1>
-                {offerId && (
-                    <span
-                        className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                            estBrouillon ? "bg-amber-100 text-amber-700" : "bg-green-500 text-white"
-                        }`}
-                    >
-                        {estBrouillon ? "Brouillon" : "Publiée"}
-                    </span>
-                )}
-            </div>
+        <div className="space-y-6 pb-8">
+            <PageHeader
+                title={offerId ? "Modifier l'offre d'emploi" : "Publier une offre d'emploi"}
+                description={
+                    offerId
+                        ? "Ajustez le contenu de votre offre : les modifications sont visibles dès l'enregistrement."
+                        : "Décrivez le poste, les compétences attendues et les questions de présélection posées aux candidats."
+                }
+                actions={
+                    offerId ? (
+                        <span
+                            className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                                estBrouillon ? "bg-amber-100 text-amber-700" : "bg-green-500 text-white"
+                            }`}
+                        >
+                            {estBrouillon ? "Brouillon" : "Publiée"}
+                        </span>
+                    ) : null
+                }
+            />
             <p className="text-sm font-medium text-muted-foreground">
                 {estBrouillon
                     ? "Enregistrez à tout moment : un brouillon n'est visible que de votre entreprise et se complète plus tard."
@@ -586,7 +592,7 @@ export default function Content() {
                                     checked={formData.visibility === "PUBLIC"}
                                     onChange={() => setChamp("visibility", "PUBLIC")}
                                 />
-                                Public — visible par tous les candidats
+                                Public - visible par tous les candidats
                             </label>
                             <label className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <input
@@ -596,7 +602,7 @@ export default function Content() {
                                     checked={formData.visibility === "PREMIUM"}
                                     onChange={() => setChamp("visibility", "PREMIUM")}
                                 />
-                                Premium — mise en avant dans les résultats de recherche
+                                Premium - mise en avant dans les résultats de recherche
                             </label>
                         </fieldset>
                     </section>
@@ -693,7 +699,7 @@ type FieldProps = {
 
 /**
  * Enveloppe commune des champs : même typographie de libellé, même espacement,
- * même emplacement pour l'aide et pour l'erreur — c'est ce qui donne au
+ * même emplacement pour l'aide et pour l'erreur - c'est ce qui donne au
  * formulaire son alignement visuel d'un bloc à l'autre.
  */
 function Field({ label, children, className = "", required, hint, error }: FieldProps) {

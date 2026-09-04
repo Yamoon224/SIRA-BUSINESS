@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { PageHeader } from "@/components/page-header"
 import { Bell, Calendar, Camera, ChevronRight, Circle, Clock3, Eye, FileText, MessageSquare, Sparkles, Users, Video, X } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
 import { DashboardContentProps } from "@/@types/props"
@@ -102,19 +103,21 @@ export default function Content(props: DashboardContentProps) {
     : []
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl sm:text-3xl font-semibold text-foreground">Tableau de bord</h1>
-      <p className="text-sm text-muted-foreground">Bienvenue dans votre espace employeur</p>
+    <div className="space-y-6">
+      <PageHeader
+        title="Tableau de bord"
+        description="Vue d'ensemble de votre activité de recrutement : offres en ligne, candidatures reçues et actions à traiter."
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-        <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
           {kpis.map((kpi) => (
-            <Card key={kpi.title}><CardContent className="p-4"><div className="flex items-start justify-between"><div><p className="text-xs text-muted-foreground">{kpi.title}</p><p className="mt-1 text-4xl font-bold">{kpi.value}</p></div><kpi.Icon className="h-5 w-5 text-muted-foreground" /></div></CardContent></Card>
+            <Card key={kpi.title}><CardContent className="p-5"><div className="flex items-start justify-between"><div><p className="text-xs text-muted-foreground">{kpi.title}</p><p className="mt-1 text-4xl font-bold">{kpi.value}</p></div><kpi.Icon className="h-5 w-5 text-muted-foreground" /></div></CardContent></Card>
           ))}
         </div>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-5">
             <div className="mb-3 flex items-center justify-between gap-2">
               <p className="text-sm font-semibold">Prochains entretiens</p>
               <div className="flex items-center gap-1 text-xs"><span>Aujourd'hui, 26 Novembre</span><ChevronRight className="h-3.5 w-3.5" /></div>
@@ -128,7 +131,7 @@ export default function Content(props: DashboardContentProps) {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <Card>
           <CardHeader className="pb-1"><CardTitle className="text-sm">Evolution des candidatures</CardTitle><p className="text-xs text-muted-foreground">Nombre de candidatures recues par mois</p></CardHeader>
           <CardContent className="pt-2"><div className="h-56"><ResponsiveContainer width="100%" height="100%"><BarChart data={bars}><CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} /><XAxis dataKey="month" tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} /><YAxis tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} /><Bar dataKey="value" fill="#2f7dea" radius={[2, 2, 0, 0]} /></BarChart></ResponsiveContainer></div></CardContent>
@@ -141,7 +144,7 @@ export default function Content(props: DashboardContentProps) {
       </div>
 
       <Card className="overflow-hidden border-0 bg-brand-gradient text-white">
-        <CardContent className="relative p-4">
+        <CardContent className="relative p-5">
           <button className="absolute right-2 top-2 text-blue-100"><X className="h-4 w-4" /></button>
           <div className="mb-2 flex items-center gap-2"><Sparkles className="h-4 w-4" /><p className="text-lg sm:text-xl font-semibold">Recommandations IA du jour</p></div>
           <div className="space-y-1 text-xs sm:text-sm text-blue-100">
@@ -153,7 +156,7 @@ export default function Content(props: DashboardContentProps) {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm">Candidatures recentes (Goriya Score)</CardTitle><button className="inline-flex items-center gap-1 text-xs text-muted-foreground">Voir tout <ChevronRight className="h-3.5 w-3.5" /></button></CardHeader>
           <CardContent className="space-y-3">
@@ -181,14 +184,14 @@ export default function Content(props: DashboardContentProps) {
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold">Offres recentes</h2>
-        <p className="mb-3 text-xs text-muted-foreground">Apercu de vos dernieres publications</p>
+        <h2 className="text-lg font-semibold text-foreground">Offres récentes</h2>
+        <p className="mb-4 mt-1 text-sm text-muted-foreground">Aperçu de vos dernières publications</p>
         {recents.length === 0 ? (
           <p className="text-xs text-muted-foreground">Aucune offre récente.</p>
         ) : (
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
             {recents.map((o, i) => (
-              <Card key={`${o.title}-${i}`}><CardContent className="p-3"><div className="mb-1 flex items-center justify-between gap-2"><p className="text-sm font-semibold">{o.title}</p><Badge className={`text-[10px] ${o.statusClass}`}>{o.status}</Badge></div><p className="text-[11px] text-muted-foreground">{o.meta}</p><div className="mt-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"><p className="text-xs text-muted-foreground">{o.apps}</p><div className="flex flex-wrap gap-1">{o.buttons.map((b) => <Button key={b} variant="outline" size="sm" className="h-6 px-2 text-[10px]">{b}</Button>)}</div></div></CardContent></Card>
+              <Card key={`${o.title}-${i}`}><CardContent className="p-4"><div className="mb-1 flex items-center justify-between gap-2"><p className="text-sm font-semibold">{o.title}</p><Badge className={`text-[10px] ${o.statusClass}`}>{o.status}</Badge></div><p className="text-[11px] text-muted-foreground">{o.meta}</p><div className="mt-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"><p className="text-xs text-muted-foreground">{o.apps}</p><div className="flex flex-wrap gap-1">{o.buttons.map((b) => <Button key={b} variant="outline" size="sm" className="h-6 px-2 text-[10px]">{b}</Button>)}</div></div></CardContent></Card>
             ))}
           </div>
         )}

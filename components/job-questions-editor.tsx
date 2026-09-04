@@ -64,7 +64,7 @@ export function JobQuestionsEditor({ questions, onChange, errors = {} }: Props) 
             {questions.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-border bg-muted/40 p-4 text-center">
                     <p className="text-xs text-muted-foreground">
-                        Aucune question pour l&apos;instant — les candidats postuleront avec leur
+                        Aucune question pour l&apos;instant - les candidats postuleront avec leur
                         profil et leur CV uniquement.
                     </p>
                 </div>

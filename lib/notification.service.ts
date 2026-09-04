@@ -2,6 +2,12 @@ import { apiRequest } from "@/lib/api-client-http"
 
 export interface INotification {
     id: string
+    /**
+     * Enum NotificationType du backend (MESSAGE / APPLICATION_STATUS /
+     * SYSTEM). Optionnel : d'anciennes notifications peuvent remonter sans,
+     * et la cloche sait retomber sur le libellé pour choisir la destination.
+     */
+    type?: string
     title: string
     body?: string | null
     isRead: boolean

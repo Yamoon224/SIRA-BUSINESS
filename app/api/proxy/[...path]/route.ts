@@ -75,7 +75,7 @@ async function handleProxy(request: NextRequest, { params }: RouteContext) {
         }
 
         // Réponse d'erreur non-JSON (413 nginx, 500 HTML, gateway…) : on ne la traite
-        // pas comme un fichier à télécharger — on renvoie un message exploitable au client.
+        // pas comme un fichier à télécharger - on renvoie un message exploitable au client.
         if (!upstreamResponse.ok) {
             const text = await upstreamResponse.text().catch(() => "")
             const message =

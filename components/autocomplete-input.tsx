@@ -143,7 +143,7 @@ export function AutocompleteInput({
 
             {open && aucunResultat && (
                 <div className="absolute z-50 mt-1 w-full rounded-sm border border-border bg-popover px-3 py-2 text-sm text-muted-foreground shadow-lg">
-                    Aucun résultat — la saisie libre reste possible.
+                    Aucun résultat - la saisie libre reste possible.
                 </div>
             )}
         </div>

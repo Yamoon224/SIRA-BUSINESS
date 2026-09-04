@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
+import { PageHeader } from "@/components/page-header"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -116,16 +117,16 @@ function EvaluationsContent() {
     }
 
     return (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-xl font-semibold text-foreground">Évaluations Employés</h1>
-                    <p className="mt-1 text-sm text-muted-foreground">Enquêtes internes anonymes - les réponses ne sont jamais individuellement identifiables.</p>
-                </div>
-                <Button className="gap-1.5 bg-blue-500 hover:bg-blue-600" onClick={() => setCreateOpen(true)}>
-                    <Plus className="h-4 w-4" />Nouvelle enquête
-                </Button>
-            </div>
+        <div className="space-y-6">
+            <PageHeader
+                title="Évaluations employés"
+                description="Enquêtes internes anonymes : les réponses ne sont jamais individuellement identifiables."
+                actions={
+                    <Button className="gap-1.5 bg-blue-500 hover:bg-blue-600" onClick={() => setCreateOpen(true)}>
+                        <Plus className="h-4 w-4" />Nouvelle enquête
+                    </Button>
+                }
+            />
 
             {surveys.length === 0 ? (
                 <Card className="border border-border">

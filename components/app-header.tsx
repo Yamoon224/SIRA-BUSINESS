@@ -75,7 +75,7 @@ export function AppHeader() {
                     className="w-full rounded-sm pl-9" />
             </div>
 
-            {/* Droite : actions seules — le nom et l'e-mail ont quitté l'en-tête,
+            {/* Droite : actions seules - le nom et l'e-mail ont quitté l'en-tête,
                 ils restent affichés en bas de la barre latérale. */}
             <div className="ml-auto flex shrink-0 items-center gap-1 md:gap-2">
                 <NotificationBell />

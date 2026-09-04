@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 
 /**
  * Profil entreprise. La route est bien `/profil` (le menu utilisateur poussait
- * `/profile`, d'où le 404 — voir components/user-menu.tsx).
+ * `/profile`, d'où le 404 - voir components/user-menu.tsx).
  */
 export default async function Page() {
     const session = await getServerSession(authOptions)

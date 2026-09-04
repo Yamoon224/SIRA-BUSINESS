@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
+import { PageHeader } from "@/components/page-header"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
@@ -136,18 +137,16 @@ function IntegrationsApiContent() {
     }
 
     return (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl sm:text-3xl font-semibold text-foreground">Intégrations API (B2B)</h1>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                        Connectez vos outils ATS/SIRH à GORIYA via l'API externe et des webhooks sortants.
-                    </p>
-                </div>
-                <Button className="gap-1.5 bg-blue-500 hover:bg-blue-600" onClick={() => setCreateOpen(true)}>
-                    <Plus className="h-4 w-4" />Nouvel identifiant
-                </Button>
-            </div>
+        <div className="space-y-6">
+            <PageHeader
+                title="Intégrations API (B2B)"
+                description="Connectez vos outils ATS/SIRH à GORIYA via l'API externe et des webhooks sortants."
+                actions={
+                    <Button className="gap-1.5 bg-blue-500 hover:bg-blue-600" onClick={() => setCreateOpen(true)}>
+                        <Plus className="h-4 w-4" />Nouvel identifiant
+                    </Button>
+                }
+            />
 
             {clients.length === 0 ? (
                 <Card className="border border-border">

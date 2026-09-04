@@ -44,7 +44,7 @@ function PaymentSuccessContent() {
 
         let cancelled = false
         // Paiement Pro confirme via une notification serveur-à-serveur qui peut
-        // arriver après le retour du navigateur — on re-tente quelques fois.
+        // arriver après le retour du navigateur - on re-tente quelques fois.
         const maxAttempts = gateway === "paiementpro" ? 5 : 1
 
         const attempt = (n: number) => {
@@ -133,7 +133,7 @@ function PaymentSuccessContent() {
                         <Button
                             onClick={() => {
                                 // Aucun abonnement activé : ce n'est pas une action
-                                // aboutie — on ouvre l'espace entreprise, pas la
+                                // aboutie - on ouvre l'espace entreprise, pas la
                                 // page de félicitations.
                                 clearSignupFlow()
                                 router.push("/dashboard")

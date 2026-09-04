@@ -45,7 +45,7 @@ export default function SignupSuccessPage() {
     // Cette page ne se justifie qu'après une action réellement aboutie
     // (inscription terminée, abonnement ou offre gratuite activés). Une
     // entreprise qui arrive ici par un lien direct ou en consultant les
-    // forfaits repart vers son espace — voir lib/signup-flow.ts.
+    // forfaits repart vers son espace - voir lib/signup-flow.ts.
     const [allowed, setAllowed] = useState<boolean | null>(null)
 
     useEffect(() => {

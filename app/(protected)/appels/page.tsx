@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
+import { PageHeader } from "@/components/page-header"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
@@ -96,16 +97,16 @@ function AppelsContent() {
     }
 
     return (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl sm:text-3xl font-semibold text-foreground">Appels vidéo</h1>
-                    <p className="mt-1 text-sm text-muted-foreground">Entretiens et réunions en visioconférence (GORIYA Call)</p>
-                </div>
-                <Button className="gap-1.5 bg-blue-500 hover:bg-blue-600" onClick={() => setCreateOpen(true)}>
-                    <Plus className="h-4 w-4" />Planifier un appel
-                </Button>
-            </div>
+        <div className="space-y-6">
+            <PageHeader
+                title="Appels vidéo"
+                description="Planifiez vos entretiens et réunions en visioconférence (GORIYA Call) et retrouvez-en l'historique."
+                actions={
+                    <Button className="gap-1.5 bg-blue-500 hover:bg-blue-600" onClick={() => setCreateOpen(true)}>
+                        <Plus className="h-4 w-4" />Planifier un appel
+                    </Button>
+                }
+            />
 
             {sessions.length === 0 ? (
                 <Card className="border border-border">

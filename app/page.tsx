@@ -206,7 +206,7 @@ function MatchCard({
 
 /**
  * Aperçu de l'application dans le hero : capture d'écran posée dans un cadre
- * clair, cadrée sur le haut de la page (`object-top`) — c'est là que se lit
+ * clair, cadrée sur le haut de la page (`object-top`) - c'est là que se lit
  * l'écran, une capture pleine hauteur réduirait tout à un aplat gris.
  */
 function AppPreview({
@@ -262,7 +262,7 @@ export default function HomePage() {
 
     // Les forfaits étaient sélectionnés par période de facturation
     // (`find(MONTHLY)` / `find(ANNUAL)`), ce qui masquait tout plan
-    // supplémentaire — l'« Offre gratuite » (mensuelle) n'apparaissait jamais.
+    // supplémentaire - l'« Offre gratuite » (mensuelle) n'apparaissait jamais.
     // On rend maintenant la liste renvoyée par l'API, du moins cher au plus cher.
     const sortedPlans = [...plans].sort((a, b) => Number(a.price) - Number(b.price))
     const popularPlanId = findPopularPlanId(sortedPlans)

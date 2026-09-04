@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useSession } from "next-auth/react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { PageHeader } from "@/components/page-header"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AutocompleteInput } from "@/components/autocomplete-input"
@@ -169,10 +170,10 @@ export default function Content({ company }: ProfilContentProps) {
 
     return (
         <div className="space-y-6 pb-10">
-            <div>
-                <h1 className="text-xl font-semibold text-foreground">Profil Entreprise</h1>
-                <p className="text-sm text-muted-foreground">Gère les informations publiques de votre entreprise</p>
-            </div>
+            <PageHeader
+                title="Profil entreprise"
+                description="Ces informations composent la page publique que les candidats consultent avant de postuler."
+            />
 
             {/* ── Section identité ── */}
             <div className="overflow-hidden rounded-xl border border-border bg-white">

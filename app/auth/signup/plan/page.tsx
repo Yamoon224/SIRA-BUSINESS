@@ -137,7 +137,7 @@ export default function ChoosePlanPage() {
         setSubscribing(plan.id)
         try {
             // Le retour de paiement doit savoir si l'on finalise une inscription
-            // ou si l'on change simplement d'offre — d'où `flow` dans l'URL.
+            // ou si l'on change simplement d'offre - d'où `flow` dans l'URL.
             const origin = window.location.origin
             const flow = signupFlow ? "signup" : "upgrade"
             const res = await subscriptionService.createCheckout({
@@ -222,7 +222,7 @@ export default function ChoosePlanPage() {
                         Numéro Mobile Money (pour les forfaits payants)
                     </label>
                     {/* Même composant que l'inscription et le profil : l'indicatif
-                        est choisi, pas tapé — Paiement Pro reçoit ainsi un numéro
+                        est choisi, pas tapé - Paiement Pro reçoit ainsi un numéro
                         au format attendu quel que soit le pays. */}
                     <PhoneInput
                         id="paiementpro-phone"
@@ -234,7 +234,7 @@ export default function ChoosePlanPage() {
             )}
 
             {/* Forfaits : pleine largeur, centrés, cards bornées.
-                flex-wrap plutôt qu'une grille — avec 3 offres sur 2 colonnes
+                flex-wrap plutôt qu'une grille - avec 3 offres sur 2 colonnes
                 (tablette), une grille laisserait la 3e collée à gauche. */}
             <div className="mx-auto mt-10 flex w-full max-w-[1100px] flex-wrap items-stretch justify-center gap-6 px-4">
                 {sortedPlans.map((plan) => {

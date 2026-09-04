@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useMemo, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { PageHeader } from "@/components/page-header"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { toast } from "sonner"
@@ -79,19 +80,19 @@ export function Content({ init }: AnnonceContentProps) {
     }
 
     return (
-        <div className="space-y-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Mes annonces</h1>
-                    <p className="mt-2 text-sm sm:text-base font-medium text-foreground">Gère et analyse toutes les candidatures reçues</p>
-                </div>
-                <Button className="gap-1.5 rounded-full px-5" asChild>
-                    <Link href="/poster-offre">
-                        <Plus className="h-4 w-4" />
-                        Nouvelle offre
-                    </Link>
-                </Button>
-            </div>
+        <div className="space-y-6">
+            <PageHeader
+                title="Mes annonces"
+                description="Suivez la performance de vos offres publiées et les candidatures qu'elles reçoivent."
+                actions={
+                    <Button className="gap-1.5 rounded-full px-5" asChild>
+                        <Link href="/poster-offre">
+                            <Plus className="h-4 w-4" />
+                            Nouvelle offre
+                        </Link>
+                    </Button>
+                }
+            />
 
             <div className="rounded-xl border border-border bg-white p-3">
                 <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">

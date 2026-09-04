@@ -75,7 +75,7 @@ export default function TarificationPage() {
 
     // Les forfaits étaient sélectionnés par période de facturation
     // (`find(MONTHLY)` / `find(ANNUAL)`), ce qui masquait tout plan
-    // supplémentaire — l'« Offre gratuite » (mensuelle) n'apparaissait jamais.
+    // supplémentaire - l'« Offre gratuite » (mensuelle) n'apparaissait jamais.
     // On rend maintenant la liste renvoyée par l'API, du moins cher au plus cher.
     const sortedPlans = [...plans].sort((a, b) => Number(a.price) - Number(b.price))
     const popularPlanId = findPopularPlanId(sortedPlans)

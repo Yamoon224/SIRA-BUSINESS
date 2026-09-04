@@ -141,20 +141,24 @@
   --brand-gradient: linear-gradient(135deg, #2b7fff 0%, #1e7df2 45%, #0b2ca8 100%);
 }
 
-@layer utilities {
-  .bg-brand-gradient {
-    background-image: var(--brand-gradient);
-  }
+/* `@utility` et non `@layer utilities` : en Tailwind v4, une classe écrite à
+   la main dans la couche `utilities` existe telle quelle mais n'accepte aucune
+   variante — `hover:bg-brand-gradient` ou `focus:bg-brand-gradient` ne
+   généraient donc aucune règle. Déclarées ainsi, les deux utilitaires
+   fonctionnent avec toutes les variantes, comme n'importe quelle classe
+   Tailwind. */
+@utility bg-brand-gradient {
+  background-image: var(--brand-gradient);
+}
 
-  /* Le logo est en dégradé : sur fond bleu il perdrait son contraste, et le
-     passer en blanc reviendrait à le rendre monochrome. On lui pose donc une
-     surface claire dessous, ses couleurs restent intactes. */
-  .logo-surface {
-    background-color: #fff;
-    border-radius: 9999px;
-    padding: 0.375rem 0.875rem;
-    box-shadow: 0 8px 24px -12px rgb(11 18 32 / 0.45);
-  }
+/* Le logo est en dégradé : sur fond bleu il perdrait son contraste, et le
+   passer en blanc reviendrait à le rendre monochrome. On lui pose donc une
+   surface claire dessous, ses couleurs restent intactes. */
+@utility logo-surface {
+  background-color: #fff;
+  border-radius: 9999px;
+  padding: 0.375rem 0.875rem;
+  box-shadow: 0 8px 24px -12px rgb(11 18 32 / 0.45);
 }
 
 @layer base {

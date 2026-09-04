@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { PageHeader } from "@/components/page-header"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AlertTriangle, Save, Smartphone } from "lucide-react"
@@ -74,11 +75,11 @@ export default function ParametresPage() {
     }
 
     return (
-        <div className="space-y-5 pb-12">
-            <div>
-                <h1 className="text-2xl font-semibold text-foreground md:text-3xl">Parametres</h1>
-                <p className="text-sm text-muted-foreground">Gerez vos preferences et parametres de compte</p>
-            </div>
+        <div className="space-y-6 pb-12">
+            <PageHeader
+                title="Paramètres"
+                description="Gérez les informations de votre compte, vos préférences de notification et la sécurité de votre accès."
+            />
 
             <Section title="Informations du compte">
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

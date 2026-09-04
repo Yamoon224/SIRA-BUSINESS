@@ -16,7 +16,7 @@ import { initializeGoogleAuth, signInWithGoogle, GOOGLE_CLIENT_ID } from "@/lib/
  * Destination post-connexion : on honore `callbackUrl` (posé par proxy.ts et
  * par les pages protégées, ex. /profil) pour renvoyer l'utilisateur là où il
  * allait, au lieu de le déposer systématiquement sur le tableau de bord.
- * Seuls les chemins internes sont acceptés — jamais une URL absolue, qui
+ * Seuls les chemins internes sont acceptés - jamais une URL absolue, qui
  * ouvrirait une redirection non contrôlée.
  */
 function safeCallbackUrl(raw: string | null): string {
