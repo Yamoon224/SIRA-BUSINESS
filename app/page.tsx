@@ -586,7 +586,7 @@ export default function HomePage() {
             {/* Plans */}
             <section id="tarification" className="bg-[#F7F8FC] py-20">
                 <div className="container mx-auto px-4 md:px-6">
-                    <h2 className="text-center text-2xl xs:text-3xl sm:text-4xl md:text-[38px] lg:text-[46px] leading-none font-extrabold text-[#111827] dark:text-foreground">Les Plans Tarifaires</h2>
+                    <h2 className="text-center text-2xl xs:text-3xl sm:text-4xl md:text-[38px] lg:text-[46px] leading-none font-extrabold text-[#111827] dark:text-foreground mb-2">Les Plans Tarifaires</h2>
                     
                     {loading ? (
                         <div className="mx-auto flex max-w-[1100px] flex-wrap justify-center gap-6">
