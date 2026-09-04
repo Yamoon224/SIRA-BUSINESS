@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation"
 import { SessionProvider } from "next-auth/react"
 import { ChevronLeft } from "lucide-react"
 import { GoriyaLogo } from "@/components/goriya-logo"
-import { BlueCircles } from "@/components/marketing/blue-circles"
 import { MarketingMotionStyles } from "@/components/marketing/reveal"
 
 /**
@@ -81,7 +80,6 @@ function SplitShell({ children }: { children: React.ReactNode }) {
                 />
                 <div className="orb-drift-1 pointer-events-none absolute -top-24 right-[-30%] h-[420px] w-[420px] rounded-full bg-[#2447FF]/25 blur-[110px]" />
                 <div className="orb-drift-2 pointer-events-none absolute bottom-[-20%] left-[-20%] h-[320px] w-[320px] rounded-full bg-[#FF6B4A]/15 blur-[100px]" />
-                <BlueCircles variant="panel" />
 
                 <Link href="/" className="relative z-10 inline-flex w-fit items-center gap-2 text-sm font-medium text-white/70 transition-colors hover:text-white">
                     <ChevronLeft className="h-4 w-4" />
@@ -99,8 +97,8 @@ function SplitShell({ children }: { children: React.ReactNode }) {
                 </div>
 
                 {/* Le panneau garde 3 zones (retour / marque / bas) pour que
-                    `justify-between` conserve sa répartition verticale : le bas
-                    est désormais laissé au motif. */}
+                    `justify-between` conserve sa répartition verticale : la
+                    zone basse reste vide. */}
                 <div aria-hidden="true" />
             </aside>
 

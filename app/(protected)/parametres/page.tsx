@@ -134,7 +134,7 @@ export default function ParametresPage() {
             </Section>
 
             <Section title="Abonnement et facturation">
-                <div className="rounded-xl bg-blue-600 px-4 py-4 text-white sm:px-5">
+                <div className="rounded-xl bg-brand-gradient px-4 py-4 text-white sm:px-5">
                     <div className="flex items-center justify-between gap-3">
                         <div>
                             <p className="font-bold">Plan Premium</p>

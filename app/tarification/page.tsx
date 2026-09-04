@@ -13,7 +13,6 @@ import {
 import { Reveal, ScrollProgress, MarketingMotionStyles } from "@/components/marketing/reveal"
 import { SiteHeader } from "@/components/marketing/site-header"
 import { SiteFooter } from "@/components/marketing/site-footer"
-import { BlueCircles } from "@/components/marketing/blue-circles"
 import { Check, Gift, Sparkles } from "lucide-react"
 import { subscriptionService } from "@/lib/api/subscription.service"
 
@@ -97,7 +96,6 @@ export default function TarificationPage() {
                 />
                 <div className="orb-drift-1 pointer-events-none absolute -top-24 right-[-10%] h-[480px] w-[480px] rounded-full bg-[#2447FF]/25 blur-[120px]" />
                 <div className="orb-drift-2 pointer-events-none absolute bottom-[-25%] left-[-10%] h-[360px] w-[360px] rounded-full bg-[#FF6B4A]/15 blur-[110px]" />
-                <BlueCircles />
 
                 <div className="container relative z-10 mx-auto px-4 pb-20 pt-32 text-center md:px-6 md:pb-24 md:pt-40">
                     <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#e6f1ff]">
@@ -258,7 +256,6 @@ export default function TarificationPage() {
             {/* Final CTA */}
             <section className="relative overflow-hidden bg-brand-gradient py-24">
                 <div className="orb-drift-1 pointer-events-none absolute left-1/2 top-0 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-[#2447FF]/20 blur-[130px]" />
-                <BlueCircles />
                 <Reveal className="container relative z-10 mx-auto px-4 text-center md:px-6">
                     <h2 className="mx-auto max-w-xl text-3xl text-white sm:text-4xl">
                         Prêt à recruter avec Goriya ?

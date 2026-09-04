@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { Reveal, ScrollProgress, MarketingMotionStyles } from "@/components/marketing/reveal"
 import { SiteHeader } from "@/components/marketing/site-header"
 import { SiteFooter } from "@/components/marketing/site-footer"
-import { BlueCircles } from "@/components/marketing/blue-circles"
 import {
     ArrowRight,
     ArrowUpRight,
@@ -102,6 +101,20 @@ const hrFeatures = [
     },
 ] as const
 
+/** Captures de l'application montrées dans le hero, dans l'ordre de la pile. */
+const appPreviews = [
+    {
+        src: "/images/apercu-dashboard.jpeg",
+        alt: "Tableau de bord Goriya : annonces actives, candidatures reçues et évolution des candidatures",
+        label: "Votre tableau de bord",
+    },
+    {
+        src: "/images/apercu-poster-offre.jpeg",
+        alt: "Formulaire de publication d'une offre d'emploi avec l'aperçu de l'annonce",
+        label: "Publier une offre",
+    },
+] as const
+
 const regionPoints = [
     { title: "Français natif", description: "Interface et support pensés pour vos équipes, pas traduits à la va-vite." },
     { title: "Mobile Money", description: "Payez votre abonnement via Paiement Pro, sans carte bancaire internationale." },
@@ -176,6 +189,37 @@ function MatchCard({
     )
 }
 
+/**
+ * Aperçu de l'application dans le hero : capture d'écran posée dans un cadre
+ * clair, cadrée sur le haut de la page (`object-top`) — c'est là que se lit
+ * l'écran, une capture pleine hauteur réduirait tout à un aplat gris.
+ */
+function AppPreview({
+    src,
+    alt,
+    label,
+    className = "",
+}: {
+    src: string
+    alt: string
+    label: string
+    className?: string
+}) {
+    return (
+        <figure
+            className={`overflow-hidden rounded-xl bg-white shadow-[0_24px_60px_-24px_rgba(11,18,32,0.55)] ring-1 ring-white/20 transition-transform duration-300 ${className}`}
+        >
+            <img
+                src={src}
+                alt={alt}
+                loading="lazy"
+                className="h-[210px] w-full object-cover object-top"
+            />
+            <figcaption className="px-4 py-2.5 text-xs font-semibold text-[#0B1220]">{label}</figcaption>
+        </figure>
+    )
+}
+
 export default function HomePage() {
     return (
         <div className="min-h-screen bg-[#F7F8FC]">
@@ -193,7 +237,6 @@ export default function HomePage() {
                 />
                 <div className="orb-drift-1 pointer-events-none absolute -top-24 right-[-10%] h-[520px] w-[520px] rounded-full bg-[#2447FF]/25 blur-[120px]" />
                 <div className="orb-drift-2 pointer-events-none absolute bottom-[-15%] left-[-5%] h-[380px] w-[380px] rounded-full bg-[#FF6B4A]/15 blur-[110px]" />
-                <BlueCircles />
 
                 <div className="container relative z-10 mx-auto grid grid-cols-1 gap-16 px-4 pb-20 pt-32 md:px-6 md:pb-28 md:pt-36 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pb-32 lg:pt-40">
                     <div>
@@ -226,29 +269,25 @@ export default function HomePage() {
                         </div>
                     </div>
 
-                    {/* Signature: floating match-card stack - desktop */}
+                    {/* Signature: pile flottante d'aperçus de l'app - desktop */}
                     <div className="relative hidden h-[380px] lg:block">
-                        <MatchCard
-                            candidate={candidates[0]}
-                            variant="glass"
-                            className="match-float-1 absolute left-4 top-0 w-[300px] -rotate-3"
-                        />
-                        <MatchCard
-                            candidate={candidates[1]}
-                            variant="glass"
-                            className="match-float-2 absolute left-32 top-32 w-[300px] rotate-2"
-                        />
-                        <MatchCard
-                            candidate={candidates[2]}
-                            variant="glass"
-                            className="match-float-3 absolute left-6 top-[248px] w-[300px] -rotate-1"
-                        />
+                        {appPreviews.map((preview, i) => (
+                            <AppPreview
+                                key={preview.src}
+                                {...preview}
+                                className={
+                                    i === 0
+                                        ? "match-float-1 absolute left-0 top-0 w-[350px] -rotate-3"
+                                        : "match-float-2 absolute left-28 top-[168px] w-[350px] rotate-2"
+                                }
+                            />
+                        ))}
                     </div>
 
-                    {/* Signature: static stack - mobile/tablet */}
-                    <div className="flex flex-col gap-3 lg:hidden">
-                        {candidates.map((c) => (
-                            <MatchCard key={c.name} candidate={c} variant="glass" />
+                    {/* Signature: pile statique - mobile/tablette */}
+                    <div className="flex flex-col gap-4 lg:hidden">
+                        {appPreviews.map((preview) => (
+                            <AppPreview key={preview.src} {...preview} />
                         ))}
                     </div>
                 </div>
@@ -520,7 +559,6 @@ export default function HomePage() {
             {/* Final CTA */}
             <section className="relative overflow-hidden bg-brand-gradient py-24">
                 <div className="orb-drift-1 pointer-events-none absolute left-1/2 top-0 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-[#2447FF]/20 blur-[130px]" />
-                <BlueCircles />
                 <Reveal className="container relative z-10 mx-auto px-4 text-center md:px-6">
                     <h2 className="mx-auto max-w-xl text-3xl text-white sm:text-4xl">
                         Donnez à votre équipe RH une longueur d&apos;avance
