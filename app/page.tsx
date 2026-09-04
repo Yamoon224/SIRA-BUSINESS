@@ -397,14 +397,7 @@ export default function HomePage() {
             {/* How it works */}
             <section id="comment-ca-marche" className="bg-[#F7F8FC] py-24">
                 <div className="container mx-auto px-4 md:px-6">
-                    <Reveal className="mx-auto max-w-2xl text-center">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#FF6B4A]">
-                            Le parcours
-                        </p>
-                        <h2 className="mt-3 text-3xl text-[#0B1220] sm:text-4xl">
-                            De l&apos;offre à l&apos;embauche, en quatre étapes
-                        </h2>
-                    </Reveal>
+                    <h2 className="text-center text-2xl xs:text-3xl sm:text-4xl md:text-[38px] lg:text-[46px] leading-none font-extrabold text-[#111827] dark:text-foreground">De l&apos;offre à l&apos;embauche</h2>
 
                     <div className="relative mt-16 grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
                         <div className="pointer-events-none absolute left-[12.5%] right-[12.5%] top-6 hidden h-px bg-black/[0.08] lg:block" />
@@ -494,18 +487,7 @@ export default function HomePage() {
             {/* Services RH */}
             <section id="services-rh" className="bg-[#F7F8FC] py-24">
                 <div className="container mx-auto px-4 md:px-6">
-                    <Reveal className="mx-auto max-w-2xl text-center">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#FF6B4A]">
-                            Services RH
-                        </p>
-                        <h2 className="mt-3 text-3xl text-[#0B1220] sm:text-4xl">
-                            Le recrutement n&apos;est que le premier jour
-                        </h2>
-                        <p className="mt-4 text-[15px] leading-relaxed text-[#5B6472]">
-                            Contrats, congés, paie, évaluations : ce qui suit l&apos;embauche se gère
-                            dans le même espace que vos offres, sans ressaisir un seul dossier.
-                        </p>
-                    </Reveal>
+                    <h2 className="text-center text-2xl xs:text-3xl sm:text-4xl md:text-[38px] lg:text-[46px] leading-none font-extrabold text-[#111827] dark:text-foreground">Services RH</h2>
 
                     <div className="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                         {hrFeatures.map((feature, i) => (
@@ -604,6 +586,8 @@ export default function HomePage() {
             {/* Plans */}
             <section id="tarification" className="bg-[#F7F8FC] py-20">
                 <div className="container mx-auto px-4 md:px-6">
+                    <h2 className="text-center text-2xl xs:text-3xl sm:text-4xl md:text-[38px] lg:text-[46px] leading-none font-extrabold text-[#111827] dark:text-foreground">Les Plans Tarifaires</h2>
+                    
                     {loading ? (
                         <div className="mx-auto flex max-w-[1100px] flex-wrap justify-center gap-6">
                             <Skeleton className="h-[440px] w-full max-w-sm rounded-md sm:w-[calc(50%-0.75rem)] lg:w-[330px]" />
