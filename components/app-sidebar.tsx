@@ -53,6 +53,14 @@ const serviceRhItems = [
     { label: "Documents RH", href: "/services-rh/documents", icon: FolderOpen },
 ]
 
+/**
+ * Fond du lien actif : le degrade de marque plutot qu'un aplat `bg-primary`.
+ * `bg-brand-gradient` est une @utility (cf. app/globals.css) : elle pose une
+ * background-image, il faut donc du texte clair par-dessus.
+ */
+const ACTIVE_LINK = "bg-brand-gradient text-white shadow-sm"
+const INACTIVE_LINK = "text-muted-foreground hover:bg-muted hover:text-foreground"
+
 const settingsNavItems = [
     { label: "Paramètres", href: "/parametres", icon: Settings },
     { label: "Mon forfait", href: "/auth/signup/plan", icon: CreditCard },
@@ -91,9 +99,7 @@ export function AppSidebar() {
                                 href={item.href}
                                 className={cn(
                                     "flex items-center gap-3 rounded-sm px-3 py-2.5 text-sm font-medium transition-colors",
-                                    isActive
-                                        ? "bg-primary text-primary-foreground"
-                                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                    isActive ? ACTIVE_LINK : INACTIVE_LINK
                                 )}
                             >
                                 <item.icon className="h-5 w-5 shrink-0" />
@@ -127,8 +133,8 @@ export function AppSidebar() {
                                         className={cn(
                                             "flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
                                             isActive
-                                                ? "text-primary font-semibold"
-                                                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                                                ? `${ACTIVE_LINK} font-semibold`
+                                                : INACTIVE_LINK
                                         )}>
                                         {item.label}
                                     </Link>
@@ -141,11 +147,9 @@ export function AppSidebar() {
                         href="/profil"
                         className={cn(
                             "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                            pathname === "/profil"
-                                ? "bg-primary text-primary-foreground"
-                                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                            pathname === "/profil" ? ACTIVE_LINK : INACTIVE_LINK
                         )}>
-                        <Building2 className={cn("h-4 w-4 shrink-0", pathname === "/profil" ? "text-primary-foreground" : "text-muted-foreground")} />
+                        <Building2 className="h-4 w-4 shrink-0" />
                         Profil Entreprise
                     </Link>
                 </nav>
@@ -165,9 +169,7 @@ export function AppSidebar() {
                                 href={item.href}
                                 className={cn(
                                     "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                                    isActive
-                                        ? "bg-primary text-primary-foreground"
-                                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                    isActive ? ACTIVE_LINK : INACTIVE_LINK
                                 )}
                             >
                                 <item.icon className="h-5 w-5 shrink-0" />

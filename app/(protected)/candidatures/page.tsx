@@ -17,6 +17,7 @@ import type { ICandidate } from "@/@types/interface"
 import { SubscriptionGate } from "@/components/subscription-gate"
 import { candidateAssessmentService, type ICandidateAssessment } from "@/lib/api/candidate-assessment.service"
 import { formatAnswerValue } from "@/lib/data/questions"
+import { FileViewerDialog, type ViewableFile } from "@/components/file-viewer-dialog"
 
 type UIStatus = "pending" | "interview" | "accepted" | "rejected" | "analyzed"
 
@@ -174,6 +175,13 @@ function CandidaturesContent() {
     // de l'offre et CV joint. Les données sont déjà dans la liste, la modale
     // ne fait que les présenter.
     const [detailFor, setDetailFor] = useState<ICandidate | null>(null)
+
+    // Lecteur de CV : le fichier s'ouvre dans une modale plutot que dans un
+    // onglet, pour ne pas perdre les filtres et le tri en cours.
+    const [cvFor, setCvFor] = useState<ICandidate | null>(null)
+    const cvFile: ViewableFile | null = cvFor?.resume?.url
+        ? { name: cvFor.resume.name, url: cvFor.resume.url, mimeType: cvFor.resume.mimeType ?? null }
+        : null
 
     const [assessmentFor, setAssessmentFor] = useState<ICandidate | null>(null)
     const [assessment, setAssessment] = useState<ICandidateAssessment | null>(null)
@@ -354,7 +362,7 @@ function CandidaturesContent() {
                                             className="h-8 w-full justify-center gap-1 rounded-md bg-blue-500 text-xs hover:bg-blue-600 disabled:opacity-50"
                                             disabled={!candidate.resume?.url}
                                             title={candidate.resume?.url ? candidate.resume.name : "Aucun CV joint à cette candidature"}
-                                            onClick={() => candidate.resume?.url && window.open(candidate.resume.url, "_blank", "noopener")}
+                                            onClick={() => candidate.resume?.url && setCvFor(candidate)}
                                         >
                                             <FileText className="h-3.5 w-3.5" />Voir CV
                                         </Button>
@@ -472,9 +480,9 @@ function CandidaturesContent() {
                                 <Button
                                     variant="outline"
                                     className="w-full justify-center gap-2"
-                                    onClick={() => window.open(detailFor.resume!.url!, "_blank", "noopener")}
+                                    onClick={() => setCvFor(detailFor)}
                                 >
-                                    <Download className="h-4 w-4" />
+                                    <FileText className="h-4 w-4" />
                                     {detailFor.resume.name}
                                 </Button>
                             ) : (
@@ -618,6 +626,12 @@ function CandidaturesContent() {
                     )}
                 </DialogContent>
             </Dialog>
+
+            <FileViewerDialog
+                file={cvFile}
+                subtitle={cvFor ? `CV de ${cvFor.name}${cvFor.jobOfferTitle ? ` — ${cvFor.jobOfferTitle}` : ""}` : null}
+                onClose={() => setCvFor(null)}
+            />
         </div>
     )
 }

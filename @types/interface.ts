@@ -131,7 +131,7 @@ export interface ICandidate {
     location?: string | null
     coverLetter?: string | null
     /** CV joint à cette candidature (null si le candidat n'en a pas choisi). */
-    resume?: { id: string; name: string; url: string | null } | null
+    resume?: { id: string; name: string; url: string | null; mimeType?: string | null } | null
     /** Réponses aux questions de présélection de l'offre. */
     answers?: { id: string; question: string; type: string; value: string[] }[]
     /** Titre professionnel du candidat (User.title côté backend). */
