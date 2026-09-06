@@ -178,7 +178,7 @@ export default function Content({ company }: ProfilContentProps) {
             {/* ── Section identité ── */}
             <div className="overflow-hidden rounded-xl border border-border bg-white">
                 {/* Bandeau de couverture éditable */}
-                <div className="relative h-40 w-full bg-brand-gradient">
+                <div className="relative h-28 w-full bg-brand-gradient sm:h-40">
                     {(cover || companyData.coverImage) && (
                         <img
                             src={cover ? URL.createObjectURL(cover) : (companyData.coverImage as string)}
@@ -187,9 +187,12 @@ export default function Content({ company }: ProfilContentProps) {
                             onError={(e) => { e.currentTarget.style.display = "none" }}
                         />
                     )}
-                    <label className="absolute bottom-3 right-3 flex cursor-pointer items-center gap-1.5 rounded-full bg-black/50 px-3 py-1.5 text-xs font-medium text-white backdrop-blur hover:bg-black/60">
-                        <Camera className="h-3.5 w-3.5" />
-                        Modifier la couverture
+                    <label
+                        title="Modifier la couverture"
+                        className="absolute bottom-3 right-3 flex cursor-pointer items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-1.5 text-xs font-medium text-white backdrop-blur hover:bg-black/60 sm:px-3"
+                    >
+                        <Camera className="h-3.5 w-3.5 shrink-0" />
+                        <span className="hidden sm:inline">Modifier la couverture</span>
                         <input
                             type="file"
                             accept="image/png,image/jpeg,image/jpg,image/webp"
@@ -202,9 +205,12 @@ export default function Content({ company }: ProfilContentProps) {
                     </label>
                 </div>
 
-                <div className="flex flex-col items-start gap-5 p-6 md:flex-row">
-                    {/* Avatar + camera */}
-                    <div className="relative -mt-14 shrink-0">
+                <div className="flex flex-col gap-5 p-4 sm:p-6 md:flex-row md:items-start">
+                    {/* Avatar + camera. `self-start` est indispensable : sans lui la
+                        colonne mobile étire ce conteneur sur toute la largeur, et le
+                        badge appareil photo — positionné par rapport à lui — part se
+                        coller au bord droit de la carte. */}
+                    <div className="relative -mt-12 shrink-0 self-start sm:-mt-14">
                         <div className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-blue-500">
                             <span className="text-2xl font-bold text-white">
                                 {companyData.name?.[0]?.toUpperCase() ?? "C"}
@@ -233,7 +239,7 @@ export default function Content({ company }: ProfilContentProps) {
                     </div>
 
                     {/* Fields grid */}
-                    <div className="grid flex-1 grid-cols-1 gap-x-8 gap-y-4 md:grid-cols-2">
+                    <div className="grid w-full min-w-0 flex-1 grid-cols-1 gap-x-8 gap-y-4 md:grid-cols-2 [&>div]:min-w-0">
                         <div>
                             <p className="mb-1 text-xs text-muted-foreground">Nom de l&apos;entreprise *</p>
                             <Input
@@ -254,9 +260,9 @@ export default function Content({ company }: ProfilContentProps) {
                         </div>
                         <div>
                             <p className="mb-1 text-xs text-muted-foreground">Adresse du siège</p>
-                            <div className="flex items-center gap-1.5 border-b border-border pb-1">
+                            <div className="flex min-w-0 items-center gap-1.5 border-b border-border pb-1">
                                 <MapPin className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                                <div className="flex-1">
+                                <div className="min-w-0 flex-1">
                                     <AutocompleteInput
                                         value={companyData.location ?? ""}
                                         onChange={(v) => setCompanyData({ ...companyData, location: v })}
@@ -270,7 +276,7 @@ export default function Content({ company }: ProfilContentProps) {
                         </div>
                         <div>
                             <p className="mb-1 text-xs text-muted-foreground">Site web</p>
-                            <div className="flex items-center gap-1.5 border-b border-border pb-1">
+                            <div className="flex min-w-0 items-center gap-1.5 border-b border-border pb-1">
                                 <Globe className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                                 <Input
                                     value={companyData.website}
@@ -285,13 +291,13 @@ export default function Content({ company }: ProfilContentProps) {
             </div>
 
             {/* ── Informations générales ── */}
-            <div className="rounded-xl border border-border bg-white p-6 space-y-5">
+            <div className="space-y-5 rounded-xl border border-border bg-white p-4 sm:p-6">
                 <h2 className="text-base font-semibold text-foreground">Informations générales</h2>
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div>
                         <p className="mb-1 text-xs text-muted-foreground">Taille de l&apos;entreprise</p>
-                        <div className="flex items-center gap-2 text-sm text-foreground">
+                        <div className="flex min-w-0 items-center gap-2 text-sm text-foreground">
                             <Users className="h-4 w-4 shrink-0 text-muted-foreground" />
                             {/* Tranches fixes plutôt que saisie libre : la même liste
                                 qu'à l'inscription, sinon deux fiches identiques
@@ -300,7 +306,7 @@ export default function Content({ company }: ProfilContentProps) {
                                 value={companyData.companySize || undefined}
                                 onValueChange={(value) => setCompanyData({ ...companyData, companySize: value })}
                             >
-                                <SelectTrigger className="h-8 w-full rounded-none border-0 border-b border-border px-0 text-sm shadow-none focus-visible:ring-0">
+                                <SelectTrigger className="h-8 w-full min-w-0 rounded-none border-0 border-b border-border px-0 text-sm shadow-none focus-visible:ring-0">
                                     <SelectValue placeholder="Sélectionner une tranche d'effectif" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -315,8 +321,8 @@ export default function Content({ company }: ProfilContentProps) {
                     </div>
                     <div>
                         <p className="mb-1 text-xs text-muted-foreground">Année de création</p>
-                        <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <div className="flex min-w-0 items-center gap-2">
+                            <Calendar className="h-4 w-4 shrink-0 text-muted-foreground" />
                             <Input
                                 value={companyData.creationDate ?? ""}
                                 onChange={(e) => setCompanyData({ ...companyData, creationDate: e.target.value })}
@@ -351,7 +357,7 @@ export default function Content({ company }: ProfilContentProps) {
             </div>
 
             {/* ── Galerie photos ── */}
-            <div className="rounded-xl border border-border bg-white p-6 space-y-4">
+            <div className="space-y-4 rounded-xl border border-border bg-white p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                     <h2 className="text-base font-semibold text-foreground">Galerie photos</h2>
                     <span className="text-xs text-muted-foreground">{existingGallery.length + galleryNew.length}/12</span>
@@ -407,7 +413,7 @@ export default function Content({ company }: ProfilContentProps) {
             </div>
 
             {/* ── Avantages et bénéfices ── */}
-            <div className="rounded-xl border border-border bg-white p-6 space-y-4">
+            <div className="space-y-4 rounded-xl border border-border bg-white p-4 sm:p-6">
                 <h2 className="text-base font-semibold text-foreground">Avantages et bénéfices</h2>
 
                 <div className="flex items-center gap-2">
@@ -446,10 +452,10 @@ export default function Content({ company }: ProfilContentProps) {
             </div>
 
             {/* ── Informations de contact ── */}
-            <div className="rounded-xl border border-border bg-white p-6 space-y-5">
+            <div className="space-y-5 rounded-xl border border-border bg-white p-4 sm:p-6">
                 <h2 className="text-base font-semibold text-foreground">Informations de contact</h2>
 
-                <div className="grid grid-cols-1 gap-x-8 gap-y-4 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-x-8 gap-y-4 md:grid-cols-2 [&>div]:min-w-0">
                     <div>
                         <p className="mb-1 text-xs text-muted-foreground">Responsable RH</p>
                         <Input
@@ -486,13 +492,16 @@ export default function Content({ company }: ProfilContentProps) {
             </div>
 
             {/* ── Statistiques ── */}
-            <div className="rounded-xl border border-border bg-white p-6 space-y-4">
+            <div className="space-y-4 rounded-xl border border-border bg-white p-4 sm:p-6">
                 <h2 className="text-base font-semibold text-foreground">Statistiques de l&apos;entreprise</h2>
-                <div className="grid grid-cols-2 divide-x divide-y divide-border md:grid-cols-4 md:divide-y-0">
+                <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg bg-border md:grid-cols-4">
                     {stats.map((s) => (
-                        <div key={s.label} className="flex flex-col items-center py-3">
-                            <span className={`text-3xl font-bold ${s.color}`}>{s.value}</span>
-                            <span className="mt-1 text-xs text-muted-foreground">{s.label}</span>
+                        <div key={s.label} className="flex min-w-0 flex-col items-center bg-white px-2 py-3">
+                            {/* La taille d'effectif est un texte (« 51-200 »), pas un
+                                nombre : elle déborderait d'une colonne de mobile en
+                                text-3xl. */}
+                            <span className={`max-w-full truncate text-2xl font-bold sm:text-3xl ${s.color}`}>{s.value}</span>
+                            <span className="mt-1 text-center text-xs text-muted-foreground">{s.label}</span>
                         </div>
                     ))}
                 </div>
@@ -503,7 +512,7 @@ export default function Content({ company }: ProfilContentProps) {
                 <Button
                     onClick={handleSubmit}
                     disabled={loading}
-                    className="gap-2 rounded-full bg-brand-gradient px-8 text-sm font-semibold text-white hover:bg-brand-gradient/90"
+                    className="w-full gap-2 rounded-full bg-brand-gradient px-8 text-sm font-semibold text-white hover:bg-brand-gradient/90 sm:w-auto"
                 >
                     <Save className="h-4 w-4" />
                     Enregistrer les modifications
