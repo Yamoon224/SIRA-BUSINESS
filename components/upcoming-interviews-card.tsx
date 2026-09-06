@@ -91,7 +91,7 @@ export function UpcomingInterviewsCard() {
             setOpen(false)
             setTitle("")
             setScheduledAt(defautPlanification())
-            toast.success("Entretien programmé. Retrouvez le lien dans « Appels vidéo ».")
+            toast.success("Entretien programmé. Retrouvez le lien dans « Goriya Meet ».")
         } catch (err) {
             console.error("[dashboard] planification entretien error:", err)
             toast.error(extractApiErrorMessage(err, "La programmation de l'entretien a échoué."))
@@ -163,7 +163,7 @@ export function UpcomingInterviewsCard() {
                         <DialogTitle>Programmer un entretien</DialogTitle>
                         <DialogDescription>
                             Une salle GORIYA Call est créée à l&apos;enregistrement. Vous retrouverez le lien
-                            à partager dans « Appels vidéo ».
+                            à partager dans « Goriya Meet ».
                         </DialogDescription>
                     </DialogHeader>
 

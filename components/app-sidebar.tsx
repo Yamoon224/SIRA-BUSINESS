@@ -38,7 +38,7 @@ const mainNavItems = [
     { label: "Mes annonces", href: "/annonces", icon: Briefcase },
     { label: "Candidatures", href: "/candidatures", icon: Users },
     { label: "Messages", href: "/messages", icon: MessageSquare },
-    { label: "Appels vidéo", href: "/appels", icon: Video },
+    { label: "Goriya Meet", href: "/appels", icon: Video },
     // { label: "Service RH", href: "/service-rh", icon: Building2 },
     // { label: "Profil Entreprise", href: "/profil", icon: Building2 },
 ]

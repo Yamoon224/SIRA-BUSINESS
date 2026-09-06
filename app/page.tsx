@@ -684,7 +684,7 @@ export default function HomePage() {
 
                                             {isFree && (
                                                 <p className="mt-4 text-xs leading-relaxed text-[#8891ab]">
-                                                    Services RH, appels vidéo et intégrations API restent réservés
+                                                    Services RH, Goriya Meet et intégrations API restent réservés
                                                     aux forfaits payants.
                                                 </p>
                                             )}

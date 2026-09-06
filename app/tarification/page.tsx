@@ -28,7 +28,7 @@ const faqs = [
     {
         question: "Que comprend l'offre gratuite ?",
         answer:
-            "L'offre gratuite s'active sans paiement et donne accès au tableau de bord, à la publication d'offres, à la gestion de vos annonces, au suivi des candidatures, à la messagerie et au profil entreprise. Les Services RH, les appels vidéo et les intégrations API restent réservés aux forfaits Business et Business+.",
+            "L'offre gratuite s'active sans paiement et donne accès au tableau de bord, à la publication d'offres, à la gestion de vos annonces, au suivi des candidatures, à la messagerie et au profil entreprise. Les Services RH, les Goriya Meet et les intégrations API restent réservés aux forfaits Business et Business+.",
     },
     {
         question: "Puis-je changer de forfait à tout moment ?",
@@ -211,7 +211,7 @@ export default function TarificationPage() {
 
                                             {isFree && (
                                                 <p className="mt-4 text-xs leading-relaxed text-[#8891ab]">
-                                                    Services RH, appels vidéo et intégrations API restent réservés
+                                                    Services RH, Goriya Meet et intégrations API restent réservés
                                                     aux forfaits payants.
                                                 </p>
                                             )}

@@ -17,12 +17,17 @@ import {
 import { notificationService, type INotification } from "@/lib/notification.service"
 
 /**
- * Destination d'une notification. Le backend envoie l'enum NotificationType
- * (MESSAGE / APPLICATION_STATUS / SYSTEM) mais l'a longtemps omis du contrat
- * TypeScript : on retombe donc sur le libellé quand `type` manque, plutôt que
- * de renvoyer tout le monde sur le tableau de bord.
+ * Destination d'une notification. Le backend porte désormais un `link` — un
+ * chemin relatif qui désigne l'élément exact, par exemple
+ * `/messages?conversation=<uuid>`. Les notifications antérieures à cette
+ * colonne n'en ont pas : on retombe alors sur le type puis sur le libellé,
+ * qui mènent à la bonne page à défaut du bon élément.
  */
 function hrefFor(notification: INotification): string {
+    const link = notification.link?.trim()
+    // Un lien absolu venu d'ailleurs n'a rien à faire dans un router.push.
+    if (link && link.startsWith("/")) return link
+
     const indice = `${notification.type ?? ""} ${notification.title ?? ""}`.toLowerCase()
 
     if (indice.includes("message") || indice.includes("conversation") || indice.includes("chat")) {

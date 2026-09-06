@@ -99,7 +99,7 @@ function AppelsContent() {
     return (
         <div className="space-y-6">
             <PageHeader
-                title="Appels vidéo"
+                title="Goriya Meet"
                 description="Planifiez vos entretiens et réunions en visioconférence (GORIYA Call) et retrouvez-en l'historique."
                 actions={
                     <Button className="gap-1.5 bg-blue-500 hover:bg-blue-600" onClick={() => setCreateOpen(true)}>
@@ -190,7 +190,7 @@ function AppelsContent() {
 
 export default function Page() {
     return (
-        <SubscriptionGate requiredTier="PAID" featureLabel="les appels vidéo">
+        <SubscriptionGate requiredTier="PAID" featureLabel="les Goriya Meet">
             <AppelsContent />
         </SubscriptionGate>
     )

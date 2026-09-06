@@ -10,6 +10,11 @@ export interface INotification {
     type?: string
     title: string
     body?: string | null
+    /**
+     * Chemin relatif de la page concernée, ex. `/messages?conversation=<uuid>`.
+     * Optionnel : les notifications antérieures à la colonne n'en ont pas.
+     */
+    link?: string | null
     isRead: boolean
     createdAt: string
 }
