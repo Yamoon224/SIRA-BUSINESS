@@ -125,7 +125,8 @@ export function AppSidebar() {
                     {rhOpen && (
                         <div className="ml-4 space-y-0.5 border-l border-border pl-3">
                             {serviceRhItems.map((item) => {
-                                const isActive = pathname === item.href
+                                // Les sous-pages (fiche d'un employé…) gardent leur rubrique en surbrillance.
+                                const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
                                 return (
                                     <Link
                                         key={item.href}

@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -9,7 +10,7 @@ import { PageHeader } from "@/components/page-header"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Progress } from "@/components/ui/progress"
 import { Textarea } from "@/components/ui/textarea"
-import { Search, User, Calendar, Star, FileText, MessageSquare, Check, X, Sparkles, Download, Loader2, Send, ClipboardList, MapPin, Phone } from "lucide-react"
+import { Search, User, Calendar, Star, FileText, MessageSquare, Check, X, Sparkles, Download, Loader2, Send, ClipboardList, MapPin, Phone, UserPlus } from "lucide-react"
 import { apiRequest } from "@/lib/api-client-http"
 import { createConversation, sendMessage } from "@/actions/messages"
 import { extractApiErrorMessage } from "@/lib/api-error"
@@ -18,6 +19,7 @@ import { SubscriptionGate } from "@/components/subscription-gate"
 import { candidateAssessmentService, type ICandidateAssessment } from "@/lib/api/candidate-assessment.service"
 import { formatAnswerValue } from "@/lib/data/questions"
 import { FileViewerDialog, type ViewableFile } from "@/components/file-viewer-dialog"
+import { employeeService } from "@/lib/api/employee.service"
 
 type UIStatus = "pending" | "interview" | "accepted" | "rejected" | "analyzed"
 
@@ -85,6 +87,17 @@ function CandidaturesContent() {
     const [messageSent, setMessageSent] = useState(false)
     const [messageError, setMessageError] = useState<string | null>(null)
 
+    // Candidatures acceptées pas encore embauchées : seules celles-ci proposent
+    // « Embaucher ». `null` (chargement impossible, ex. droits) : on affiche le
+    // bouton sur toute candidature acceptée, la modale d'ajout tranchera.
+    const [hireableIds, setHireableIds] = useState<Set<string> | null>(null)
+    useEffect(() => {
+        employeeService
+            .hireableCandidatures()
+            .then((list) => setHireableIds(new Set(list.map((c) => c.id))))
+            .catch(() => setHireableIds(null))
+    }, [])
+
     useEffect(() => {
         const load = async () => {
             try {
@@ -107,6 +120,7 @@ function CandidaturesContent() {
         try {
             await apiRequest({ endpoint: `/candidatures/${id}`, method: "PATCH", data: { status: "APPROUVEE" } })
             setCandidates((prev) => prev.map((c) => c.id === id ? { ...c, status: "ACCEPTEE" as any } : c))
+            setHireableIds((prev) => (prev ? new Set(prev).add(id) : prev))
         } catch (err) {
             console.error("[candidatures] accept error:", err)
         }
@@ -397,6 +411,16 @@ function CandidaturesContent() {
                                             <Sparkles className="h-3.5 w-3.5" />Évaluation IA
                                         </Button>
                                     </div>
+                                    {/* Candidature acceptée : l'embauche ouvre la fiche employé
+                                        pré-remplie avec les données Goriya du candidat. */}
+                                    {us === "accepted" && (hireableIds === null || hireableIds.has(candidate.id)) && (
+                                        <Button asChild size="sm" className="mt-2 h-8 w-full gap-1.5 rounded-md bg-brand-gradient text-xs text-white">
+                                            <Link href={`/services-rh/employes?candidature=${candidate.id}`}>
+                                                <UserPlus className="h-3.5 w-3.5" />
+                                                Embaucher
+                                            </Link>
+                                        </Button>
+                                    )}
                                     {us === "pending" && (
                                         <div className="mt-2 grid grid-cols-2 overflow-hidden rounded-md border border-border bg-white shadow-sm">
                                             <button className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-green-600 hover:bg-green-50" onClick={() => handleAccept(candidate.id)}>
