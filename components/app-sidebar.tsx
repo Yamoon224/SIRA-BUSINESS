@@ -30,8 +30,9 @@ import { cn } from "@/lib/utils"
 import { GoriyaLogo } from "./goriya-logo"
 import { useSidebar } from "./sidebar-context"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import UserMenu from "./user-menu"
+import { employeeService } from "@/lib/api/employee.service"
 
 const mainNavItems = [
     { label: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard },
@@ -44,13 +45,16 @@ const mainNavItems = [
     // { label: "Profil Entreprise", href: "/profil", icon: Building2 },
 ]
 
-const serviceRhItems = [
+/** Clé du badge "en attente" (cf. useEffect ci-dessous) associée à chaque rubrique. */
+type PendingKey = "conges" | "demandes"
+
+const serviceRhItems: { label: string; href: string; icon: typeof UserCheck; pendingKey?: PendingKey }[] = [
     { label: "Employés", href: "/services-rh/employes", icon: UserCheck },
     { label: "Recrutements", href: "/services-rh/recrutements", icon: UserPlus },
     { label: "Évaluations Employés", href: "/services-rh/evaluations", icon: FileText },
     { label: "Contrats", href: "/services-rh/contrats", icon: FileSignature },
-    { label: "Congés", href: "/services-rh/conges", icon: CalendarDays },
-    { label: "Demandes RH", href: "/services-rh/demandes", icon: ClipboardList },
+    { label: "Congés", href: "/services-rh/conges", icon: CalendarDays, pendingKey: "conges" },
+    { label: "Demandes RH", href: "/services-rh/demandes", icon: ClipboardList, pendingKey: "demandes" },
     { label: "Gestion de Paie", href: "/services-rh/paie", icon: DollarSign },
     { label: "Documents RH", href: "/services-rh/documents", icon: FolderOpen },
 ]
@@ -75,6 +79,21 @@ export function AppSidebar() {
     const { open, setOpen } = useSidebar()
     const isRhActive = pathname.startsWith("/services-rh")
     const [rhOpen, setRhOpen] = useState(isRhActive)
+
+    // Demandes en attente : Congés et Demandes RH méritent une alerte dans la
+    // sidebar, où qu'on soit dans l'appli — pas seulement une fois sur leur page.
+    const [pendingCounts, setPendingCounts] = useState<{ conges: number; demandes: number }>({ conges: 0, demandes: 0 })
+
+    useEffect(() => {
+        let cancelled = false
+        Promise.all([
+            employeeService.companyLeaves({ status: ["PENDING"] }).catch(() => []),
+            employeeService.companyRequests({ status: ["PENDING"] }).catch(() => []),
+        ]).then(([leaves, requests]) => {
+            if (!cancelled) setPendingCounts({ conges: leaves.length, demandes: requests.length })
+        })
+        return () => { cancelled = true }
+    }, [])
 
     return (
         <>
@@ -129,6 +148,7 @@ export function AppSidebar() {
                             {serviceRhItems.map((item) => {
                                 // Les sous-pages (fiche d'un employé…) gardent leur rubrique en surbrillance.
                                 const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
+                                const pendingCount = item.pendingKey ? pendingCounts[item.pendingKey] : 0
                                 return (
                                     <Link
                                         key={item.href}
@@ -139,6 +159,11 @@ export function AppSidebar() {
                                                 ? `${ACTIVE_LINK} font-semibold`
                                                 : INACTIVE_LINK
                                         )}>
+                                        {pendingCount > 0 && (
+                                            <span className="flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-semibold text-white">
+                                                {pendingCount > 9 ? "9+" : pendingCount}
+                                            </span>
+                                        )}
                                         {item.label}
                                     </Link>
                                 )
