@@ -13,6 +13,7 @@ import type {
     LeaveType,
 } from "@/lib/api/employee.service"
 import type { ContractKind, ContractStatus, IEmployeeContract } from "@/lib/api/contract.service"
+import type { PayrollRunStatus } from "@/lib/api/payroll.service"
 
 export { DEPARTMENTS, JOB_TYPES as CONTRACT_TYPES, jobTypeLabel as contractTypeLabel } from "@/lib/data/offres"
 
@@ -144,6 +145,29 @@ export function contractPeriod(contract: Pick<IEmployeeContract, "startDate" | "
     return contract.endDate
         ? `Du ${formatDate(contract.startDate)} au ${formatDate(contract.endDate)}`
         : `Depuis le ${formatDate(contract.startDate)} · durée indéterminée`
+}
+
+// ── Paie ───────────────────────────────────────────────────────────────────
+
+export const PAYROLL_STATUS_META: Record<PayrollRunStatus, StatusMeta & { hint: string }> = {
+    DRAFT: { label: "Brouillon", className: "bg-amber-100 text-amber-700", hint: "Recalculable et ajustable" },
+    VALIDATED: { label: "Validée", className: "bg-blue-100 text-blue-700", hint: "Bulletins figés, en attente de paiement" },
+    PAID: { label: "Payée", className: "bg-green-100 text-green-700", hint: "Virements effectués" },
+}
+
+/** « septembre 2026 » → « Septembre 2026 » : les mois s'écrivent en minuscules en français. */
+export function capitalize(value: string): string {
+    return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
+export function periodLabel(year: number, month: number): string {
+    return capitalize(new Date(year, month - 1, 1).toLocaleDateString("fr-FR", { month: "long", year: "numeric" }))
+}
+
+/** Taux en pourcentage, sans zéros inutiles : 6,3 %, 5,75 %, 16 %. */
+export function formatRate(rate: number | null | undefined): string {
+    if (rate === null || rate === undefined) return "—"
+    return `${new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 }).format(rate)} %`
 }
 
 // ── Formatage ──────────────────────────────────────────────────────────────

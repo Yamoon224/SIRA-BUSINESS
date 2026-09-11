@@ -34,6 +34,7 @@ import { EmployeeFormDialog } from "@/components/rh/employee-form-dialog"
 import { EmployeeHistory } from "@/components/rh/employee-history"
 import { EmployeeLeavesTab } from "@/components/rh/employee-leaves-tab"
 import { EmployeeOverview } from "@/components/rh/employee-overview"
+import { EmployeePayslipsTab } from "@/components/rh/employee-payslips-tab"
 import { EmployeeRequestsTab } from "@/components/rh/employee-requests-tab"
 import { KpiCard } from "@/components/rh/kpi-card"
 import { StatusPill } from "@/components/rh/status-pill"
@@ -47,6 +48,7 @@ import {
     type IHrRequest,
 } from "@/lib/api/employee.service"
 import { contractService, type IEmployeeContract } from "@/lib/api/contract.service"
+import { payrollService, type IPayslip } from "@/lib/api/payroll.service"
 import { cn } from "@/lib/utils"
 
 /**
@@ -64,6 +66,7 @@ export function EmployeeDetail({ id }: { id: string }) {
     const [leaves, setLeaves] = useState<IEmployeeLeave[]>([])
     const [requests, setRequests] = useState<IHrRequest[]>([])
     const [contracts, setContracts] = useState<IEmployeeContract[]>([])
+    const [payslips, setPayslips] = useState<IPayslip[]>([])
     const [operationsLoading, setOperationsLoading] = useState(true)
 
     const [tab, setTab] = useState("apercu")
@@ -87,14 +90,16 @@ export function EmployeeDetail({ id }: { id: string }) {
 
     const loadOperations = useCallback(async () => {
         try {
-            const [leaveList, requestList, contractList] = await Promise.all([
+            const [leaveList, requestList, contractList, payslipList] = await Promise.all([
                 employeeService.leaves(id),
                 employeeService.requests(id),
                 contractService.employeeContracts(id),
+                payrollService.employeePayslips(id),
             ])
             setLeaves(leaveList)
             setRequests(requestList)
             setContracts(contractList)
+            setPayslips(payslipList)
         } catch (err) {
             toast.error(extractApiErrorMessage(err, "Impossible de charger les contrats, congés et demandes."))
         } finally {
@@ -285,6 +290,7 @@ export function EmployeeDetail({ id }: { id: string }) {
                             Demandes
                             {openRequests > 0 && <Counter value={openRequests} />}
                         </TabsTrigger>
+                        <TabsTrigger value="paie">Paie</TabsTrigger>
                         <TabsTrigger value="historique">Historique</TabsTrigger>
                     </TabsList>
                 </div>
@@ -300,6 +306,9 @@ export function EmployeeDetail({ id }: { id: string }) {
                 </TabsContent>
                 <TabsContent value="demandes" className="mt-4">
                     <EmployeeRequestsTab employee={employee} requests={requests} loading={operationsLoading} onChanged={refresh} />
+                </TabsContent>
+                <TabsContent value="paie" className="mt-4">
+                    <EmployeePayslipsTab employee={employee} payslips={payslips} loading={operationsLoading} />
                 </TabsContent>
                 <TabsContent value="historique" className="mt-4">
                     <EmployeeHistory employee={employee} leaves={leaves} requests={requests} contracts={contracts} />

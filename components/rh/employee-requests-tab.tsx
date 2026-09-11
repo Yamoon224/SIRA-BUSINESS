@@ -124,6 +124,11 @@ export function EmployeeRequestsTab({ employee, requests, loading, onChanged }: 
                                             {request.amount !== null ? ` · ${formatFcfa(request.amount)}` : ""}
                                         </p>
                                         {request.description && <p className="mt-2 whitespace-pre-line text-sm text-foreground">{request.description}</p>}
+                                        {request.type === "SALARY_ADVANCE" && request.status === "APPROVED" && (
+                                            <p className={`mt-2 text-xs font-medium ${request.payslipId ? "text-green-700" : "text-amber-700"}`}>
+                                                {request.payslipId ? "Retenue sur un bulletin de paie validé." : "Sera retenue sur la prochaine paie validée."}
+                                            </p>
+                                        )}
                                         {request.decidedAt && (
                                             <p className="mt-2 text-xs text-muted-foreground">
                                                 {WORKFLOW_STATUS_META[request.status].label} le {formatDate(request.decidedAt)}

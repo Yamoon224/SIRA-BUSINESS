@@ -173,6 +173,8 @@ export interface IHrRequest {
     decidedAt: string | null
     decidedByName: string | null
     decisionComment: string | null
+    /** Avance sur salaire déjà retenue sur un bulletin de paie validé. */
+    payslipId?: string | null
     createdAt: string
 }
 
