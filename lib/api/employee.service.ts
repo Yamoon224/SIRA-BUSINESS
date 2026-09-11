@@ -175,6 +175,8 @@ export interface IHrRequest {
     decisionComment: string | null
     /** Avance sur salaire déjà retenue sur un bulletin de paie validé. */
     payslipId?: string | null
+    /** Attestation délivrée en réponse à la demande (Documents RH). */
+    document?: { id: string; title: string; fileName: string } | null
     createdAt: string
 }
 

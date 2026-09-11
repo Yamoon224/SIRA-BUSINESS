@@ -30,6 +30,7 @@ import {
 import { ConfirmDialog } from "@/components/rh/confirm-dialog"
 import { EmployeeAvatar } from "@/components/rh/employee-avatar"
 import { EmployeeContractsTab } from "@/components/rh/employee-contracts-tab"
+import { EmployeeDocumentsTab } from "@/components/rh/employee-documents-tab"
 import { EmployeeFormDialog } from "@/components/rh/employee-form-dialog"
 import { EmployeeHistory } from "@/components/rh/employee-history"
 import { EmployeeLeavesTab } from "@/components/rh/employee-leaves-tab"
@@ -291,6 +292,7 @@ export function EmployeeDetail({ id }: { id: string }) {
                             {openRequests > 0 && <Counter value={openRequests} />}
                         </TabsTrigger>
                         <TabsTrigger value="paie">Paie</TabsTrigger>
+                        <TabsTrigger value="documents">Documents</TabsTrigger>
                         <TabsTrigger value="historique">Historique</TabsTrigger>
                     </TabsList>
                 </div>
@@ -309,6 +311,9 @@ export function EmployeeDetail({ id }: { id: string }) {
                 </TabsContent>
                 <TabsContent value="paie" className="mt-4">
                     <EmployeePayslipsTab employee={employee} payslips={payslips} loading={operationsLoading} />
+                </TabsContent>
+                <TabsContent value="documents" className="mt-4">
+                    <EmployeeDocumentsTab employee={employee} onChanged={refresh} />
                 </TabsContent>
                 <TabsContent value="historique" className="mt-4">
                     <EmployeeHistory employee={employee} leaves={leaves} requests={requests} contracts={contracts} />

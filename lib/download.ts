@@ -1,13 +1,12 @@
 /**
- * Télécharge un fichier servi par l'API (via le proxy authentifié) sous le nom
- * voulu.
+ * Fichiers servis par l'API (via le proxy authentifié).
  *
  * Le proxy force `Content-Disposition: attachment` sans nom de fichier : un
  * simple lien ferait nommer le fichier d'après l'URL (« document », « draft »).
  * Passer par un blob permet aussi de lire le message d'erreur de l'API au lieu
  * de télécharger une page d'erreur.
  */
-export async function downloadFromApi(endpoint: string, filename: string): Promise<void> {
+async function fetchBlob(endpoint: string): Promise<Blob> {
     const response = await fetch(`/api/proxy${endpoint}`)
 
     if (!response.ok) {
@@ -15,8 +14,12 @@ export async function downloadFromApi(endpoint: string, filename: string): Promi
         throw { message: payload?.message ?? `Téléchargement impossible (erreur ${response.status}).` }
     }
 
-    const blob = await response.blob()
-    const url = URL.createObjectURL(blob)
+    return response.blob()
+}
+
+/** Télécharge un fichier de l'API sous le nom voulu. */
+export async function downloadFromApi(endpoint: string, filename: string): Promise<void> {
+    const url = URL.createObjectURL(await fetchBlob(endpoint))
     const link = document.createElement("a")
     link.href = url
     link.download = filename
@@ -24,4 +27,12 @@ export async function downloadFromApi(endpoint: string, filename: string): Promi
     link.click()
     link.remove()
     window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+
+/**
+ * URL locale d'un fichier de l'API, pour l'afficher (PDF, image) sans le
+ * télécharger. À libérer avec `URL.revokeObjectURL` une fois l'aperçu fermé.
+ */
+export async function fetchBlobUrl(endpoint: string): Promise<string> {
+    return URL.createObjectURL(await fetchBlob(endpoint))
 }

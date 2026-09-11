@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { toast } from "sonner"
-import { Check, ClipboardList, FilePlus2, Loader2, MoreHorizontal, PlayCircle, Trash2, X } from "lucide-react"
+import { Check, ClipboardList, Download, FilePlus2, FileSignature, Loader2, MoreHorizontal, PlayCircle, Trash2, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ConfirmDialog } from "@/components/rh/confirm-dialog"
 import { DecisionDialog } from "@/components/rh/decision-dialog"
+import { DocumentGenerateDialog } from "@/components/rh/document-generate-dialog"
+import { hrDocumentService } from "@/lib/api/hr-document.service"
 import { HrRequestDialog } from "@/components/rh/hr-request-dialog"
 import { StatusPill } from "@/components/rh/status-pill"
 import { HR_REQUEST_TYPE_META, WORKFLOW_STATUS_META, formatDate, formatFcfa } from "@/lib/data/rh"
@@ -39,6 +41,21 @@ export function EmployeeRequestsTab({ employee, requests, loading, onChanged }: 
     const [startingId, setStartingId] = useState<string | null>(null)
     const [toDelete, setToDelete] = useState<IHrRequest | null>(null)
     const [deleting, setDeleting] = useState(false)
+    // Attestation demandée : rédigée depuis la demande, qu'elle approuve.
+    const [certificateFor, setCertificateFor] = useState<IHrRequest | null>(null)
+    const [downloadingId, setDownloadingId] = useState<string | null>(null)
+
+    const downloadDocument = async (request: IHrRequest) => {
+        if (!request.document) return
+        setDownloadingId(request.id)
+        try {
+            await hrDocumentService.download({ downloadPath: `/hr-documents/${request.document.id}/download`, fileName: request.document.fileName })
+        } catch (err) {
+            toast.error(extractApiErrorMessage(err, "Le téléchargement de l'attestation a échoué."))
+        } finally {
+            setDownloadingId(null)
+        }
+    }
 
     /** « Prendre en charge » n'est pas une décision : pas de modale, un clic suffit. */
     const start = async (request: IHrRequest) => {
@@ -111,6 +128,7 @@ export function EmployeeRequestsTab({ employee, requests, loading, onChanged }: 
                 <ul className="space-y-2">
                     {requests.map((request) => {
                         const open = request.status === "PENDING" || request.status === "IN_PROGRESS"
+                        const certificate = request.type === "WORK_CERTIFICATE" || request.type === "SALARY_CERTIFICATE"
                         return (
                             <li key={request.id} className="rounded-xl border border-border bg-white p-4">
                                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -139,7 +157,19 @@ export function EmployeeRequestsTab({ employee, requests, loading, onChanged }: 
                                     </div>
 
                                     <div className="flex shrink-0 flex-wrap items-center gap-2">
-                                        {request.status === "PENDING" && (
+                                        {certificate && open && (
+                                            <Button size="sm" onClick={() => setCertificateFor(request)}>
+                                                <FileSignature className="h-4 w-4" />
+                                                Rédiger l&apos;attestation
+                                            </Button>
+                                        )}
+                                        {request.document && (
+                                            <Button size="sm" variant="outline" disabled={downloadingId === request.id} onClick={() => void downloadDocument(request)} className="hover:bg-muted hover:text-foreground">
+                                                {downloadingId === request.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                                                Attestation
+                                            </Button>
+                                        )}
+                                        {request.status === "PENDING" && !certificate && (
                                             <Button size="sm" variant="outline" disabled={startingId === request.id} onClick={() => void start(request)} className="hover:bg-muted hover:text-foreground">
                                                 {startingId === request.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <PlayCircle className="h-4 w-4" />}
                                                 Prendre en charge
@@ -187,6 +217,17 @@ export function EmployeeRequestsTab({ employee, requests, loading, onChanged }: 
             )}
 
             <HrRequestDialog open={createOpen} onOpenChange={setCreateOpen} employee={employee} onCreated={() => void onChanged()} />
+
+            <DocumentGenerateDialog
+                open={!!certificateFor}
+                onOpenChange={(value) => !value && setCertificateFor(null)}
+                employee={employee}
+                preset={{
+                    template: certificateFor?.type === "SALARY_CERTIFICATE" ? "SALARY_CERTIFICATE" : "WORK_CERTIFICATE",
+                    hrRequestId: certificateFor?.id ?? null,
+                }}
+                onGenerated={() => void onChanged()}
+            />
 
             <DecisionDialog
                 open={!!decision}
