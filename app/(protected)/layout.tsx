@@ -67,7 +67,15 @@ function ProtectedLayoutContent({ children }: { children: React.ReactNode }) {
                 />
             )}
 
-            <div className="flex-1 flex flex-col md:ml-64 h-screen">
+            {/* `min-w-0` : sans lui, cet enfant de flex garde la largeur de son
+                contenu le plus large (ex. le tableau de bord Recrutements et
+                son pipeline en colonnes) au lieu de se limiter à l'espace
+                disponible. Le `overflow-x-hidden` du conteneur ne faisait que
+                masquer le débordement en silence : la page se rendait bien à
+                1220px de large en interne, simplement rognée à la largeur de
+                l'écran - plus de la moitié du contenu restait invisible sur
+                mobile plutôt que de défiler. */}
+            <div className="min-w-0 flex-1 flex flex-col md:ml-64 h-screen">
                 <AppHeader />
                 <main className="flex-1 overflow-y-auto p-4 md:p-6">
                     {children}

@@ -46,7 +46,7 @@ export function GoriyaLogo({
             className={`flex w-fit items-center gap-2 ${className}`}
         >
             <Image
-                src={`${variant === "onDark" ? "/images/logo-white.png" : "/images/logo.png"} `}
+                src={variant === "onDark" ? "/images/logo-white.png" : "/images/logo.png"}
                 alt="Goriya"
                 width={width}
                 height={height}

@@ -175,6 +175,8 @@ export interface IEmployeeLeave {
 export interface IHrRequest {
     id: string
     employeeId: string
+    /** Présent sur la liste de l'entreprise uniquement. */
+    employee?: IEmployeeSummary | null
     type: HrRequestType
     subject: string
     description: string | null
@@ -188,6 +190,14 @@ export interface IHrRequest {
     /** Attestation délivrée en réponse à la demande (Documents RH). */
     document?: { id: string; title: string; fileName: string } | null
     createdAt: string
+}
+
+export interface HrRequestFilters {
+    status?: HrWorkflowStatus[]
+    type?: HrRequestType[]
+    employeeId?: string
+    department?: string
+    search?: string
 }
 
 const unwrap = <T,>(res: unknown): T => ((res as { data?: T })?.data ?? res) as T
@@ -239,6 +249,12 @@ export const employeeService = {
     removeLeave: async (id: string) => apiRequest<{ message: string }>({ endpoint: `/employee-leaves/${id}`, method: "DELETE" }),
 
     // ── Demandes RH ──
+    /** Demandes RH de toute l'entreprise (page Demandes RH), employé inclus. */
+    companyRequests: async (filters: HrRequestFilters = {}) => {
+        const params = { ...filters, status: filters.status?.join(","), type: filters.type?.join(",") }
+        return unwrap<IHrRequest[]>(await apiRequest({ endpoint: "/hr-requests", method: "GET", params }))
+    },
+
     requests: async (employeeId: string) =>
         unwrap<IHrRequest[]>(await apiRequest({ endpoint: `/employees/${employeeId}/hr-requests`, method: "GET" })),
 
