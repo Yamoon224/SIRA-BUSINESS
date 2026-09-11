@@ -4,7 +4,8 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { MessageSquare, Mail, Phone, Search, ChevronDown, ChevronRight, Star, ExternalLink, Zap, FileText, Users, CreditCard, BookOpen, Video, FileCode, Check, UserCog, X } from "lucide-react"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { MessageSquare, Mail, Phone, Search, ChevronDown, Star, Zap, FileText, Users, CreditCard, BookOpen, Video, FileCode, Check, UserCog, X } from "lucide-react"
 import { subscriptionService } from "@/lib/api/subscription.service"
 import { SUPPORT_EMAIL, SUPPORT_EMAIL_HREF, SUPPORT_PHONE, SUPPORT_PHONE_HREF } from "@/lib/contact"
 import { AssistanceNav, AssistanceFooterActions, AssistanceFooterLinks } from "@/components/assistance-nav"
@@ -45,10 +46,58 @@ const faqs: { question: string; tag: CategoryId; tagColor: string; answer: strin
 ]
 
 const resources = [
-    { Icon: BookOpen, title: "Guide de demarrage rapide", description: "Apprenez les bases de Goriya en 5 minutes", tag: "guide", duration: "5 min" },
-    { Icon: Video, title: "Maximiser l'efficacite de l'IA", description: "Tutoriel video sur l'optimisation IA", tag: "video", duration: "12 min" },
-    { Icon: BookOpen, title: "Meilleures pratiques de recrutement", description: "Guide complet pour recruter efficacement", tag: "guide", duration: "20 min" },
-    { Icon: FileCode, title: "API et integrations", description: "Documentation technique pour les developpeurs", tag: "docs", duration: "Variable" },
+    {
+        Icon: BookOpen,
+        title: "Guide de demarrage rapide",
+        description: "Apprenez les bases de Goriya en 5 minutes",
+        tag: "guide",
+        duration: "5 min",
+        content: [
+            "1. Completez votre Profil entreprise (logo, secteur, description) : c'est la premiere chose qu'un candidat consulte avant de postuler.",
+            "2. Publiez votre premiere offre depuis Poster une offre - titre, description, competences et questions de preselection eventuelles.",
+            "3. Suivez les candidatures recues depuis Candidatures : filtrez par statut, consultez le score de compatibilite IA et le CV de chaque candidat.",
+            "4. Echangez directement avec un candidat via la Messagerie, sans quitter la fiche de sa candidature.",
+            "5. Une fois un candidat accepte, embauchez-le en un clic depuis Services RH > Employes : sa fiche est pre-remplie avec ses informations Goriya.",
+        ],
+    },
+    {
+        Icon: Video,
+        title: "Maximiser l'efficacite de l'IA",
+        description: "Optimiser le score de compatibilite et l'evaluation des candidats",
+        tag: "guide",
+        duration: "6 min",
+        content: [
+            "Le score de compatibilite affiche sur chaque candidature compare le profil du candidat aux exigences de votre offre : intitule, competences demandees et description. Plus votre offre est precise et detaillee, plus le score est fiable.",
+            "Renseignez des competences specifiques plutot que generiques (\"React et TypeScript\" plutot que \"developpement web\") : l'IA s'appuie dessus pour comparer les CV.",
+            "Depuis une fiche de candidature, lancez une Evaluation IA pour obtenir un score detaille (competences techniques, soft skills, adequation culturelle) et des questions d'entretien suggerees - utile avant de planifier un echange.",
+            "Ajoutez vos notes d'echange avec le candidat avant de regenerer une evaluation : l'IA en tient compte pour affiner son analyse.",
+        ],
+    },
+    {
+        Icon: BookOpen,
+        title: "Meilleures pratiques de recrutement",
+        description: "Guide complet pour recruter efficacement sur Goriya",
+        tag: "guide",
+        duration: "8 min",
+        content: [
+            "Redigez des offres precises : intitule clair, missions concretes, competences requises et avantages. Les offres detaillees attirent des candidats plus qualifies et ameliorent la pertinence du score IA.",
+            "Repondez rapidement : les candidats consultent le statut de leur candidature, un traitement rapide (acceptation, refus ou message) ameliore votre reputation aupres des talents.",
+            "Utilisez les questions de preselection lors de la creation d'une offre pour filtrer en amont sur des criteres essentiels (disponibilite, mobilite, pretentions salariales...).",
+            "Centralisez le suivi post-embauche dans Services RH : contrat, periode d'essai, conges et evaluations d'un meme employe restent lies a sa fiche.",
+        ],
+    },
+    {
+        Icon: FileCode,
+        title: "API et integrations",
+        description: "Documentation technique pour les developpeurs",
+        tag: "docs",
+        duration: "Variable",
+        content: [
+            "Les integrations API (synchronisation de vos offres et candidatures avec votre ATS ou votre site carriere) sont reservees aux forfaits Business et Business+.",
+            "Depuis Integrations API, generez une cle d'acces pour authentifier vos appels et consultez les points d'entree disponibles (offres, candidatures, webhooks de statut).",
+            "Pour un besoin d'integration non couvert par l'offre actuelle (volume eleve, connecteur specifique), contactez notre equipe via le formulaire ci-dessous : nous etudions les demandes sur mesure.",
+        ],
+    },
 ]
 
 export default function AssistancePage() {
@@ -295,24 +344,32 @@ export default function AssistancePage() {
 
                 <div className="rounded-xl border border-border bg-white p-4 sm:p-5">
                     <h3 className="mb-2 text-sm font-semibold text-foreground">Ressources utiles</h3>
-                    <div className="divide-y divide-border">
-                        {resources.map(({ Icon, title, description, tag, duration }) => (
-                            <div key={title} className="flex items-center justify-between py-4 hover:bg-muted/20 transition-colors">
-                                <div className="flex items-center gap-3 sm:gap-4">
-                                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50"><Icon className="h-4 w-4 text-blue-500" /></div>
-                                    <div>
-                                        <p className="text-sm font-medium text-foreground">{title}</p>
-                                        <p className="text-xs text-muted-foreground">{description}</p>
-                                        <div className="mt-1 flex items-center gap-2">
-                                            <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">{tag}</span>
-                                            <span className="text-[10px] text-muted-foreground">{duration}</span>
+                    <Accordion type="single" collapsible>
+                        {resources.map(({ Icon, title, description, tag, duration, content }) => (
+                            <AccordionItem key={title} value={title} className="border-border">
+                                <AccordionTrigger className="py-4 hover:no-underline [&>svg]:shrink-0">
+                                    <div className="flex items-center gap-3 sm:gap-4">
+                                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50"><Icon className="h-4 w-4 text-blue-500" /></div>
+                                        <div className="text-left">
+                                            <p className="text-sm font-medium text-foreground">{title}</p>
+                                            <p className="text-xs text-muted-foreground">{description}</p>
+                                            <div className="mt-1 flex items-center gap-2">
+                                                <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">{tag}</span>
+                                                <span className="text-[10px] text-muted-foreground">{duration}</span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-                            </div>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <div className="space-y-2.5 pl-[52px] text-sm leading-relaxed text-muted-foreground">
+                                        {content.map((paragraph, i) => (
+                                            <p key={i}>{paragraph}</p>
+                                        ))}
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
                         ))}
-                    </div>
+                    </Accordion>
                 </div>
 
                 <div className="rounded-xl border border-border bg-white py-8 text-center">

@@ -5,8 +5,10 @@ import { useSession } from "next-auth/react"
 import { useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/page-header"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
     AlertDialog,
     AlertDialogAction,
@@ -37,6 +39,7 @@ import {
     FileText,
     MailOpen,
     RefreshCw,
+    Video,
 } from "lucide-react"
 import {
     getConversations,
@@ -47,11 +50,12 @@ import {
     markUnread,
     starConversation,
     deleteConversation,
+    scheduleCallSession,
 } from "@/actions/messages"
 import { extractApiErrorMessage } from "@/lib/api-error"
 import { FileViewerDialog, type ViewableFile } from "@/components/file-viewer-dialog"
 
-type Conversation = { id: string; name: string; role: string; time: string; unread: number; lastMessage: string; starred: boolean }
+type Conversation = { id: string; otherUserId: string | null; name: string; role: string; time: string; unread: number; lastMessage: string; starred: boolean }
 type Attachment = { name: string; url: string; mimeType: string | null; size: number | null }
 type Message = { id: string; content: string; time: string; isMe: boolean; attachment: Attachment | null; pending?: boolean }
 
@@ -60,6 +64,7 @@ const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024
 function mapConversation(raw: any): Conversation {
     return {
         id: String(raw.id ?? raw._id ?? ""),
+        otherUserId: raw.otherUserId ? String(raw.otherUserId) : null,
         name: raw.name ?? raw.participantName ?? raw.candidate?.name ?? "-",
         role: raw.role ?? raw.candidate?.title ?? "Candidat",
         time: raw.lastMessageAt ? new Date(raw.lastMessageAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "-",
@@ -111,6 +116,12 @@ function MessagesContent() {
     const [confirmDelete, setConfirmDelete] = useState<Conversation | null>(null)
     const [deleting, setDeleting] = useState(false)
     const [viewedFile, setViewedFile] = useState<ViewableFile | null>(null)
+
+    // Planifier un Goriya Meet depuis la conversation en cours.
+    const [meetOpen, setMeetOpen] = useState(false)
+    const [meetTitle, setMeetTitle] = useState("")
+    const [meetDate, setMeetDate] = useState("")
+    const [scheduling, setScheduling] = useState(false)
 
     useEffect(() => {
         if (status === "loading") return
@@ -229,6 +240,42 @@ function MessagesContent() {
         } catch (err) {
             console.error("[messages] unread error:", err)
             toast.error(extractApiErrorMessage(err, "Le marquage a échoué."))
+        }
+    }
+
+    const openScheduleMeet = () => {
+        if (!selected) return
+        setMeetTitle(`Échange avec ${selected.name}`)
+        setMeetDate("")
+        setMeetOpen(true)
+    }
+
+    /**
+     * Crée la session Goriya Meet (en invitant l'autre participant, qui la
+     * retrouvera dans son propre espace Appels) puis annonce le rendez-vous
+     * dans la conversation — un message reste le moyen le plus sûr d'avertir
+     * quelqu'un qui n'a pas de notification push active.
+     */
+    const handleScheduleMeet = async () => {
+        if (!selected || !meetTitle.trim()) return
+        setScheduling(true)
+        try {
+            const scheduledAtIso = meetDate ? new Date(meetDate).toISOString() : undefined
+            await scheduleCallSession(meetTitle.trim(), scheduledAtIso, selected.otherUserId ? [selected.otherUserId] : [])
+            const quand = scheduledAtIso
+                ? new Date(scheduledAtIso).toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short" })
+                : "dès maintenant"
+            const contenu = `📅 Appel Goriya Meet planifié : « ${meetTitle.trim()} » — ${quand}. Rejoignez-le depuis votre espace Appels.`
+            await sendMessage(selected.id, contenu)
+            await loadMessages(selected.id)
+            setConversations((prev) => prev.map((c) => c.id === selected.id ? { ...c, lastMessage: contenu } : c))
+            setMeetOpen(false)
+            toast.success("Goriya Meet planifié et annoncé dans la conversation.")
+        } catch (err) {
+            console.error("[messages] schedule meet error:", err)
+            toast.error(extractApiErrorMessage(err, "La planification a échoué."))
+        } finally {
+            setScheduling(false)
         }
     }
 
@@ -369,6 +416,10 @@ function MessagesContent() {
                                                 <RefreshCw className="h-4 w-4" />
                                                 Actualiser les messages
                                             </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={openScheduleMeet} className="gap-2">
+                                                <Video className="h-4 w-4" />
+                                                Planifier Goriya Meet
+                                            </DropdownMenuItem>
                                             <DropdownMenuSeparator />
                                             <DropdownMenuItem
                                                 onClick={() => setConfirmDelete(selected)}
@@ -504,6 +555,52 @@ function MessagesContent() {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            <Dialog open={meetOpen} onOpenChange={(open) => !scheduling && setMeetOpen(open)}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Planifier Goriya Meet</DialogTitle>
+                        <DialogDescription>
+                            {selected?.name} sera invité·e à rejoindre la session, et prévenu·e par un message dans
+                            cette conversation.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-3">
+                        <div>
+                            <label htmlFor="meet-title" className="mb-1.5 block text-xs text-muted-foreground">Titre</label>
+                            <Input id="meet-title" value={meetTitle} onChange={(e) => setMeetTitle(e.target.value)} placeholder="Échange avec…" />
+                        </div>
+                        <div>
+                            <label htmlFor="meet-date" className="mb-1.5 block text-xs text-muted-foreground">
+                                Date et heure <span className="text-muted-foreground/70">(vide = démarrer maintenant)</span>
+                            </label>
+                            <Input
+                                id="meet-date"
+                                type="datetime-local"
+                                value={meetDate}
+                                onChange={(e) => setMeetDate(e.target.value)}
+                                min={new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
+                            />
+                        </div>
+                    </div>
+
+                    <DialogFooter>
+                        <Button variant="outline" size="sm" disabled={scheduling} onClick={() => setMeetOpen(false)}>
+                            Annuler
+                        </Button>
+                        <Button
+                            size="sm"
+                            className="gap-1.5 bg-blue-500 hover:bg-blue-600"
+                            disabled={scheduling || !meetTitle.trim()}
+                            onClick={handleScheduleMeet}
+                        >
+                            {scheduling ? <Loader2 className="h-4 w-4 animate-spin" /> : <Video className="h-4 w-4" />}
+                            Planifier
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }

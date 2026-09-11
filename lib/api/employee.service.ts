@@ -118,6 +118,16 @@ export interface IHireableCandidature {
     prefill: Partial<Pick<EmployeePayload, "firstName" | "lastName" | "email" | "phone" | "address" | "jobTitle" | "contractType">>
 }
 
+/** Champs extraits d'un CV pour pré-remplir le formulaire d'ajout — chacun `null` si indéterminé. */
+export interface ExtractedCvInfo {
+    firstName: string | null
+    lastName: string | null
+    email: string | null
+    phone: string | null
+    address: string | null
+    jobTitle: string | null
+}
+
 /** Identité minimale d'un employé, embarquée dans les congés et les soldes de la page Congés. */
 export interface IEmployeeSummary {
     id: string
@@ -188,6 +198,13 @@ export const employeeService = {
 
     hireableCandidatures: async () =>
         unwrap<IHireableCandidature[]>(await apiRequest({ endpoint: "/employees/hireable-candidatures", method: "GET" })),
+
+    /** Extrait identité/coordonnées/poste d'un CV pour pré-remplir le formulaire d'ajout. */
+    extractFromCv: async (file: File) => {
+        const body = new FormData()
+        body.append("file", file)
+        return unwrap<ExtractedCvInfo>(await apiRequest({ endpoint: "/employees/extract-cv", method: "POST", data: body }))
+    },
 
     get: async (id: string) => unwrap<IEmployee>(await apiRequest({ endpoint: `/employees/${id}`, method: "GET" })),
 

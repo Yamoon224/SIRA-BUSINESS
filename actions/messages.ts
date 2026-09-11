@@ -41,3 +41,12 @@ export const deleteConversation = (convId: string) =>
 
 export const createConversation = (candidatureId: string) =>
     apiRequest<any>({ endpoint: "/messages/conversations", method: "POST", data: { candidatureId } })
+
+/**
+ * Planifie une session Goriya Meet (ou la démarre immédiatement si
+ * `scheduledAt` est omis). `guestIds` invite explicitement d'autres
+ * utilisateurs (ex. l'autre participant d'une conversation) : sans ça, seul
+ * l'hôte verrait la session dans son propre espace Appels.
+ */
+export const scheduleCallSession = (title: string, scheduledAt?: string, guestIds: string[] = []) =>
+    apiRequest<any>({ endpoint: "/calls", method: "POST", data: { title, scheduledAt, guestIds } })

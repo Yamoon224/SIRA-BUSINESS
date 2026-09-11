@@ -1,8 +1,8 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useState, type ComponentType, type ReactNode } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from "react"
 import { toast } from "sonner"
-import { ArrowLeft, Loader2, PenLine, Search, Sparkles } from "lucide-react"
+import { ArrowLeft, FileUp, Loader2, PenLine, Search, Sparkles, UploadCloud } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -18,6 +18,7 @@ import {
     type ContractType,
     type EmployeePayload,
     type EmployeeStatus,
+    type ExtractedCvInfo,
     type IEmployee,
     type IHireableCandidature,
 } from "@/lib/api/employee.service"
@@ -150,7 +151,7 @@ function toPayload(f: FormState): EmployeePayload {
 
 const normalise = (v: string) => v.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase()
 
-type Step = "origin" | "candidature" | "form"
+type Step = "origin" | "candidature" | "cv" | "form"
 
 interface EmployeeFormDialogProps {
     open: boolean
@@ -191,6 +192,12 @@ export function EmployeeFormDialog({ open, onOpenChange, employee, candidatureId
     const [selected, setSelected] = useState<IHireableCandidature | null>(null)
     const [unavailable, setUnavailable] = useState(false)
 
+    // Origine « Uploader un CV » : extraction IA des champs identité/coordonnées/poste.
+    const [cvExtracting, setCvExtracting] = useState(false)
+    const [cvError, setCvError] = useState<string | null>(null)
+    const [cvExtracted, setCvExtracted] = useState(false)
+    const cvInputRef = useRef<HTMLInputElement | null>(null)
+
     const loadCandidatures = useCallback(async (): Promise<IHireableCandidature[] | null> => {
         setCandidaturesLoading(true)
         setCandidaturesError(null)
@@ -209,6 +216,7 @@ export function EmployeeFormDialog({ open, onOpenChange, employee, candidatureId
     const applyCandidature = useCallback((c: IHireableCandidature) => {
         const p = c.prefill ?? {}
         setSelected(c)
+        setCvExtracted(false)
         setForm({
             ...emptyForm(),
             firstName: p.firstName ?? "",
@@ -224,6 +232,37 @@ export function EmployeeFormDialog({ open, onOpenChange, employee, candidatureId
         setStep("form")
     }, [])
 
+    /**
+     * Envoie le CV à l'extraction IA et pré-remplit le formulaire avec ce qui
+     * a pu en être tiré — les champs non détectés restent vides, à compléter
+     * à la main. Aucun champ n'est inventé côté backend.
+     */
+    const handleCvFile = async (file: File) => {
+        setCvExtracting(true)
+        setCvError(null)
+        try {
+            const info: ExtractedCvInfo = await employeeService.extractFromCv(file)
+            setSelected(null)
+            setCvExtracted(true)
+            setForm({
+                ...emptyForm(),
+                firstName: info.firstName ?? "",
+                lastName: info.lastName ?? "",
+                email: info.email ?? "",
+                phone: info.phone ?? "",
+                address: info.address ?? "",
+                jobTitle: info.jobTitle ?? "",
+            })
+            setErrors({})
+            setServerError(null)
+            setStep("form")
+        } catch (err) {
+            setCvError(extractApiErrorMessage(err, "Impossible d'analyser ce CV. Réessayez ou saisissez la fiche manuellement."))
+        } finally {
+            setCvExtracting(false)
+        }
+    }
+
     // Chaque ouverture repart d'un état propre : une saisie abandonnée ne doit
     // pas réapparaître à l'ajout suivant.
     useEffect(() => {
@@ -233,6 +272,8 @@ export function EmployeeFormDialog({ open, onOpenChange, employee, candidatureId
         setSelected(null)
         setUnavailable(false)
         setCandidatureQuery("")
+        setCvExtracted(false)
+        setCvError(null)
 
         if (employee) {
             setForm(fromEmployee(employee))
@@ -309,9 +350,11 @@ export function EmployeeFormDialog({ open, onOpenChange, employee, candidatureId
             ? "Ajouter un employé"
             : step === "candidature"
                 ? "Embaucher un candidat"
-                : selected
-                    ? `Embaucher ${selected.candidateName}`
-                    : "Nouvel employé"
+                : step === "cv"
+                    ? "Importer un CV"
+                    : selected
+                        ? `Embaucher ${selected.candidateName}`
+                        : "Nouvel employé"
 
     const description = isEdit
         ? employee?.fullName
@@ -319,7 +362,9 @@ export function EmployeeFormDialog({ open, onOpenChange, employee, candidatureId
             ? "Comment ce collaborateur rejoint-il votre entreprise ?"
             : step === "candidature"
                 ? "Choisissez une candidature acceptée : sa fiche sera pré-remplie avec les informations Goriya."
-                : "Les champs marqués d'un astérisque sont obligatoires."
+                : step === "cv"
+                    ? "Le CV n'est utilisé que pour pré-remplir la fiche : rien n'est enregistré avant de l'avoir vérifiée."
+                    : "Les champs marqués d'un astérisque sont obligatoires."
 
     return (
         <Dialog open={open} onOpenChange={(next) => !saving && onOpenChange(next)}>
@@ -330,7 +375,7 @@ export function EmployeeFormDialog({ open, onOpenChange, employee, candidatureId
                 </DialogHeader>
 
                 {step === "origin" && (
-                    <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="grid gap-3 sm:grid-cols-3">
                         <OriginOption
                             icon={Sparkles}
                             title="Depuis une candidature"
@@ -341,11 +386,68 @@ export function EmployeeFormDialog({ open, onOpenChange, employee, candidatureId
                             }}
                         />
                         <OriginOption
+                            icon={FileUp}
+                            title="Uploader un CV"
+                            description="Le CV est analysé pour pré-remplir la fiche : nom, coordonnées et poste."
+                            onClick={() => {
+                                setCvError(null)
+                                setStep("cv")
+                            }}
+                        />
+                        <OriginOption
                             icon={PenLine}
                             title="Saisie manuelle"
                             description="Pour un collaborateur recruté hors de Goriya : vous remplissez sa fiche."
-                            onClick={() => setStep("form")}
+                            onClick={() => {
+                                setSelected(null)
+                                setCvExtracted(false)
+                                setForm(emptyForm())
+                                setStep("form")
+                            }}
                         />
+                    </div>
+                )}
+
+                {step === "cv" && (
+                    <div className="space-y-3">
+                        <input
+                            ref={cvInputRef}
+                            type="file"
+                            accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                            className="hidden"
+                            onChange={(e) => {
+                                const file = e.target.files?.[0]
+                                e.target.value = ""
+                                if (file) void handleCvFile(file)
+                            }}
+                        />
+                        <button
+                            type="button"
+                            disabled={cvExtracting}
+                            onClick={() => cvInputRef.current?.click()}
+                            className="flex w-full flex-col items-center gap-2 rounded-xl border-2 border-dashed border-border px-6 py-10 text-center transition-colors hover:border-primary/40 hover:bg-secondary/40 disabled:pointer-events-none disabled:opacity-60"
+                        >
+                            {cvExtracting ? (
+                                <>
+                                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                    <p className="text-sm text-foreground">Analyse du CV en cours…</p>
+                                </>
+                            ) : (
+                                <>
+                                    <UploadCloud className="h-8 w-8 text-muted-foreground" />
+                                    <p className="text-sm font-medium text-foreground">Cliquez pour choisir un CV</p>
+                                    <p className="text-xs text-muted-foreground">PDF ou Word, 8 Mo maximum</p>
+                                </>
+                            )}
+                        </button>
+                        {cvError && (
+                            <p role="alert" className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                                {cvError}
+                            </p>
+                        )}
+                        <Button variant="ghost" size="sm" disabled={cvExtracting} onClick={() => setStep("form")}>
+                            Passer et saisir la fiche manuellement
+                        </Button>
                     </div>
                 )}
 
@@ -436,6 +538,16 @@ export function EmployeeFormDialog({ open, onOpenChange, employee, candidatureId
                                     Informations reprises du profil Goriya de <strong>{selected.candidateName}</strong>
                                     {selected.jobOfferTitle ? <> et de l&apos;offre « {selected.jobOfferTitle} »</> : null}.
                                     Vérifiez-les, puis complétez le contrat.
+                                </p>
+                            </div>
+                        )}
+
+                        {cvExtracted && (
+                            <div className="flex items-start gap-2 rounded-lg border border-primary/20 bg-secondary/70 px-3 py-2.5 text-sm">
+                                <FileUp className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                                <p className="text-foreground">
+                                    Informations extraites du CV importé. Un champ non détecté reste vide - vérifiez et
+                                    complétez avant d&apos;enregistrer.
                                 </p>
                             </div>
                         )}
@@ -569,7 +681,7 @@ export function EmployeeFormDialog({ open, onOpenChange, employee, candidatureId
                                 disabled={saving}
                                 onClick={() => {
                                     setServerError(null)
-                                    setStep(step === "form" && selected ? "candidature" : "origin")
+                                    setStep(step === "form" && selected ? "candidature" : step === "form" && cvExtracted ? "cv" : "origin")
                                 }}
                             >
                                 <ArrowLeft className="h-4 w-4" />
