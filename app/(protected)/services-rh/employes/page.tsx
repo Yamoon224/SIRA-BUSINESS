@@ -7,7 +7,7 @@ import { EmployeesContent } from "./content"
 
 export default function Page() {
     return (
-        <SubscriptionGate requiredTier="PAID" featureLabel="la gestion des employés">
+        <SubscriptionGate featureLabel="la gestion des employés">
             {/* La liste lit `?candidature=` (embauche ouverte depuis la page
                 Candidatures) : useSearchParams impose une frontière Suspense. */}
             <Suspense

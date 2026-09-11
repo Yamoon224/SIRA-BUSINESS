@@ -5,7 +5,7 @@ import { ContratsContent } from "./content"
 
 export default function Page() {
     return (
-        <SubscriptionGate requiredTier="PAID" featureLabel="la gestion des contrats">
+        <SubscriptionGate featureLabel="la gestion des contrats">
             <ContratsContent />
         </SubscriptionGate>
     )

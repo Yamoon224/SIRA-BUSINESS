@@ -8,7 +8,7 @@ export default function Page() {
     const { id } = useParams<{ id: string }>()
 
     return (
-        <SubscriptionGate requiredTier="PAID" featureLabel="la gestion de la paie">
+        <SubscriptionGate featureLabel="la gestion de la paie">
             <PayrollRunDetail id={id} />
         </SubscriptionGate>
     )

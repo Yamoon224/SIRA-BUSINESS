@@ -5,7 +5,7 @@ import { PaieContent } from "./content"
 
 export default function Page() {
     return (
-        <SubscriptionGate requiredTier="PAID" featureLabel="la gestion de la paie">
+        <SubscriptionGate featureLabel="la gestion de la paie">
             <PaieContent />
         </SubscriptionGate>
     )

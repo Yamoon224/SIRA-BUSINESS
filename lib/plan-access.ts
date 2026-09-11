@@ -46,11 +46,12 @@ export const FREE_PLAN_INCLUDES = [
     "Suivi des candidatures",
     "Messagerie avec les candidats",
     "Profil entreprise",
+    // Ouverts à l'offre gratuite : les pages Services RH n'exigent plus de forfait payant.
+    "Services RH (employés, recrutements, contrats, congés, paie, documents, évaluations)",
 ] as const
 
 /** Ce qui reste réservé aux forfaits payants. */
 export const PAID_PLAN_ONLY = [
-    "Services RH (employés, contrats, paie, congés, documents, évaluations)",
-    "Appels vidéo et entretiens intégrés",
+    "Goriya Meet : appels vidéo et réunions",
     "Intégrations API",
 ] as const

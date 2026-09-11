@@ -385,15 +385,15 @@ export default function HomePage() {
                         subtitle="L'IA note vos candidatures, GORIYA Meet accueille vos entretiens et votre abonnement se règle en Mobile Money."
                     />
                     <Reveal className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-2">
-                        {/* Aperçu de la page Candidatures incliné à 45°. Tourné, il
-                            occupe un carré d'environ 1,3 fois sa largeur : la largeur
-                            est bornée pour qu'il tienne dans la cellule 2 × 2. */}
-                        <div className="flex min-h-[340px] items-center justify-center sm:col-span-2 sm:min-h-[420px] lg:col-span-2 lg:row-span-2">
+                        {/* Aperçu de la page Candidatures incliné à 18°. Tourné, il
+                            occupe environ 1,2 fois sa largeur et 1,1 fois sa largeur en
+                            hauteur : la hauteur minimale de la cellule lui laisse cette place. */}
+                        <div className="flex min-h-[320px] items-center justify-center py-6 sm:col-span-2 sm:min-h-[460px] lg:col-span-2 lg:row-span-2 lg:min-h-[500px]">
                             <img
                                 src="/images/apercu-candidatures.jpeg"
                                 alt="Page Candidatures de Goriya : chaque candidat noté par l'IA, avec ses compétences et sa compatibilité"
                                 loading="lazy"
-                                className="w-[62%] max-w-[300px] rotate-45 rounded-xl shadow-[0_24px_60px_-24px_rgba(11,18,32,0.45)] ring-1 ring-black/5"
+                                className="w-[86%] max-w-[480px] rotate-[18deg] rounded-xl shadow-[0_24px_60px_-24px_rgba(11,18,32,0.45)] ring-1 ring-black/5"
                             />
                         </div>
 
@@ -569,10 +569,10 @@ export default function HomePage() {
                             <div className="flex h-full flex-col justify-between rounded-md bg-brand-gradient p-6">
                                 <div>
                                     <h3 className="text-[15px] font-semibold text-white">
-                                        Toute votre RH, un seul abonnement
+                                        Toute votre RH, dès l&apos;offre gratuite
                                     </h3>
                                     <p className="mt-2 text-sm leading-relaxed text-[#e6f1ff]">
-                                        Les services RH sont inclus dans les forfaits Business.
+                                        Les Services RH sont inclus dans tous les forfaits, offre gratuite comprise.
                                     </p>
                                 </div>
                                 <div className="mt-5 flex flex-col gap-2">
@@ -741,8 +741,8 @@ export default function HomePage() {
 
                                             {isFree && (
                                                 <p className="mt-4 text-xs leading-relaxed text-[#8891ab]">
-                                                    Services RH, Goriya Meet et intégrations API restent réservés
-                                                    aux forfaits payants.
+                                                    Services RH inclus. Goriya Meet et intégrations API restent
+                                                    réservés aux forfaits payants.
                                                 </p>
                                             )}
                                         </div>

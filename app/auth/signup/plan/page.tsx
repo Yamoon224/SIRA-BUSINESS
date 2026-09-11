@@ -323,8 +323,8 @@ export default function ChoosePlanPage() {
 
                                 {isFree && (
                                     <p className="mt-4 rounded-lg bg-[#F7F8FC] p-3 text-[11px] leading-relaxed text-[#5B6472]">
-                                        Services RH, Goriya Meet et intégrations API restent réservés aux
-                                        forfaits payants.
+                                        Services RH inclus. Goriya Meet et intégrations API restent réservés
+                                        aux forfaits payants.
                                     </p>
                                 )}
                             </div>

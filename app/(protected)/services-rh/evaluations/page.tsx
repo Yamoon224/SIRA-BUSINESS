@@ -282,7 +282,7 @@ function EvaluationsContent() {
 
 export default function Page() {
     return (
-        <SubscriptionGate requiredTier="PAID" featureLabel="les évaluations des employés">
+        <SubscriptionGate featureLabel="les évaluations des employés">
             <EvaluationsContent />
         </SubscriptionGate>
     )
