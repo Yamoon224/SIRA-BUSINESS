@@ -23,6 +23,7 @@ import {
     KeyRound,
     Video,
     CreditCard,
+    ClipboardList,
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -49,6 +50,7 @@ const serviceRhItems = [
     { label: "Évaluations Employés", href: "/services-rh/evaluations", icon: FileText },
     { label: "Contrats", href: "/services-rh/contrats", icon: FileSignature },
     { label: "Congés", href: "/services-rh/conges", icon: CalendarDays },
+    { label: "Demandes RH", href: "/services-rh/demandes", icon: ClipboardList },
     { label: "Gestion de Paie", href: "/services-rh/paie", icon: DollarSign },
     { label: "Documents RH", href: "/services-rh/documents", icon: FolderOpen },
 ]

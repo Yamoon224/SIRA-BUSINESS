@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { AutocompleteInput } from "@/components/autocomplete-input"
-import { ClipboardList, Plus, Trash2, BarChart3, Star, Building2, CalendarClock } from "lucide-react"
+import { ClipboardList, Plus, Trash2, BarChart3, Star, Building2, CalendarClock, Pencil } from "lucide-react"
 import { SubscriptionGate } from "@/components/subscription-gate"
 import { DEPARTMENTS } from "@/lib/data/rh"
 import {

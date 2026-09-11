@@ -19,6 +19,8 @@ export interface IEmployeeSurvey {
     dueDate: string | null
     /** Département ciblé — `null` = toute l'entreprise. */
     department: string | null
+    /** Au moins une réponse reçue — les questions ne sont alors plus modifiables. */
+    hasResponses: boolean
     createdAt: string
 }
 
@@ -37,6 +39,14 @@ export const employeeSurveyService = {
 
     create: async (data: { title: string; description?: string; questions: ISurveyQuestion[]; dueDate?: string | null; department?: string | null }) => {
         return apiRequest<IEmployeeSurvey>({ endpoint: "/employee-surveys", method: "POST", data })
+    },
+
+    /**
+     * `questions` refusé (400) si l'évaluation a déjà reçu des réponses —
+     * voir `hasResponses` sur IEmployeeSurvey pour désactiver ce champ côté UI.
+     */
+    update: async (id: string, data: Partial<{ title: string; description: string | null; questions: ISurveyQuestion[]; dueDate: string | null; department: string | null }>) => {
+        return apiRequest<IEmployeeSurvey>({ endpoint: `/employee-surveys/${id}`, method: "PATCH", data })
     },
 
     get: async (id: string) => {
