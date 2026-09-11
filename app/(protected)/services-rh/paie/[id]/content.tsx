@@ -28,7 +28,7 @@ import { KpiCard } from "@/components/rh/kpi-card"
 import { PayRunDialog } from "@/components/rh/pay-run-dialog"
 import { PayslipDialog } from "@/components/rh/payslip-dialog"
 import { StatusPill } from "@/components/rh/status-pill"
-import { PAYROLL_STATUS_META, capitalize, formatDate, formatFcfa, normaliseText } from "@/lib/data/rh"
+import { PAYROLL_STATUS_META, formatDate, formatFcfa, normaliseText } from "@/lib/data/rh"
 import { extractApiErrorMessage } from "@/lib/api-error"
 import { payrollService, type IPayrollRun, type IPayslip } from "@/lib/api/payroll.service"
 import { cn } from "@/lib/utils"
@@ -332,5 +332,3 @@ export function PayrollRunDetail({ id }: { id: string }) {
         </div>
     )
 }
-
-export const _capitalize = capitalize
