@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState, type ComponentType } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
@@ -29,13 +29,15 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ConfirmDialog } from "@/components/rh/confirm-dialog"
 import { EmployeeAvatar } from "@/components/rh/employee-avatar"
+import { EmployeeContractsTab } from "@/components/rh/employee-contracts-tab"
 import { EmployeeFormDialog } from "@/components/rh/employee-form-dialog"
 import { EmployeeHistory } from "@/components/rh/employee-history"
 import { EmployeeLeavesTab } from "@/components/rh/employee-leaves-tab"
 import { EmployeeOverview } from "@/components/rh/employee-overview"
 import { EmployeeRequestsTab } from "@/components/rh/employee-requests-tab"
+import { KpiCard } from "@/components/rh/kpi-card"
 import { StatusPill } from "@/components/rh/status-pill"
-import { EMPLOYEE_STATUS_META, ON_LEAVE_META, contractTypeLabel, seniority } from "@/lib/data/rh"
+import { EMPLOYEE_STATUS_META, ON_LEAVE_META, contractAlerts, contractTypeLabel, formatDate, seniority } from "@/lib/data/rh"
 import { extractApiErrorMessage } from "@/lib/api-error"
 import {
     employeeService,
@@ -44,11 +46,12 @@ import {
     type IEmployeeLeave,
     type IHrRequest,
 } from "@/lib/api/employee.service"
+import { contractService, type IEmployeeContract } from "@/lib/api/contract.service"
 import { cn } from "@/lib/utils"
 
 /**
  * Fiche d'un employé et toutes les opérations qui le concernent : modification,
- * changement de statut, congés, demandes RH, historique.
+ * changement de statut, contrats, congés, demandes RH, historique.
  */
 export function EmployeeDetail({ id }: { id: string }) {
     const router = useRouter()
@@ -60,6 +63,7 @@ export function EmployeeDetail({ id }: { id: string }) {
 
     const [leaves, setLeaves] = useState<IEmployeeLeave[]>([])
     const [requests, setRequests] = useState<IHrRequest[]>([])
+    const [contracts, setContracts] = useState<IEmployeeContract[]>([])
     const [operationsLoading, setOperationsLoading] = useState(true)
 
     const [tab, setTab] = useState("apercu")
@@ -83,11 +87,16 @@ export function EmployeeDetail({ id }: { id: string }) {
 
     const loadOperations = useCallback(async () => {
         try {
-            const [leaveList, requestList] = await Promise.all([employeeService.leaves(id), employeeService.requests(id)])
+            const [leaveList, requestList, contractList] = await Promise.all([
+                employeeService.leaves(id),
+                employeeService.requests(id),
+                contractService.employeeContracts(id),
+            ])
             setLeaves(leaveList)
             setRequests(requestList)
+            setContracts(contractList)
         } catch (err) {
-            toast.error(extractApiErrorMessage(err, "Impossible de charger les congés et demandes."))
+            toast.error(extractApiErrorMessage(err, "Impossible de charger les contrats, congés et demandes."))
         } finally {
             setOperationsLoading(false)
         }
@@ -98,10 +107,12 @@ export function EmployeeDetail({ id }: { id: string }) {
         void Promise.all([loadEmployee(), loadOperations()]).finally(() => setLoading(false))
     }, [loadEmployee, loadOperations])
 
-    /** Après une opération : solde, compteurs et listes se recalculent côté serveur. */
+    /** Après une opération : fiche (synchronisée sur le contrat), solde, compteurs et listes se rechargent. */
     const refresh = useCallback(async () => {
         await Promise.all([loadEmployee(), loadOperations()])
     }, [loadEmployee, loadOperations])
+
+    const contractAlertCount = useMemo(() => (employee ? contractAlerts(contracts, [employee]).length : 0), [contracts, employee])
 
     const openEdit = async () => {
         setEditOpen(true)
@@ -159,9 +170,7 @@ export function EmployeeDetail({ id }: { id: string }) {
                     {notFound ? "Employé introuvable" : "Fiche indisponible"}
                 </h1>
                 <p className="mt-2 text-sm text-muted-foreground">
-                    {notFound
-                        ? "Cette fiche n'existe pas ou a été supprimée."
-                        : loadError}
+                    {notFound ? "Cette fiche n'existe pas ou a été supprimée." : loadError}
                 </p>
                 <div className="mt-5 flex justify-center gap-2">
                     {!notFound && <Button variant="outline" onClick={() => { setLoading(true); void refresh().finally(() => setLoading(false)) }}>Réessayer</Button>}
@@ -174,6 +183,7 @@ export function EmployeeDetail({ id }: { id: string }) {
     const balance = employee.leaveBalance
     const openRequests = requests.filter((r) => r.status === "PENDING" || r.status === "IN_PROGRESS").length
     const pendingLeaves = leaves.filter((l) => l.status === "PENDING").length
+    const activeContract = employee.activeContract
 
     return (
         <div className="space-y-5 pb-8">
@@ -198,7 +208,14 @@ export function EmployeeDetail({ id }: { id: string }) {
                                 <StatusPill meta={EMPLOYEE_STATUS_META[employee.status]} />
                                 {employee.onLeaveToday && <StatusPill meta={ON_LEAVE_META} />}
                                 <span className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-semibold text-foreground">{employee.matricule}</span>
-                                <span className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-semibold text-foreground">{contractTypeLabel(employee.contractType)}</span>
+                                <button
+                                    type="button"
+                                    onClick={() => setTab("contrats")}
+                                    className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-semibold text-foreground transition-colors hover:bg-secondary hover:text-primary"
+                                >
+                                    {contractTypeLabel(employee.contractType)}
+                                    {activeContract?.endDate ? ` jusqu'au ${formatDate(activeContract.endDate)}` : ""}
+                                </button>
                                 {employee.source === "CANDIDATURE" && (
                                     <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-0.5 text-[11px] font-semibold text-primary">
                                         <Sparkles className="h-3 w-3" />
@@ -241,21 +258,25 @@ export function EmployeeDetail({ id }: { id: string }) {
             </div>
 
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-                <Kpi icon={Clock3} label="Ancienneté" value={seniority(employee.hireDate)} />
-                <Kpi
+                <KpiCard icon={Clock3} label="Ancienneté" value={seniority(employee.hireDate)} />
+                <KpiCard
                     icon={Wallet}
                     label={`Solde congés ${balance?.year ?? ""}`.trim()}
                     value={balance ? `${balance.remaining} / ${balance.entitlement} j` : "—"}
                     hint={balance ? `${balance.taken} pris · ${balance.pending} en attente` : undefined}
                 />
-                <Kpi icon={CalendarDays} label="Congés en attente" value={String(pendingLeaves)} highlight={pendingLeaves > 0} onClick={() => setTab("conges")} />
-                <Kpi icon={ClipboardList} label="Demandes ouvertes" value={String(openRequests)} highlight={openRequests > 0} onClick={() => setTab("demandes")} />
+                <KpiCard icon={CalendarDays} label="Congés en attente" value={String(pendingLeaves)} highlight={pendingLeaves > 0} onClick={() => setTab("conges")} />
+                <KpiCard icon={ClipboardList} label="Demandes ouvertes" value={String(openRequests)} highlight={openRequests > 0} onClick={() => setTab("demandes")} />
             </div>
 
             <Tabs value={tab} onValueChange={setTab}>
                 <div className="overflow-x-auto">
                     <TabsList>
                         <TabsTrigger value="apercu">Aperçu</TabsTrigger>
+                        <TabsTrigger value="contrats">
+                            Contrats
+                            {contractAlertCount > 0 && <Counter value={contractAlertCount} />}
+                        </TabsTrigger>
                         <TabsTrigger value="conges">
                             Congés
                             {pendingLeaves > 0 && <Counter value={pendingLeaves} />}
@@ -271,6 +292,9 @@ export function EmployeeDetail({ id }: { id: string }) {
                 <TabsContent value="apercu" className="mt-4">
                     <EmployeeOverview employee={employee} />
                 </TabsContent>
+                <TabsContent value="contrats" className="mt-4">
+                    <EmployeeContractsTab employee={employee} contracts={contracts} loading={operationsLoading} onChanged={refresh} />
+                </TabsContent>
                 <TabsContent value="conges" className="mt-4">
                     <EmployeeLeavesTab employee={employee} leaves={leaves} loading={operationsLoading} onChanged={refresh} />
                 </TabsContent>
@@ -278,7 +302,7 @@ export function EmployeeDetail({ id }: { id: string }) {
                     <EmployeeRequestsTab employee={employee} requests={requests} loading={operationsLoading} onChanged={refresh} />
                 </TabsContent>
                 <TabsContent value="historique" className="mt-4">
-                    <EmployeeHistory employee={employee} leaves={leaves} requests={requests} />
+                    <EmployeeHistory employee={employee} leaves={leaves} requests={requests} contracts={contracts} />
                 </TabsContent>
             </Tabs>
 
@@ -299,7 +323,7 @@ export function EmployeeDetail({ id }: { id: string }) {
                 title={statusTarget ? `Passer ${employee.fullName} en « ${EMPLOYEE_STATUS_META[statusTarget].label} » ?` : ""}
                 description={
                     statusTarget === "TERMINATED"
-                        ? "L'employé ne pourra plus poser de congé. Sa fiche, son historique et ses demandes restent consultables, et une attestation peut toujours lui être délivrée."
+                        ? "L'employé ne pourra plus poser de congé. Sa fiche, son historique et ses demandes restent consultables, et une attestation peut toujours lui être délivrée. Pensez à clôturer ou rompre son contrat en vigueur depuis l'onglet Contrats."
                         : "Le nouveau statut s'affiche immédiatement dans le répertoire."
                 }
                 confirmLabel="Confirmer"
@@ -312,49 +336,13 @@ export function EmployeeDetail({ id }: { id: string }) {
                 open={deleteOpen}
                 onOpenChange={setDeleteOpen}
                 title={`Supprimer ${employee.fullName} ?`}
-                description="Sa fiche, ses congés et ses demandes RH seront définitivement supprimés. Pour un départ, préférez le statut « Parti » : l'historique reste consultable."
+                description="Sa fiche, ses contrats (documents signés compris), ses congés et ses demandes RH seront définitivement supprimés. Pour un départ, préférez le statut « Parti » : l'historique reste consultable."
                 confirmLabel="Supprimer"
                 destructive
                 loading={deleting}
                 onConfirm={confirmDelete}
             />
         </div>
-    )
-}
-
-function Kpi({
-    icon: Icon,
-    label,
-    value,
-    hint,
-    highlight,
-    onClick,
-}: {
-    icon: ComponentType<{ className?: string }>
-    label: string
-    value: string
-    hint?: string
-    highlight?: boolean
-    onClick?: () => void
-}) {
-    const Tag = onClick ? "button" : "div"
-    return (
-        <Tag
-            {...(onClick ? { type: "button" as const, onClick } : {})}
-            className={cn(
-                "rounded-xl border border-border bg-white p-4 text-left",
-                onClick && "transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
-            )}
-        >
-            <div className="flex items-center justify-between gap-2">
-                <p className="text-xs font-medium text-muted-foreground">{label}</p>
-                <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg", highlight ? "bg-amber-100 text-amber-700" : "bg-secondary text-primary")}>
-                    <Icon className="h-4 w-4" />
-                </span>
-            </div>
-            <p className="mt-2 text-lg font-semibold text-foreground">{value}</p>
-            {hint && <p className="text-[11px] text-muted-foreground">{hint}</p>}
-        </Tag>
     )
 }
 

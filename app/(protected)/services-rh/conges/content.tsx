@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useState, type ComponentType } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import {
     CalendarCheck,
@@ -20,6 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { EmployeeAvatar } from "@/components/rh/employee-avatar"
+import { KpiCard as Kpi } from "@/components/rh/kpi-card"
 import { LeaveActionButtons, useLeaveWorkflow } from "@/components/rh/leave-actions"
 import { LeaveBalancesTable } from "@/components/rh/leave-balances-table"
 import { LeaveDialog } from "@/components/rh/leave-dialog"
@@ -372,38 +373,5 @@ export function CongesContent() {
             />
             {dialogs}
         </div>
-    )
-}
-
-function Kpi({
-    icon: Icon,
-    label,
-    value,
-    highlight,
-    onClick,
-}: {
-    icon: ComponentType<{ className?: string }>
-    label: string
-    value: number
-    highlight?: boolean
-    onClick?: () => void
-}) {
-    const Tag = onClick ? "button" : "div"
-    return (
-        <Tag
-            {...(onClick ? { type: "button" as const, onClick } : {})}
-            className={cn(
-                "rounded-xl border border-border bg-white p-4 text-left",
-                onClick && "transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
-            )}
-        >
-            <div className="flex items-center justify-between gap-2">
-                <p className="text-xs font-medium text-muted-foreground">{label}</p>
-                <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg", highlight ? "bg-amber-100 text-amber-700" : "bg-secondary text-primary")}>
-                    <Icon className="h-4 w-4" />
-                </span>
-            </div>
-            <p className="mt-2 text-2xl font-semibold tabular-nums text-foreground">{value}</p>
-        </Tag>
     )
 }

@@ -174,6 +174,9 @@ interface EmployeeFormDialogProps {
  */
 export function EmployeeFormDialog({ open, onOpenChange, employee, candidatureId, employees, onSaved }: EmployeeFormDialogProps) {
     const isEdit = !!employee
+    // Type, fin de contrat et salaire suivent le contrat en vigueur : ils se
+    // changent par un avenant, pas depuis la fiche (le backend le refuse aussi).
+    const lockedBy = employee?.activeContract ?? null
 
     const [step, setStep] = useState<Step>("form")
     const [form, setForm] = useState<FormState>(emptyForm)
@@ -503,8 +506,14 @@ export function EmployeeFormDialog({ open, onOpenChange, employee, candidatureId
                         </Section>
 
                         <Section title="Contrat et rémunération">
+                            {lockedBy && (
+                                <p className="rounded-md bg-secondary/70 px-3 py-2 text-xs text-foreground sm:col-span-2">
+                                    Type de contrat, fin de contrat et salaire suivent le contrat en vigueur <strong>{lockedBy.reference}</strong>.
+                                    Pour les changer, établissez un avenant depuis l&apos;onglet Contrats de la fiche.
+                                </p>
+                            )}
                             <Field label="Type de contrat" required error={errors.contractType}>
-                                <Select value={form.contractType || undefined} onValueChange={(v) => set("contractType", v as ContractType)}>
+                                <Select value={form.contractType || undefined} onValueChange={(v) => set("contractType", v as ContractType)} disabled={!!lockedBy}>
                                     <SelectTrigger className="w-full" aria-invalid={!!errors.contractType}><SelectValue placeholder="Choisir" /></SelectTrigger>
                                     <SelectContent>
                                         {CONTRACT_TYPES.map((t) => (
@@ -527,10 +536,10 @@ export function EmployeeFormDialog({ open, onOpenChange, employee, candidatureId
                                 <Input type="date" value={form.hireDate} onChange={(e) => set("hireDate", e.target.value)} aria-invalid={!!errors.hireDate} />
                             </Field>
                             <Field label="Fin de contrat" required={form.contractType === "CDD"} error={errors.contractEndDate}>
-                                <Input type="date" min={form.hireDate || undefined} value={form.contractEndDate} onChange={(e) => set("contractEndDate", e.target.value)} aria-invalid={!!errors.contractEndDate} />
+                                <Input type="date" disabled={!!lockedBy} min={form.hireDate || undefined} value={form.contractEndDate} onChange={(e) => set("contractEndDate", e.target.value)} aria-invalid={!!errors.contractEndDate} />
                             </Field>
                             <Field label="Salaire brut mensuel (FCFA)" error={errors.salary}>
-                                <Input type="number" inputMode="numeric" min={0} value={form.salary} onChange={(e) => set("salary", e.target.value)} aria-invalid={!!errors.salary} placeholder="450000" />
+                                <Input type="number" inputMode="numeric" min={0} disabled={!!lockedBy} value={form.salary} onChange={(e) => set("salary", e.target.value)} aria-invalid={!!errors.salary} placeholder="450000" />
                             </Field>
                             <Field label="Congés annuels (jours)" hint="26 par défaut" error={errors.annualLeaveDays}>
                                 <Input type="number" inputMode="numeric" min={0} max={60} value={form.annualLeaveDays} onChange={(e) => set("annualLeaveDays", e.target.value)} aria-invalid={!!errors.annualLeaveDays} />

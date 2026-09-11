@@ -54,6 +54,10 @@ export function EmployeeOverview({ employee }: { employee: IEmployee }) {
             </InfoCard>
 
             <InfoCard title="Contrat et rémunération">
+                <Info
+                    label="Contrat en vigueur"
+                    value={employee.activeContract ? `${employee.activeContract.reference} · ${employee.activeContract.signed ? "signé" : "non signé"}` : "Aucun"}
+                />
                 <Info label="Type de contrat" value={contractTypeLabel(employee.contractType)} />
                 <Info label="Date d'embauche" value={formatDate(employee.hireDate, { day: "numeric", month: "long", year: "numeric" })} />
                 <Info label="Fin de contrat" value={employee.contractEndDate ? formatDate(employee.contractEndDate, { day: "numeric", month: "long", year: "numeric" }) : null} />
