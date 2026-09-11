@@ -56,7 +56,7 @@ const steps = [
     {
         n: "03",
         title: "Échangez en visio",
-        description: "Menez vos entretiens dans Goriya Call, sans quitter la plateforme.",
+        description: "Menez vos entretiens sur GORIYA Meet, sans quitter la plateforme.",
     },
     {
         n: "04",
@@ -236,6 +236,43 @@ function AppPreview({
 }
 
 /**
+ * En-tête de section de la page d'accueil : titre en H1 gras centré, sous-titre
+ * en H3 centré. Toutes les sections l'utilisent, pour une hiérarchie identique.
+ */
+function SectionHeading({
+    title,
+    subtitle,
+    tone = "dark",
+    className = "",
+}: {
+    title: string
+    subtitle?: string
+    tone?: "dark" | "light"
+    className?: string
+}) {
+    return (
+        <div className={`mx-auto max-w-3xl text-center ${className}`}>
+            <h1
+                className={`text-center text-2xl font-extrabold leading-tight sm:text-4xl md:text-[38px] lg:text-[46px] ${
+                    tone === "light" ? "text-white" : "text-[#111827]"
+                }`}
+            >
+                {title}
+            </h1>
+            {subtitle && (
+                <h3
+                    className={`mt-4 text-center text-base font-normal leading-relaxed sm:text-lg ${
+                        tone === "light" ? "text-[#e6f1ff]" : "text-[#5B6472]"
+                    }`}
+                >
+                    {subtitle}
+                </h3>
+            )}
+        </div>
+    )
+}
+
+/**
  * Forfait mis en avant : le premier payant mensuel (« Business »), plan standard
  * entre l'offre gratuite et l'annuel.
  */
@@ -287,7 +324,7 @@ export default function HomePage() {
                 <div className="container relative z-10 mx-auto grid grid-cols-1 gap-16 px-4 pb-20 pt-32 md:px-6 md:pb-28 md:pt-36 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pb-32 lg:pt-40">
                     <div>
                         <h1
-                            className="text-4xl leading-[1.06] tracking-tight text-white sm:text-5xl md:text-[3.75rem]"
+                            className="text-4xl font-bold leading-[1.06] tracking-tight text-white sm:text-5xl md:text-[3.75rem]"
                         >
                             Le bon candidat,
                             <br />
@@ -342,28 +379,31 @@ export default function HomePage() {
             {/* Capability bento */}
             <section className="border-b border-black/[0.06] bg-white py-16">
                 <div className="container mx-auto px-4 md:px-6">
+                    <SectionHeading
+                        className="mb-12"
+                        title="Tout pour recruter, au même endroit"
+                        subtitle="L'IA note vos candidatures, GORIYA Meet accueille vos entretiens et votre abonnement se règle en Mobile Money."
+                    />
                     <Reveal className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-2">
-                        <div className="tilt-card rounded-md border border-black/[0.06] bg-white p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:col-span-2 lg:col-span-2 lg:row-span-2">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#1e7df2]">
-                                <Sparkles className="h-5 w-5 text-white" />
-                            </div>
-                            <h3 className="mt-5 text-lg font-semibold text-[#0B1220]">Scoring IA des CV</h3>
-                            <p className="mt-2 max-w-sm text-sm leading-relaxed text-[#5B6472]">
-                                Chaque candidature reçoit un score de compatibilité et un résumé automatique,
-                                dès sa réception.
-                            </p>
-                            <div className="mt-6 max-w-xs">
-                                <MatchCard candidate={candidates[0]} />
-                            </div>
+                        {/* Aperçu de la page Candidatures incliné à 45°. Tourné, il
+                            occupe un carré d'environ 1,3 fois sa largeur : la largeur
+                            est bornée pour qu'il tienne dans la cellule 2 × 2. */}
+                        <div className="flex min-h-[340px] items-center justify-center sm:col-span-2 sm:min-h-[420px] lg:col-span-2 lg:row-span-2">
+                            <img
+                                src="/images/apercu-candidatures.jpeg"
+                                alt="Page Candidatures de Goriya : chaque candidat noté par l'IA, avec ses compétences et sa compatibilité"
+                                loading="lazy"
+                                className="w-[62%] max-w-[300px] rotate-45 rounded-xl shadow-[0_24px_60px_-24px_rgba(11,18,32,0.45)] ring-1 ring-black/5"
+                            />
                         </div>
 
                         <div className="tilt-card rounded-md bg-brand-gradient p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                             <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-white/10">
                                 <Video className="h-5 w-5 text-white" />
                             </div>
-                            <h3 className="mt-5 text-base font-semibold text-white">Goriya Call</h3>
+                            <h3 className="mt-5 text-base font-semibold text-white">GORIYA Meet</h3>
                             <p className="mt-2 text-sm leading-relaxed text-[#e6f1ff]">
-                                Entretiens vidéo intégrés, sans lien tiers à partager.
+                                Entretiens vidéo intégrés : le candidat rejoint la salle depuis son espace Goriya.
                             </p>
                         </div>
 
@@ -397,7 +437,10 @@ export default function HomePage() {
             {/* How it works */}
             <section id="comment-ca-marche" className="bg-[#F7F8FC] py-24">
                 <div className="container mx-auto px-4 md:px-6">
-                    <h2 className="text-center text-2xl xs:text-3xl sm:text-4xl md:text-[38px] lg:text-[46px] leading-none font-extrabold text-[#111827] dark:text-foreground">De l&apos;offre à l&apos;embauche</h2>
+                    <SectionHeading
+                        title="De l'offre à l'embauche"
+                        subtitle="Quatre étapes pour passer d'un poste ouvert à une nouvelle recrue, sans jongler entre les outils."
+                    />
 
                     <div className="relative mt-16 grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
                         <div className="pointer-events-none absolute left-[12.5%] right-[12.5%] top-6 hidden h-px bg-black/[0.08] lg:block" />
@@ -418,6 +461,12 @@ export default function HomePage() {
 
             {/* Feature spotlight */}
             <section className="bg-white py-24">
+                <div className="container mx-auto mb-16 px-4 md:px-6">
+                    <SectionHeading
+                        title="Moins de tri, plus d'échanges"
+                        subtitle="L'IA fait le premier tri, GORIYA Meet accueille vos entretiens : vous gardez votre temps pour les bons profils."
+                    />
+                </div>
                 <div className="container mx-auto flex flex-col gap-24 px-4 md:px-6">
                     <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
                         <Reveal>
@@ -450,7 +499,7 @@ export default function HomePage() {
                                     </span>
                                     <div>
                                         <p className="text-sm font-semibold text-white">Entretien - Aïcha Koné</p>
-                                        <p className="text-xs text-[#8891ab]">Goriya Call</p>
+                                        <p className="text-xs text-[#8891ab]">GORIYA Meet</p>
                                     </div>
                                 </div>
                                 <span className="flex items-center gap-1.5 rounded-full bg-[#FF6B4A]/15 px-2.5 py-1 text-[11px] font-semibold text-[#FF6B4A]">
@@ -470,7 +519,7 @@ export default function HomePage() {
                         </Reveal>
                         <Reveal delay={120} className="order-1 lg:order-2">
                             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2447FF]">
-                                Goriya Call
+                                GORIYA Meet
                             </p>
                             <h3 className="mt-3 text-2xl text-[#0B1220] sm:text-3xl">
                                 Des entretiens qui ne quittent jamais la plateforme
@@ -487,7 +536,10 @@ export default function HomePage() {
             {/* Services RH */}
             <section id="services-rh" className="bg-[#F7F8FC] py-24">
                 <div className="container mx-auto px-4 md:px-6">
-                    <h2 className="text-center text-2xl xs:text-3xl sm:text-4xl md:text-[38px] lg:text-[46px] leading-none font-extrabold text-[#111827] dark:text-foreground">Services RH</h2>
+                    <SectionHeading
+                        title="Services RH"
+                        subtitle="Une fois la recrue arrivée, suivez tout son parcours : contrats, congés, paie, évaluations et documents."
+                    />
 
                     <div className="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                         {hrFeatures.map((feature, i) => (
@@ -547,10 +599,11 @@ export default function HomePage() {
             {/* Region fit */}
             <section className="bg-[#FFF4F0] py-20">
                 <div className="container mx-auto px-4 md:px-6">
-                    <Reveal className="mx-auto max-w-2xl text-center">
-                        <h2 className="text-3xl text-[#0B1220] sm:text-4xl">
-                            Conçu pour vos réalités, pas importé d&apos;ailleurs
-                        </h2>
+                    <Reveal>
+                        <SectionHeading
+                            title="Conçu pour vos réalités, pas importé d'ailleurs"
+                            subtitle="Une plateforme pensée pour les entreprises de Côte d'Ivoire et de la zone UEMOA."
+                        />
                     </Reveal>
                     <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-3">
                         {regionPoints.map((point, i) => (
@@ -586,7 +639,11 @@ export default function HomePage() {
             {/* Plans */}
             <section id="tarification" className="bg-[#F7F8FC] py-20">
                 <div className="container mx-auto px-4 md:px-6">
-                    <h2 className="text-center text-2xl xs:text-3xl sm:text-4xl md:text-[38px] lg:text-[46px] leading-none font-extrabold text-[#111827] dark:text-foreground mb-2">Les Plans Tarifaires</h2>
+                    <SectionHeading
+                        className="mb-12"
+                        title="Les Plans Tarifaires"
+                        subtitle="Commencez gratuitement, puis passez à un forfait payant quand vos recrutements s'accélèrent. Paiement en Mobile Money."
+                    />
                     
                     {loading ? (
                         <div className="mx-auto flex max-w-[1100px] flex-wrap justify-center gap-6">
@@ -701,13 +758,11 @@ export default function HomePage() {
             <section className="relative overflow-hidden bg-brand-gradient py-24">
                 <div className="orb-drift-1 pointer-events-none absolute left-1/2 top-0 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-[#2447FF]/20 blur-[130px]" />
                 <Reveal className="container relative z-10 mx-auto px-4 text-center md:px-6">
-                    <h2 className="mx-auto max-w-xl text-3xl text-white sm:text-4xl">
-                        Donnez à votre équipe RH une longueur d&apos;avance
-                    </h2>
-                    <p className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-[#e6f1ff]">
-                        Goriya est disponible dès aujourd&apos;hui pour les entreprises basées en
-                        Côte d&apos;Ivoire et dans la zone UEMOA.
-                    </p>
+                    <SectionHeading
+                        tone="light"
+                        title="Donnez à votre équipe RH une longueur d'avance"
+                        subtitle="Goriya est disponible dès aujourd'hui pour les entreprises basées en Côte d'Ivoire et dans la zone UEMOA."
+                    />
                     <div className="mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row">
                         <Button size="lg" className="rounded-full bg-white px-7 font-semibold text-[#0B1220] transition-transform duration-200 hover:scale-[1.03] hover:bg-white/90" asChild>
                             <Link href="/auth/signup">Commencer gratuitement</Link>

@@ -3,7 +3,10 @@
 import { useState, type ReactNode } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { toast } from "sonner"
+import { CallEmbed } from "@/components/call-embed"
+import { callSessionService, type ICallJoinToken } from "@/lib/api/call-session.service"
 import { CalendarPlus, FolderOpen, MessageSquare, MoreHorizontal, UserCheck, UserPlus, XCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -38,6 +41,10 @@ export interface RecruitmentWorkflow {
     reportInterview: (interview: IRecruitmentInterview, candidate: CandidateRef, preset?: InterviewOutcome) => void
     deleteInterview: (interview: IRecruitmentInterview) => void
     message: (candidate: IRecruitmentCandidate) => void
+    /** Ouvre la salle GORIYA Meet d'un entretien en visio. */
+    joinCall: (interview: IRecruitmentInterview, candidate: CandidateRef) => Promise<void>
+    /** Entretien dont la salle est en cours d'ouverture. */
+    joiningId: string | null
     /** Candidat en cours de déplacement : sa carte affiche un indicateur. */
     busyId: string | null
     dialogs: ReactNode
@@ -65,6 +72,23 @@ export function useRecruitmentWorkflow({ onChanged }: { onChanged: () => Promise
     const [toDelete, setToDelete] = useState<IRecruitmentInterview | null>(null)
     const [deleting, setDeleting] = useState(false)
     const [messageFor, setMessageFor] = useState<IRecruitmentCandidate | null>(null)
+    const { data: session } = useSession()
+    const [joiningId, setJoiningId] = useState<string | null>(null)
+    const [activeCall, setActiveCall] = useState<{ title: string; token: string; url: string; room: string } | null>(null)
+
+    const joinCall = async (interview: IRecruitmentInterview, candidate: CandidateRef) => {
+        if (!interview.callSession) return
+        setJoiningId(interview.id)
+        try {
+            const res = await callSessionService.join(interview.callSession.id)
+            const body = ((res as { data?: ICallJoinToken })?.data ?? res) as ICallJoinToken
+            setActiveCall({ title: `Entretien avec ${candidate.name}`, token: body.token, url: body.url, room: body.room })
+        } catch (err) {
+            toast.error(extractApiErrorMessage(err, "Impossible d'ouvrir la salle GORIYA Meet."))
+        } finally {
+            setJoiningId(null)
+        }
+    }
 
     const perform = async (candidate: IRecruitmentCandidate, stage: RecruitmentStage, comment: string | null): Promise<boolean> => {
         setBusyId(candidate.id)
@@ -210,6 +234,20 @@ export function useRecruitmentWorkflow({ onChanged }: { onChanged: () => Promise
                 onOpenChange={(open) => !open && setMessageFor(null)}
                 candidate={messageFor ? { id: messageFor.id, name: messageFor.candidateName, email: messageFor.candidateEmail } : null}
             />
+
+            {activeCall && (
+                <CallEmbed
+                    token={activeCall.token}
+                    url={activeCall.url}
+                    room={activeCall.room}
+                    name={session?.user?.name ?? "Recruteur"}
+                    title={activeCall.title}
+                    onClose={() => {
+                        setActiveCall(null)
+                        refresh()
+                    }}
+                />
+            )}
         </>
     )
 
@@ -221,6 +259,8 @@ export function useRecruitmentWorkflow({ onChanged }: { onChanged: () => Promise
         reportInterview: (interview, candidate, preset) => setOutcomeFor({ candidate, interview, preset }),
         deleteInterview: setToDelete,
         message: setMessageFor,
+        joinCall,
+        joiningId,
         busyId,
         dialogs,
     }

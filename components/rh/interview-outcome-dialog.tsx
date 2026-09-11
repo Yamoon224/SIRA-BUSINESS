@@ -96,7 +96,7 @@ export function InterviewOutcomeDialog({ open, onOpenChange, candidate, intervie
                 <DialogHeader>
                     <DialogTitle>{status === "CANCELLED" && preset === "CANCELLED" ? "Annuler l'entretien" : "Compte rendu d'entretien"}</DialogTitle>
                     <DialogDescription>
-                        {candidate.name} · {INTERVIEW_TYPE_META[interview.type].label.toLowerCase()} · {formatDateTime(interview.scheduledAt)}
+                        {candidate.name} · {INTERVIEW_TYPE_META[interview.type].label} · {formatDateTime(interview.scheduledAt)}
                     </DialogDescription>
                 </DialogHeader>
 

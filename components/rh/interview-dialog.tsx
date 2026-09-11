@@ -38,15 +38,16 @@ function defaultStart(): string {
 }
 
 /**
- * Planification (ou modification) d'un entretien. Le candidat est convoqué par
- * une notification Goriya, sauf si on décoche — ou si la date est déjà passée.
+ * Planification (ou modification) d'un entretien. En visio, une salle GORIYA
+ * Meet est ouverte : le recruteur la rejoint depuis la liste des entretiens,
+ * le candidat depuis son espace Goriya Meet. Le candidat est convoqué par une
+ * notification Goriya, sauf si on décoche — ou si la date est déjà passée.
  */
 export function InterviewDialog({ open, onOpenChange, candidate, interview, onSaved }: InterviewDialogProps) {
     const [type, setType] = useState<InterviewType>("VIDEO")
     const [when, setWhen] = useState("")
     const [duration, setDuration] = useState("45")
     const [location, setLocation] = useState("")
-    const [meetingUrl, setMeetingUrl] = useState("")
     const [interviewers, setInterviewers] = useState("")
     const [description, setDescription] = useState("")
     const [notify, setNotify] = useState(true)
@@ -59,7 +60,6 @@ export function InterviewDialog({ open, onOpenChange, candidate, interview, onSa
         setWhen(interview ? toDatetimeLocal(interview.scheduledAt) : defaultStart())
         setDuration(String(interview?.durationMinutes ?? 45))
         setLocation(interview?.location ?? "")
-        setMeetingUrl(interview?.meetingUrl ?? "")
         setInterviewers(interview?.interviewers ?? "")
         setDescription(interview?.description ?? "")
         setNotify(true)
@@ -70,14 +70,11 @@ export function InterviewDialog({ open, onOpenChange, candidate, interview, onSa
 
     const start = when ? new Date(when) : null
     const inPast = !!start && start.getTime() < Date.now()
-    const rescheduled = !!interview && !!start && start.getTime() !== new Date(interview.scheduledAt).getTime()
+    const changed = !!interview && !!start && (start.getTime() !== new Date(interview.scheduledAt).getTime() || type !== interview.type)
     const meta = INTERVIEW_TYPE_META[type]
 
     const submit = async () => {
         if (!start || Number.isNaN(start.getTime())) return setError("Indiquez la date et l'heure de l'entretien.")
-        if (type === "VIDEO" && meetingUrl.trim() && !/^https?:\/\//i.test(meetingUrl.trim())) {
-            return setError("Le lien de visioconférence doit commencer par https://.")
-        }
         setSaving(true)
         setError(null)
         const payload = {
@@ -85,7 +82,6 @@ export function InterviewDialog({ open, onOpenChange, candidate, interview, onSa
             scheduledAt: start.toISOString(),
             durationMinutes: Number(duration),
             location: type === "VIDEO" ? null : location.trim() || null,
-            meetingUrl: type === "VIDEO" ? meetingUrl.trim() || null : null,
             interviewers: interviewers.trim() || null,
             description: description.trim() || null,
             notifyCandidate: notify,
@@ -110,7 +106,7 @@ export function InterviewDialog({ open, onOpenChange, candidate, interview, onSa
         }
     }
 
-    const showNotify = !inPast && (!interview || rescheduled)
+    const showNotify = !inPast && (!interview || changed)
 
     return (
         <Dialog open={open} onOpenChange={(next) => !saving && onOpenChange(next)}>
@@ -166,14 +162,20 @@ export function InterviewDialog({ open, onOpenChange, candidate, interview, onSa
                         </div>
                     </div>
 
-                    <label className="block">
-                        <span className="mb-1.5 block text-sm font-medium text-foreground">{meta.locationLabel}</span>
-                        {type === "VIDEO" ? (
-                            <Input type="url" value={meetingUrl} onChange={(e) => { setMeetingUrl(e.target.value); setError(null) }} placeholder={meta.locationPlaceholder} />
-                        ) : (
+                    {type === "VIDEO" ? (
+                        <div className="flex items-start gap-2.5 rounded-lg border border-primary/20 bg-secondary/50 px-3 py-2.5 text-sm">
+                            <Video className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                            <p className="text-foreground">
+                                Une salle <strong>GORIYA Meet</strong> est ouverte pour cet entretien. Vous la rejoignez depuis la liste des
+                                entretiens ; le candidat, depuis son espace Goriya Meet. Elle se ferme une fois l&apos;entretien passé ou annulé.
+                            </p>
+                        </div>
+                    ) : (
+                        <label className="block">
+                            <span className="mb-1.5 block text-sm font-medium text-foreground">{meta.locationLabel}</span>
                             <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder={meta.locationPlaceholder} />
-                        )}
-                    </label>
+                        </label>
+                    )}
 
                     <label className="block">
                         <span className="mb-1.5 block text-sm font-medium text-foreground">Intervenants</span>
@@ -189,9 +191,10 @@ export function InterviewDialog({ open, onOpenChange, candidate, interview, onSa
                         <label className="flex items-start gap-2 rounded-lg bg-muted/50 px-3 py-2.5 text-sm text-foreground">
                             <Checkbox checked={notify} onCheckedChange={(v) => setNotify(v === true)} className="mt-0.5" />
                             <span>
-                                {rescheduled ? "Prévenir le candidat du nouvel horaire" : "Convoquer le candidat"}
+                                {interview ? "Prévenir le candidat du changement" : "Convoquer le candidat"}
                                 <span className="block text-xs text-muted-foreground">
-                                    Notification Goriya avec la date, le format{type === "VIDEO" ? " et le lien" : type === "ONSITE" ? " et l'adresse" : ""}.
+                                    Notification Goriya avec la date, le format
+                                    {type === "VIDEO" ? " et l'accès à la salle GORIYA Meet" : type === "ONSITE" ? " et l'adresse" : ""}.
                                 </span>
                             </span>
                         </label>

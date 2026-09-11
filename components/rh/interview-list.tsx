@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Ban, ClipboardCheck, ExternalLink, MapPin, MoreHorizontal, Pencil, Phone, Star, Trash2, UserX, Video } from "lucide-react"
+import { Ban, ClipboardCheck, Loader2, MapPin, MoreHorizontal, Pencil, Phone, Star, Trash2, UserX, Video } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
@@ -78,7 +78,7 @@ function InterviewItem({ interview, workflow, showCandidate, candidate }: { inte
                             {ref.name}
                         </Link>
                     ) : (
-                        <p className="font-semibold text-foreground">Entretien {INTERVIEW_TYPE_META[interview.type].label.toLowerCase()}</p>
+                        <p className="font-semibold text-foreground">Entretien · {INTERVIEW_TYPE_META[interview.type].label}</p>
                     )}
                     <StatusPill meta={INTERVIEW_STATUS_META[interview.status]} />
                     {feedbackDue && <StatusPill meta={{ label: "Compte rendu à rédiger", className: "bg-amber-100 text-amber-800" }} />}
@@ -95,11 +95,16 @@ function InterviewItem({ interview, workflow, showCandidate, candidate }: { inte
                     {interview.interviewers && <span>Avec {interview.interviewers}</span>}
                 </p>
 
-                {interview.meetingUrl && interview.status === "SCHEDULED" && (
-                    <a href={interview.meetingUrl} target="_blank" rel="noopener noreferrer" className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
-                        <ExternalLink className="h-3.5 w-3.5" />
-                        Rejoindre la visioconférence
-                    </a>
+                {interview.status === "SCHEDULED" && interview.callSession && interview.callSession.status !== "ENDED" && (
+                    <Button
+                        size="sm"
+                        disabled={workflow.joiningId === interview.id}
+                        onClick={() => void workflow.joinCall(interview, ref)}
+                        className="mt-2 bg-brand-gradient text-white"
+                    >
+                        {workflow.joiningId === interview.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Video className="h-4 w-4" />}
+                        Rejoindre sur GORIYA Meet
+                    </Button>
                 )}
                 {interview.location && <p className="mt-1 text-xs text-foreground">{interview.location}</p>}
                 {interview.rating !== null && <RatingStars value={interview.rating} className="mt-2" />}

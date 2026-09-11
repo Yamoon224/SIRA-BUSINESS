@@ -100,7 +100,7 @@ function AppelsContent() {
         <div className="space-y-6">
             <PageHeader
                 title="Goriya Meet"
-                description="Planifiez vos entretiens et réunions en visioconférence (GORIYA Call) et retrouvez-en l'historique."
+                description="Planifiez vos entretiens et réunions en visioconférence sur GORIYA Meet (Lunion Meet) et retrouvez-en l'historique. Les entretiens vidéo planifiés depuis Recrutements y apparaissent aussi."
                 actions={
                     <Button className="gap-1.5 bg-blue-500 hover:bg-blue-600" onClick={() => setCreateOpen(true)}>
                         <Plus className="h-4 w-4" />Planifier un appel
@@ -133,6 +133,9 @@ function AppelsContent() {
                                             {new Date(callSession.scheduledAt).toLocaleString("fr-FR")}
                                         </p>
                                     )}
+                                    {callSession.isHost === false && callSession.hostName && (
+                                        <p className="mt-1 text-xs text-muted-foreground">Organisé par {callSession.hostName}</p>
+                                    )}
                                 </div>
                                 {callSession.status !== "ENDED" && (
                                     <div className="flex items-center gap-2">
@@ -145,9 +148,11 @@ function AppelsContent() {
                                             <LogIn className="h-3.5 w-3.5" />
                                             {joiningId === callSession.id ? "Connexion..." : "Rejoindre"}
                                         </Button>
-                                        <Button variant="outline" size="sm" className="h-9 gap-1.5 text-xs text-red-500 hover:bg-red-50" onClick={() => handleEnd(callSession)}>
-                                            <PhoneOff className="h-3.5 w-3.5" />Clôturer
-                                        </Button>
+                                        {callSession.isHost !== false && (
+                                            <Button variant="outline" size="sm" className="h-9 gap-1.5 text-xs text-red-500 hover:bg-red-50" onClick={() => handleEnd(callSession)}>
+                                                <PhoneOff className="h-3.5 w-3.5" />Clôturer
+                                            </Button>
+                                        )}
                                     </div>
                                 )}
                             </div>

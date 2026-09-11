@@ -29,7 +29,8 @@ export interface IRecruitmentInterview {
     endsAt: string
     durationMinutes: number
     location: string | null
-    meetingUrl: string | null
+    /** Entretien en visio : salle GORIYA Meet, rejointe via /calls/{id}/join. */
+    callSession: { id: string; status: "SCHEDULED" | "ACTIVE" | "ENDED" } | null
     interviewers: string | null
     description: string | null
     status: InterviewStatus
@@ -112,7 +113,6 @@ export interface InterviewPayload {
     scheduledAt: string
     durationMinutes?: number | null
     location?: string | null
-    meetingUrl?: string | null
     interviewers?: string | null
     description?: string | null
     notifyCandidate?: boolean

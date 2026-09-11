@@ -201,7 +201,8 @@ export const CANDIDATE_VISIBLE_STATUS: Record<RecruitmentStage, string> = {
 
 export const INTERVIEW_TYPE_META: Record<InterviewType, { label: string; locationLabel: string; locationPlaceholder: string }> = {
     PHONE: { label: "Téléphone", locationLabel: "Numéro à appeler", locationPlaceholder: "+225 07 00 00 00 00 (facultatif)" },
-    VIDEO: { label: "Visioconférence", locationLabel: "Lien de visioconférence", locationPlaceholder: "https://meet.google.com/…" },
+    // La visio se tient toujours sur GORIYA Meet : pas de lieu à saisir.
+    VIDEO: { label: "GORIYA Meet", locationLabel: "Salle GORIYA Meet", locationPlaceholder: "" },
     ONSITE: { label: "Sur place", locationLabel: "Adresse", locationPlaceholder: "Immeuble, étage, quartier…" },
 }
 
