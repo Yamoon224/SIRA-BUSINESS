@@ -15,6 +15,10 @@ export interface IEmployeeSurvey {
     description: string | null
     questions: ISurveyQuestion[]
     status: SurveyStatus
+    /** Passée cette date, l'évaluation ACTIVE est clôturée automatiquement. */
+    dueDate: string | null
+    /** Département ciblé — `null` = toute l'entreprise. */
+    department: string | null
     createdAt: string
 }
 
@@ -31,7 +35,7 @@ export const employeeSurveyService = {
         return apiRequest<IEmployeeSurvey[]>({ endpoint: "/employee-surveys", method: "GET" })
     },
 
-    create: async (data: { title: string; description?: string; questions: ISurveyQuestion[] }) => {
+    create: async (data: { title: string; description?: string; questions: ISurveyQuestion[]; dueDate?: string | null; department?: string | null }) => {
         return apiRequest<IEmployeeSurvey>({ endpoint: "/employee-surveys", method: "POST", data })
     },
 

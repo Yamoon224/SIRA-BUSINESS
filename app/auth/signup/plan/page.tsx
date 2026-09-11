@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { PhoneInput, telephoneValide } from "@/components/phone-input"
 import { Check, Gift, Loader2, Sparkles, Star } from "lucide-react"
+import { CustomPlanCard } from "@/components/marketing/custom-plan-card"
 import { subscriptionService } from "@/lib/api/subscription.service"
 import { extractApiErrorMessage } from "@/lib/api-error"
 import {
@@ -331,6 +332,9 @@ export default function ChoosePlanPage() {
                         </div>
                     )
                 })}
+                {/* Pas un SubscriptionPlan sélectionnable : le CTA ouvre le choix
+                    du canal de contact plutôt qu'une souscription/checkout. */}
+                <CustomPlanCard />
             </div>
 
             <div className="mt-10 text-center">

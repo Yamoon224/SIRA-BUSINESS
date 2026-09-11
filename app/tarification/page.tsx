@@ -10,13 +10,12 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Reveal, ScrollProgress, MarketingMotionStyles } from "@/components/marketing/reveal"
 import { SiteHeader } from "@/components/marketing/site-header"
 import { SiteFooter } from "@/components/marketing/site-footer"
-import { Building2, Check, Gift, Mail, MessageCircle, Sparkles } from "lucide-react"
+import { CustomPlanCard } from "@/components/marketing/custom-plan-card"
+import { Check, Gift, Sparkles } from "lucide-react"
 import { subscriptionService } from "@/lib/api/subscription.service"
-import { SUPPORT_EMAIL, SUPPORT_EMAIL_HREF, SUPPORT_PHONE, SUPPORT_WHATSAPP_HREF } from "@/lib/contact"
 
 interface Plan {
     id: string
@@ -64,7 +63,6 @@ function findPopularPlanId(plans: Plan[]): string | null {
 export default function TarificationPage() {
     const [plans, setPlans] = useState<Plan[]>([])
     const [loading, setLoading] = useState(true)
-    const [contactOpen, setContactOpen] = useState(false)
 
     useEffect(() => {
         subscriptionService.getPlans("ENTREPRISE")
@@ -120,9 +118,9 @@ export default function TarificationPage() {
                 <div className="container mx-auto px-4 md:px-6">
                     {loading ? (
                         <div className="mx-auto flex max-w-[1100px] flex-wrap justify-center gap-6">
-                            <Skeleton className="h-[440px] w-full max-w-sm rounded-md sm:w-[calc(50%-0.75rem)] lg:w-[330px]" />
-                            <Skeleton className="h-[440px] w-full max-w-sm rounded-md sm:w-[calc(50%-0.75rem)] lg:w-[330px]" />
-                            <Skeleton className="h-[440px] w-full max-w-sm rounded-md sm:w-[calc(50%-0.75rem)] lg:w-[330px]" />
+                            <Skeleton className="h-[440px] w-full max-w-sm rounded-md bg-brand-gradient sm:w-[calc(50%-0.75rem)] lg:w-[330px]" />
+                            <Skeleton className="h-[440px] w-full max-w-sm rounded-md bg-brand-gradient sm:w-[calc(50%-0.75rem)] lg:w-[330px]" />
+                            <Skeleton className="h-[440px] w-full max-w-sm rounded-md bg-brand-gradient sm:w-[calc(50%-0.75rem)] lg:w-[330px]" />
                         </div>
                     ) : sortedPlans.length === 0 ? (
                         <p className="text-center text-sm text-[#5B6472]">
@@ -227,89 +225,11 @@ export default function TarificationPage() {
                                 pas de checkout) — même disposition que les autres cartes,
                                 le CTA ouvre le choix du canal de contact plutôt qu'un
                                 abonnement. */}
-                            <div className="relative flex w-full max-w-sm flex-col overflow-hidden rounded-md border border-black/[0.06] bg-white shadow-sm transition-transform duration-300 hover:-translate-y-1 sm:w-[calc(50%-0.75rem)] lg:w-[330px]">
-                                <div className="p-7">
-                                    <div className="flex items-center gap-2">
-                                        <Building2 className="h-4 w-4 text-[#2447FF]" />
-                                        <h3 className="text-xl font-semibold text-[#0B1220]">Sur mesure</h3>
-                                    </div>
-
-                                    <p className="mt-1 text-sm text-[#5B6472]">
-                                        Grand compte ou besoins spécifiques
-                                    </p>
-
-                                    <div className="mt-5 flex items-baseline gap-1.5">
-                                        <span className="text-4xl text-[#0B1220]">Sur devis</span>
-                                    </div>
-
-                                    <Button
-                                        variant="outline"
-                                        className="mt-6 w-full rounded-full border-black/10 transition-transform duration-200 hover:scale-[1.02]"
-                                        onClick={() => setContactOpen(true)}
-                                    >
-                                        Nous contacter
-                                    </Button>
-                                </div>
-
-                                <div className="flex-1 border-t border-black/[0.06] bg-[#F7F8FC] px-7 py-6">
-                                    <ul className="space-y-3">
-                                        {[
-                                            "Volume d'offres et d'utilisateurs illimité",
-                                            "Intégrations API dédiées",
-                                            "SLA et accompagnement par un account manager dédié",
-                                        ].map((f) => (
-                                            <li key={f} className="flex items-start gap-2.5 text-sm text-[#5B6472]">
-                                                <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#2447FF]" />
-                                                {f}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            </div>
+                            <CustomPlanCard />
                         </Reveal>
                     )}
                 </div>
             </section>
-
-            {/* Choix du canal de contact pour l'offre sur mesure */}
-            <Dialog open={contactOpen} onOpenChange={setContactOpen}>
-                <DialogContent className="max-w-sm">
-                    <DialogHeader>
-                        <DialogTitle>Contactez-nous</DialogTitle>
-                        <DialogDescription>
-                            Décrivez vos besoins, notre équipe vous propose un forfait sur mesure.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="flex flex-col gap-3">
-                        <a
-                            href={SUPPORT_EMAIL_HREF}
-                            className="flex items-center gap-3 rounded-lg border border-black/[0.06] px-4 py-3 transition-colors hover:bg-[#F7F8FC]"
-                        >
-                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50">
-                                <Mail className="h-4 w-4 text-blue-600" />
-                            </span>
-                            <span>
-                                <span className="block text-sm font-medium text-[#0B1220]">Par email</span>
-                                <span className="block text-xs text-[#5B6472]">{SUPPORT_EMAIL}</span>
-                            </span>
-                        </a>
-                        <a
-                            href={SUPPORT_WHATSAPP_HREF}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="flex items-center gap-3 rounded-lg border border-black/[0.06] px-4 py-3 transition-colors hover:bg-[#F7F8FC]"
-                        >
-                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green-50">
-                                <MessageCircle className="h-4 w-4 text-green-600" />
-                            </span>
-                            <span>
-                                <span className="block text-sm font-medium text-[#0B1220]">Par téléphone / WhatsApp</span>
-                                <span className="block text-xs text-[#5B6472]">{SUPPORT_PHONE}</span>
-                            </span>
-                        </a>
-                    </div>
-                </DialogContent>
-            </Dialog>
 
             {/* FAQ */}
             <section className="bg-white py-24">

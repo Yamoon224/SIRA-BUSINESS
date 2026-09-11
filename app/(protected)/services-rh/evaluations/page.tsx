@@ -8,8 +8,10 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { ClipboardList, Plus, Trash2, BarChart3, Star } from "lucide-react"
+import { AutocompleteInput } from "@/components/autocomplete-input"
+import { ClipboardList, Plus, Trash2, BarChart3, Star, Building2, CalendarClock } from "lucide-react"
 import { SubscriptionGate } from "@/components/subscription-gate"
+import { DEPARTMENTS } from "@/lib/data/rh"
 import {
     employeeSurveyService,
     type IEmployeeSurvey,
@@ -36,6 +38,8 @@ function EvaluationsContent() {
     const [title, setTitle] = useState("")
     const [description, setDescription] = useState("")
     const [questions, setQuestions] = useState<ISurveyQuestion[]>([newQuestion()])
+    const [dueDate, setDueDate] = useState("")
+    const [department, setDepartment] = useState("")
     const [creating, setCreating] = useState(false)
 
     const [statsFor, setStatsFor] = useState<IEmployeeSurvey | null>(null)
@@ -63,11 +67,19 @@ function EvaluationsContent() {
         if (!title.trim() || validQuestions.length === 0) return
         setCreating(true)
         try {
-            await employeeSurveyService.create({ title: title.trim(), description: description.trim() || undefined, questions: validQuestions })
+            await employeeSurveyService.create({
+                title: title.trim(),
+                description: description.trim() || undefined,
+                questions: validQuestions,
+                dueDate: dueDate || null,
+                department: department.trim() || null,
+            })
             setCreateOpen(false)
             setTitle("")
             setDescription("")
             setQuestions([newQuestion()])
+            setDueDate("")
+            setDepartment("")
             await load()
         } catch (err) {
             console.error("[evaluations] create error:", err)
@@ -147,7 +159,15 @@ function EvaluationsContent() {
                                             {STATUS_META[survey.status].label}
                                         </span>
                                     </div>
-                                    <p className="text-xs text-muted-foreground">{survey.questions.length} question(s)</p>
+                                    <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                                        <span>{survey.questions.length} question(s)</span>
+                                        {survey.department && (
+                                            <span className="inline-flex items-center gap-1"><Building2 className="h-3 w-3" />{survey.department}</span>
+                                        )}
+                                        {survey.dueDate && (
+                                            <span className="inline-flex items-center gap-1"><CalendarClock className="h-3 w-3" />Échéance {new Date(survey.dueDate).toLocaleDateString("fr-FR")}</span>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="flex flex-wrap items-center gap-2">
                                     <Select value={survey.status} onValueChange={(v) => handleStatusChange(survey, v as SurveyStatus)}>
@@ -178,6 +198,26 @@ function EvaluationsContent() {
                     <div className="space-y-3">
                         <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Titre de l'enquête" />
                         <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description (optionnel)" className="min-h-[60px]" />
+
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div>
+                                <p className="mb-1 text-xs text-muted-foreground">Département ciblé (optionnel)</p>
+                                <AutocompleteInput
+                                    value={department}
+                                    onChange={setDepartment}
+                                    options={DEPARTMENTS}
+                                    placeholder="Toute l'entreprise"
+                                    aria-label="Département ciblé"
+                                />
+                            </div>
+                            <div>
+                                <p className="mb-1 text-xs text-muted-foreground">Échéance (optionnel)</p>
+                                <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+                            </div>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground">
+                            Sans département, l&apos;évaluation est visible par toute l&apos;entreprise. Passée l&apos;échéance, une évaluation active se clôture automatiquement.
+                        </p>
 
                         <div className="space-y-2">
                             <p className="text-xs font-medium text-foreground">Questions</p>

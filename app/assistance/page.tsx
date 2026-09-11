@@ -278,6 +278,16 @@ export default function AssistancePage() {
                                     </ul>
                                 </div>
                             ))}
+                            {/* Pas un forfait à prix fixe : contact direct plutôt qu'un
+                                lien "Voir tous les détails" qui ne mènerait à rien de plus. */}
+                            <div className="flex flex-col justify-between rounded-lg border border-dashed border-border bg-muted/20 p-4">
+                                <div>
+                                    <p className="text-sm font-semibold text-foreground">Sur mesure</p>
+                                    <p className="mt-1 mb-3 text-xl font-bold text-foreground">Sur devis</p>
+                                    <p className="text-xs text-muted-foreground">Grand compte ou besoins spécifiques : volumes, intégrations dédiées, accompagnement.</p>
+                                </div>
+                                <a href={SUPPORT_EMAIL_HREF} className="mt-3 text-xs font-medium text-blue-600 hover:underline">Nous contacter →</a>
+                            </div>
                         </div>
                     )}
                 </div>

@@ -179,7 +179,7 @@ export function RecrutementsContent() {
             )}
 
             {loading ? (
-                <div className="flex gap-3 overflow-hidden" aria-busy="true">
+                <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-2" aria-busy="true">
                     {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-80 w-72 shrink-0 animate-pulse rounded-xl bg-muted" />)}
                 </div>
             ) : loadError ? (
@@ -283,7 +283,7 @@ function CandidateTable({ candidates, workflow }: { candidates: IRecruitmentCand
     const rows = [...candidates].sort((a, b) => rank(a.stage) - rank(b.stage) || (b.appliedDate ?? "").localeCompare(a.appliedDate ?? ""))
 
     return (
-        <div className="overflow-hidden rounded-xl border border-border bg-white">
+        <div className="overflow-x-auto rounded-xl border border-border bg-white">
             <Table>
                 <TableHeader>
                     <TableRow className="bg-muted/40 hover:bg-muted/40">

@@ -24,7 +24,7 @@ import {
     Gift
 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
-import {  } from "lucide-react"
+import { CustomPlanCard } from "@/components/marketing/custom-plan-card"
 import { subscriptionService } from "@/lib/api/subscription.service"
 
 
@@ -407,12 +407,12 @@ export default function HomePage() {
                             </p>
                         </div>
 
-                        <div className="tilt-card rounded-md bg-[#FFF4F0] p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                        <div className="tilt-card rounded-md bg-brand-gradient p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                             <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#FF6B4A]">
                                 <Wallet className="h-5 w-5 text-white" />
                             </div>
-                            <h3 className="mt-5 text-base font-semibold text-[#0B1220]">Mobile Money</h3>
-                            <p className="mt-2 text-sm leading-relaxed text-[#5B6472]">
+                            <h3 className="mt-5 text-base font-semibold text-white">Mobile Money</h3>
+                            <p className="mt-2 text-sm leading-relaxed text-[#e6f1ff]">
                                 Abonnement réglé via Paiement Pro, comme vos autres services du quotidien.
                             </p>
                         </div>
@@ -597,10 +597,11 @@ export default function HomePage() {
             </section>
 
             {/* Region fit */}
-            <section className="bg-[#FFF4F0] py-20">
+            <section className="bg-brand-gradient py-20">
                 <div className="container mx-auto px-4 md:px-6">
                     <Reveal>
                         <SectionHeading
+                            tone="light"
                             title="Conçu pour vos réalités, pas importé d'ailleurs"
                             subtitle="Une plateforme pensée pour les entreprises de Côte d'Ivoire et de la zone UEMOA."
                         />
@@ -610,10 +611,10 @@ export default function HomePage() {
                             <Reveal
                                 key={point.title}
                                 delay={i * 90}
-                                className="rounded-md bg-white/70 p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-white"
+                                className="rounded-md bg-white/10 p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-white/15"
                             >
-                                <h3 className="text-[15px] font-semibold text-[#0B1220]">{point.title}</h3>
-                                <p className="mt-2 text-sm leading-relaxed text-[#5B6472]">{point.description}</p>
+                                <h3 className="text-[15px] font-semibold text-white">{point.title}</h3>
+                                <p className="mt-2 text-sm leading-relaxed text-[#e6f1ff]">{point.description}</p>
                             </Reveal>
                         ))}
                     </div>
@@ -647,9 +648,9 @@ export default function HomePage() {
                     
                     {loading ? (
                         <div className="mx-auto flex max-w-[1100px] flex-wrap justify-center gap-6">
-                            <Skeleton className="h-[440px] w-full max-w-sm rounded-md sm:w-[calc(50%-0.75rem)] lg:w-[330px]" />
-                            <Skeleton className="h-[440px] w-full max-w-sm rounded-md sm:w-[calc(50%-0.75rem)] lg:w-[330px]" />
-                            <Skeleton className="h-[440px] w-full max-w-sm rounded-md sm:w-[calc(50%-0.75rem)] lg:w-[330px]" />
+                            <Skeleton className="h-[440px] w-full max-w-sm rounded-md bg-brand-gradient sm:w-[calc(50%-0.75rem)] lg:w-[330px]" />
+                            <Skeleton className="h-[440px] w-full max-w-sm rounded-md bg-brand-gradient sm:w-[calc(50%-0.75rem)] lg:w-[330px]" />
+                            <Skeleton className="h-[440px] w-full max-w-sm rounded-md bg-brand-gradient sm:w-[calc(50%-0.75rem)] lg:w-[330px]" />
                         </div>
                     ) : sortedPlans.length === 0 ? (
                         <p className="text-center text-sm text-[#5B6472]">
@@ -749,6 +750,7 @@ export default function HomePage() {
                                     </div>
                                 )
                             })}
+                            <CustomPlanCard />
                         </Reveal>
                     )}
                 </div>
