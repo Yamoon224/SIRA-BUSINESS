@@ -248,6 +248,10 @@ export const employeeService = {
 
     removeLeave: async (id: string) => apiRequest<{ message: string }>({ endpoint: `/employee-leaves/${id}`, method: "DELETE" }),
 
+    /** Suppression par lot (sélection multiple sur la page Congés). */
+    removeLeaves: async (ids: string[]) =>
+        unwrap<{ deleted: number }>(await apiRequest({ endpoint: "/employee-leaves/bulk-delete", method: "POST", data: { ids } })),
+
     // ── Demandes RH ──
     /** Demandes RH de toute l'entreprise (page Demandes RH), employé inclus. */
     companyRequests: async (filters: HrRequestFilters = {}) => {

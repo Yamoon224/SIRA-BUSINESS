@@ -11,10 +11,12 @@ import {
     ChevronRight,
     Hourglass,
     Search,
+    Trash2,
     UserX,
 } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -73,6 +75,7 @@ export function CongesContent() {
     const [type, setType] = useState<string>(ALL)
     const [period, setPeriod] = useState<Period>("all")
     const [page, setPage] = useState(1)
+    const [selected, setSelected] = useState<Set<string>>(new Set())
 
     const loadLeaves = useCallback(async () => {
         try {
@@ -112,7 +115,7 @@ export function CongesContent() {
         await Promise.all([loadLeaves(), loadBalances(balanceYear)])
     }, [loadLeaves, loadBalances, balanceYear])
 
-    const { requestDecision, requestDelete, dialogs } = useLeaveWorkflow(refresh)
+    const { requestDecision, requestDelete, requestBulkDelete, dialogs } = useLeaveWorkflow(refresh, () => setSelected(new Set()))
 
     const kpis = useMemo(() => {
         const today = todayIso()
@@ -145,6 +148,7 @@ export function CongesContent() {
 
     useEffect(() => {
         setPage(1)
+        setSelected(new Set())
     }, [query, status, type, period])
 
     const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
@@ -160,6 +164,22 @@ export function CongesContent() {
     }, [balances, balanceYear, currentYear])
 
     const presentEmployees = employees.filter((e) => e.status !== "TERMINATED")
+
+    const allPageSelected = pageRows.length > 0 && pageRows.every((l) => selected.has(l.id))
+    const togglePage = (checked: boolean) => {
+        setSelected((prev) => {
+            const next = new Set(prev)
+            for (const l of pageRows) checked ? next.add(l.id) : next.delete(l.id)
+            return next
+        })
+    }
+    const toggleOne = (id: string, checked: boolean) => {
+        setSelected((prev) => {
+            const next = new Set(prev)
+            checked ? next.add(id) : next.delete(id)
+            return next
+        })
+    }
 
     return (
         <div className="space-y-5 pb-8">
@@ -242,6 +262,28 @@ export function CongesContent() {
                             </div>
                         </div>
 
+                        {selected.size > 0 && (
+                            <div className="flex items-center justify-between gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5">
+                                <span className="text-sm font-medium text-red-700">
+                                    {selected.size} congé{selected.size > 1 ? "s" : ""} sélectionné{selected.size > 1 ? "s" : ""}
+                                </span>
+                                <div className="flex items-center gap-2">
+                                    <Button variant="ghost" size="sm" onClick={() => setSelected(new Set())}>
+                                        Annuler
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="gap-1.5 border-red-200 text-red-600 hover:bg-red-100 hover:text-red-700"
+                                        onClick={() => requestBulkDelete(Array.from(selected))}
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                        Supprimer
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+
                         {loading ? (
                             <div className="space-y-2 rounded-xl border border-border bg-white p-3" aria-busy="true">
                                 {Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-12 animate-pulse rounded-md bg-muted" />)}
@@ -269,6 +311,13 @@ export function CongesContent() {
                                 <Table>
                                     <TableHeader>
                                         <TableRow className="bg-muted/40 hover:bg-muted/40">
+                                            <TableHead className="w-10">
+                                                <Checkbox
+                                                    checked={allPageSelected}
+                                                    onCheckedChange={(v) => togglePage(v === true)}
+                                                    aria-label="Tout sélectionner"
+                                                />
+                                            </TableHead>
                                             <TableHead>Employé</TableHead>
                                             <TableHead className="hidden md:table-cell">Type</TableHead>
                                             <TableHead>Période</TableHead>
@@ -280,6 +329,13 @@ export function CongesContent() {
                                     <TableBody>
                                         {pageRows.map((leave) => (
                                             <TableRow key={leave.id} className={cn(leave.status === "PENDING" && "bg-amber-50/40")}>
+                                                <TableCell>
+                                                    <Checkbox
+                                                        checked={selected.has(leave.id)}
+                                                        onCheckedChange={(v) => toggleOne(leave.id, v === true)}
+                                                        aria-label="Sélectionner ce congé"
+                                                    />
+                                                </TableCell>
                                                 <TableCell>
                                                     <div className="flex min-w-0 items-center gap-3">
                                                         {leave.employee && (

@@ -28,12 +28,17 @@ const DECISION_COPY: Partial<Record<HrWorkflowStatus, { title: string; confirm: 
  * Décisions et suppression d'un congé, partagées par la fiche employé et la
  * page Congés : mêmes modales, mêmes messages, mêmes règles. `dialogs` est à
  * placer une fois dans le rendu de l'écran appelant.
+ *
+ * `onBulkDeleted` (page Congés uniquement) vide la sélection de la page une
+ * fois la suppression par lot confirmée.
  */
-export function useLeaveWorkflow(onChanged: () => Promise<void> | void) {
+export function useLeaveWorkflow(onChanged: () => Promise<void> | void, onBulkDeleted?: () => void) {
     const [decision, setDecision] = useState<Decision | null>(null)
     const [deciding, setDeciding] = useState(false)
     const [toDelete, setToDelete] = useState<IEmployeeLeave | null>(null)
     const [deleting, setDeleting] = useState(false)
+    const [bulkIds, setBulkIds] = useState<string[] | null>(null)
+    const [bulkDeleting, setBulkDeleting] = useState(false)
 
     const decide = async (comment: string | null) => {
         if (!decision) return
@@ -62,6 +67,22 @@ export function useLeaveWorkflow(onChanged: () => Promise<void> | void) {
             toast.error(extractApiErrorMessage(err, "La suppression du congé a échoué."))
         } finally {
             setDeleting(false)
+        }
+    }
+
+    const removeBulk = async () => {
+        if (!bulkIds || bulkIds.length === 0) return
+        setBulkDeleting(true)
+        try {
+            const { deleted } = await employeeService.removeLeaves(bulkIds)
+            toast.success(deleted > 1 ? `${deleted} congés supprimés.` : "Congé supprimé.")
+            setBulkIds(null)
+            onBulkDeleted?.()
+            await onChanged()
+        } catch (err) {
+            toast.error(extractApiErrorMessage(err, "La suppression a échoué."))
+        } finally {
+            setBulkDeleting(false)
         }
     }
 
@@ -95,12 +116,23 @@ export function useLeaveWorkflow(onChanged: () => Promise<void> | void) {
                 loading={deleting}
                 onConfirm={remove}
             />
+            <ConfirmDialog
+                open={!!bulkIds}
+                onOpenChange={(open) => !open && setBulkIds(null)}
+                title={`Supprimer ${bulkIds?.length ?? 0} congé${(bulkIds?.length ?? 0) > 1 ? "s" : ""} ?`}
+                description="Ils disparaîtront de l'historique des employés concernés. Cette action est définitive."
+                confirmLabel="Supprimer"
+                destructive
+                loading={bulkDeleting}
+                onConfirm={removeBulk}
+            />
         </>
     )
 
     return {
         requestDecision: (leave: IEmployeeLeave, status: HrWorkflowStatus) => setDecision({ leave, status }),
         requestDelete: (leave: IEmployeeLeave) => setToDelete(leave),
+        requestBulkDelete: (ids: string[]) => setBulkIds(ids),
         dialogs,
     }
 }
@@ -114,9 +146,9 @@ interface LeaveActionButtonsProps {
 }
 
 /**
- * Actions possibles selon le statut : un congé en attente s'approuve ou se
- * refuse, un congé approuvé s'annule (il ne se supprime pas), un congé refusé
- * ou annulé peut être retiré de l'historique.
+ * Actions possibles selon le statut : un congé en attente s'approuve, se
+ * refuse ou s'annule. Une fois approuvé, il est définitif — on ne l'annule
+ * plus, on le supprime si besoin (retour anticipé, erreur d'approbation).
  */
 export function LeaveActionButtons({ leave, onDecide, onDelete, compact = false }: LeaveActionButtonsProps) {
     const size = compact ? "icon-sm" : "sm"
@@ -148,32 +180,25 @@ export function LeaveActionButtons({ leave, onDecide, onDelete, compact = false 
                     </Button>
                 </>
             )}
-            {leave.status === "APPROVED" && (
-                <Button size="sm" variant="outline" className="hover:bg-muted hover:text-foreground" onClick={() => onDecide(leave, "CANCELLED")}>
-                    Annuler
-                </Button>
-            )}
-            {leave.status !== "APPROVED" && (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button size="icon-sm" variant="ghost" aria-label="Autres actions" className="hover:bg-muted hover:text-foreground">
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        {leave.status === "PENDING" && (
-                            <DropdownMenuItem onSelect={() => onDecide(leave, "CANCELLED")}>
-                                <X className="h-4 w-4" />
-                                Annuler la demande
-                            </DropdownMenuItem>
-                        )}
-                        <DropdownMenuItem onSelect={() => onDelete(leave)} className="text-red-600 focus:text-red-600">
-                            <Trash2 className="h-4 w-4" />
-                            Supprimer
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button size="icon-sm" variant="ghost" aria-label="Autres actions" className="hover:bg-muted hover:text-foreground">
+                        <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    {leave.status === "PENDING" && (
+                        <DropdownMenuItem onSelect={() => onDecide(leave, "CANCELLED")}>
+                            <X className="h-4 w-4" />
+                            Annuler la demande
                         </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            )}
+                    )}
+                    <DropdownMenuItem onSelect={() => onDelete(leave)} className="text-red-600 focus:text-red-600">
+                        <Trash2 className="h-4 w-4" />
+                        Supprimer
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
         </div>
     )
 }
