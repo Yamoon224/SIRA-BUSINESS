@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -16,6 +16,7 @@ import { ProfilContentProps } from "@/@types/props"
 import { ICompany } from "@/@types/interface"
 import { toast } from "sonner"
 import { Camera, MapPin, Globe, Users, Calendar, Save, Plus, X, ImagePlus } from "lucide-react"
+import { apiRequest } from "@/lib/api-client-http"
 
 /** Extrait un message lisible quelle que soit la forme de l'erreur (Error, body JSON Laravel, string, Blob, ArrayBuffer…). */
 async function errorMessage(error: unknown): Promise<string> {
@@ -93,14 +94,28 @@ export default function Content({ company }: ProfilContentProps) {
     const [newBenefit, setNewBenefit] = useState("")
     const [mission, setMission] = useState(company.about ?? "")
 
-    const activeOffers = (company.jobOffers as any[])?.filter((j: any) => j.status === "ACTIVE").length ?? null
-    const totalApplicants = (company.jobOffers as any[])?.reduce((sum: number, j: any) => sum + (j.applicants ?? 0), 0) ?? null
+    // `/companies/{id}` ne renvoie pas les offres de l'entreprise (CompanyResource
+    // n'expose pas `jobOffers`) : ces deux stats restaient bloquées sur "-".
+    // On les récupère séparément, chacune via `meta.total` (limit=1, on ne veut
+    // que le total de la pagination, pas les lignes).
+    const [activeOffers, setActiveOffers] = useState<number | null>(null)
+    const [totalCandidatures, setTotalCandidatures] = useState<number | null>(null)
+    useEffect(() => {
+        apiRequest<any>({ endpoint: "/job-offers/paginate", method: "GET", params: { companyId: company.id, status: "ACTIVE", limit: 1 } })
+            .then((res) => setActiveOffers((res as any)?.meta?.total ?? null))
+            .catch(() => setActiveOffers(null))
+        // Portée automatiquement à l'entreprise du compte connecté (voir
+        // CandidaturesController::scopeToViewer côté backend).
+        apiRequest<any>({ endpoint: "/candidatures/paginate", method: "GET", params: { limit: 1 } })
+            .then((res) => setTotalCandidatures((res as any)?.meta?.total ?? null))
+            .catch(() => setTotalCandidatures(null))
+    }, [company.id])
 
     const stats = [
         { value: company.companySize ?? "-", label: "Employés",       color: "text-blue-500" },
         { value: activeOffers != null ? String(activeOffers) : "-",  label: "Offres actives",  color: "text-orange-400" },
         { value: "-", label: "Note moyenne",    color: "text-yellow-400" },
-        { value: totalApplicants != null ? String(totalApplicants) : "-", label: "Candidatures",    color: "text-green-500" },
+        { value: totalCandidatures != null ? String(totalCandidatures) : "-", label: "Candidatures",    color: "text-green-500" },
     ]
 
     const addBenefit = () => {

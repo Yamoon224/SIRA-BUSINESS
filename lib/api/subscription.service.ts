@@ -10,6 +10,17 @@ export interface CreateCheckoutData {
     customerPhone?: string
 }
 
+export interface ITransaction {
+    id: string
+    planId: string | null
+    planName: string | null
+    gateway: "kkiapay" | "wave" | "stripe" | "paiementpro"
+    amount: number
+    currency: string
+    status: "PENDING" | "SUCCESS" | "FAILED" | "REFUNDED"
+    createdAt: string
+}
+
 // Kkiapay (widget client) renvoie amount/clientReference ; les gateways à
 // session hébergée (paiementpro, wave, stripe) renvoient une checkoutUrl.
 export type CheckoutResponse =
@@ -47,6 +58,14 @@ export const subscriptionService = {
 
     cancelSubscription: (userId: string) =>
         apiRequest({ endpoint: `/subscriptions/me/${userId}`, method: "DELETE" }),
+
+    /** Historique des paiements (« Historique des factures » côté paramètres). */
+    getTransactions: (userId: string, page = 1, limit = 20) =>
+        apiRequest<{ data: ITransaction[]; meta: { total: number; page: number; limit: number; totalPages: number } }>({
+            endpoint: `/subscriptions/me/${userId}/transactions`,
+            method: "GET",
+            params: { page, limit },
+        }),
 
     checkSubscription: (userId: string) =>
         apiRequest<{

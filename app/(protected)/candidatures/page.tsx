@@ -287,10 +287,18 @@ function CandidaturesContent() {
                     </Select>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <div className="grid min-w-[720px] grid-cols-6 overflow-hidden rounded-lg border border-border bg-muted/35 text-xs">
+                {/* Onglets à largeur de contenu (pas de min-width forcée) : sur
+                    mobile ils défilent horizontalement sans imposer un tiroir
+                    plus large que nécessaire ; à partir de `sm`, `flex-1` leur
+                    redonne des colonnes égales comme sur desktop. */}
+                <div className="-mx-1 overflow-x-auto px-1">
+                    <div className="flex gap-1 rounded-lg border border-border bg-muted/35 p-1 text-xs sm:gap-0 sm:p-0">
                         {TAB_LABELS.map((item, i) => (
-                            <button key={item.key} onClick={() => setTab(item.key)} className={`py-2.5 text-center transition-colors ${tab === item.key ? "bg-white text-foreground" : "text-muted-foreground hover:bg-muted/60"} ${i > 0 ? "border-l border-border" : ""}`}>
+                            <button
+                                key={item.key}
+                                onClick={() => setTab(item.key)}
+                                className={`shrink-0 whitespace-nowrap rounded-md px-3.5 py-2 text-center transition-colors sm:flex-1 sm:rounded-none sm:px-2 ${tab === item.key ? "bg-white text-foreground shadow-sm sm:shadow-none" : "text-muted-foreground hover:bg-muted/60"} ${i > 0 ? "sm:border-l sm:border-border" : ""}`}
+                            >
                                 {item.label} ({counts[item.key]})
                             </button>
                         ))}
@@ -368,7 +376,7 @@ function CandidaturesContent() {
                                 {/* `mt-auto` colle le bloc d'actions en bas : les
                                     cartes d'une même ligne alignent leurs boutons. */}
                                 <div className="mt-auto pt-4">
-                                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+                                    <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
                                         {/* Sans CV joint, le bouton n'ouvrirait rien : il le dit
                                             plutôt que de rester cliquable dans le vide. */}
                                         <Button
@@ -623,11 +631,11 @@ function CandidaturesContent() {
                                             </ul>
                                         </div>
                                     )}
-                                    <div className="flex gap-2">
-                                        <a href={candidateAssessmentService.reportUrl(assessmentFor!.id)} target="_blank" rel="noreferrer" className="flex-1">
+                                    <div className="flex flex-col gap-2 sm:flex-row">
+                                        <a href={candidateAssessmentService.reportUrl(assessmentFor!.id)} target="_blank" rel="noreferrer" className="sm:flex-1">
                                             <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs"><Download className="h-3.5 w-3.5" />Télécharger le rapport (.docx)</Button>
                                         </a>
-                                        <Button variant="outline" size="sm" className="gap-1.5 text-xs" disabled={assessmentLoading} onClick={generateAssessment}>
+                                        <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs sm:w-auto" disabled={assessmentLoading} onClick={generateAssessment}>
                                             <Sparkles className="h-3.5 w-3.5" />Régénérer
                                         </Button>
                                     </div>

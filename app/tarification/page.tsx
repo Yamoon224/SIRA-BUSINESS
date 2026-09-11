@@ -13,7 +13,7 @@ import {
 import { Reveal, ScrollProgress, MarketingMotionStyles } from "@/components/marketing/reveal"
 import { SiteHeader } from "@/components/marketing/site-header"
 import { SiteFooter } from "@/components/marketing/site-footer"
-import { Check, Gift, Sparkles } from "lucide-react"
+import { Building2, Check, Gift, Sparkles } from "lucide-react"
 import { subscriptionService } from "@/lib/api/subscription.service"
 
 interface Plan {
@@ -221,6 +221,45 @@ export default function TarificationPage() {
                             })}
                         </Reveal>
                     )}
+
+                    {/* Offre sur mesure : pas un SubscriptionPlan (pas de prix fixe,
+                        pas de checkout) — une carte à part qui redirige vers le
+                        contact, pour les besoins hors grille tarifaire standard. */}
+                    <Reveal delay={100} className="mx-auto mt-6 max-w-[1100px]">
+                        <div className="flex flex-col items-center gap-6 rounded-md border border-black/[0.06] bg-white p-7 shadow-sm sm:flex-row sm:justify-between">
+                            <div className="text-center sm:text-left">
+                                <div className="flex items-center justify-center gap-2 sm:justify-start">
+                                    <Building2 className="h-4 w-4 text-[#2447FF]" />
+                                    <h3 className="text-xl font-semibold text-[#0B1220]">Sur mesure</h3>
+                                </div>
+                                <p className="mt-1 text-sm text-[#5B6472]">
+                                    Grand compte, volumes de recrutement élevés ou besoins spécifiques (SLA, intégrations
+                                    dédiées, accompagnement) - un forfait taillé pour votre organisation.
+                                </p>
+                                <ul className="mt-4 flex flex-wrap justify-center gap-x-5 gap-y-2 sm:justify-start">
+                                    {[
+                                        "Volume d'offres et d'utilisateurs illimité",
+                                        "Intégrations API dédiées",
+                                        "Accompagnement et account manager dédié",
+                                    ].map((f) => (
+                                        <li key={f} className="flex items-center gap-2 text-sm text-[#5B6472]">
+                                            <Check className="h-4 w-4 shrink-0 text-[#2447FF]" />
+                                            {f}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                            <div className="flex shrink-0 flex-col items-center gap-2">
+                                <span className="text-lg font-semibold text-[#0B1220]">Sur devis</span>
+                                <Button
+                                    asChild
+                                    className="rounded-full bg-[#2447FF] px-6 text-white transition-transform duration-200 hover:scale-[1.02] hover:bg-[#1d3ce0]"
+                                >
+                                    <Link href="/assistance">Nous contacter</Link>
+                                </Button>
+                            </div>
+                        </div>
+                    </Reveal>
                 </div>
             </section>
 
