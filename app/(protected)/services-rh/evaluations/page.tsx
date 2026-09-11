@@ -168,8 +168,8 @@ function EvaluationsContent() {
     return (
         <div className="space-y-6">
             <PageHeader
-                title="Évaluations employés"
-                description="Enquêtes internes anonymes : les réponses ne sont jamais individuellement identifiables."
+                title="Enquêtes internes"
+                description="Enquêtes anonymes auprès de vos employés : les réponses ne sont jamais individuellement identifiables."
                 actions={
                     <Button className="gap-1.5 bg-blue-500 hover:bg-blue-600" onClick={openCreate}>
                         <Plus className="h-4 w-4" />Nouvelle enquête
@@ -256,7 +256,7 @@ function EvaluationsContent() {
                             </div>
                         </div>
                         <p className="text-[11px] text-muted-foreground">
-                            Sans département, l&apos;évaluation est visible par toute l&apos;entreprise. Passée l&apos;échéance, une évaluation active se clôture automatiquement.
+                            Sans département, l&apos;enquête est visible par toute l&apos;entreprise. Passée l&apos;échéance, une enquête active se clôture automatiquement.
                         </p>
 
                         <div className="space-y-2">
@@ -370,7 +370,7 @@ function EvaluationsContent() {
 
 export default function Page() {
     return (
-        <SubscriptionGate featureLabel="les évaluations des employés">
+        <SubscriptionGate featureLabel="les enquêtes internes">
             <EvaluationsContent />
         </SubscriptionGate>
     )

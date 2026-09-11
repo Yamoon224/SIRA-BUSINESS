@@ -51,7 +51,7 @@ type PendingKey = "conges" | "demandes"
 const serviceRhItems: { label: string; href: string; icon: typeof UserCheck; pendingKey?: PendingKey }[] = [
     { label: "Employés", href: "/services-rh/employes", icon: UserCheck },
     { label: "Recrutements", href: "/services-rh/recrutements", icon: UserPlus },
-    { label: "Évaluations Employés", href: "/services-rh/evaluations", icon: FileText },
+    { label: "Enquêtes internes", href: "/services-rh/evaluations", icon: FileText },
     { label: "Contrats", href: "/services-rh/contrats", icon: FileSignature },
     { label: "Congés", href: "/services-rh/conges", icon: CalendarDays, pendingKey: "conges" },
     { label: "Demandes RH", href: "/services-rh/demandes", icon: ClipboardList, pendingKey: "demandes" },
