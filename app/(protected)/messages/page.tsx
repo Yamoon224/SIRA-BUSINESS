@@ -404,26 +404,29 @@ function MessagesContent() {
                                             </button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end" className="w-56">
-                                            <DropdownMenuItem onClick={handleMarkUnread} className="gap-2">
+                                            {/* focus:bg-accent (par défaut) rendait un orangé proche du rouge au
+                                                survol clavier/souris de n'importe quelle option : le dégradé de
+                                                marque remplace cet aplat, comme sur la cloche de notifications. */}
+                                            <DropdownMenuItem onClick={handleMarkUnread} className="gap-2 focus:bg-brand-gradient focus:text-white focus:[&_svg:not([class*='text-'])]:text-white">
                                                 <MailOpen className="h-4 w-4" />
                                                 Marquer comme non lue
                                             </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={handleToggleStar} className="gap-2">
+                                            <DropdownMenuItem onClick={handleToggleStar} className="gap-2 focus:bg-brand-gradient focus:text-white focus:[&_svg:not([class*='text-'])]:text-white">
                                                 <Star className="h-4 w-4" />
                                                 {selected.starred ? "Retirer des épinglées" : "Épingler la conversation"}
                                             </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={handleRefresh} className="gap-2">
+                                            <DropdownMenuItem onClick={handleRefresh} className="gap-2 focus:bg-brand-gradient focus:text-white focus:[&_svg:not([class*='text-'])]:text-white">
                                                 <RefreshCw className="h-4 w-4" />
                                                 Actualiser les messages
                                             </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={openScheduleMeet} className="gap-2">
+                                            <DropdownMenuItem onClick={openScheduleMeet} className="gap-2 focus:bg-brand-gradient focus:text-white focus:[&_svg:not([class*='text-'])]:text-white">
                                                 <Video className="h-4 w-4" />
                                                 Planifier Goriya Meet
                                             </DropdownMenuItem>
                                             <DropdownMenuSeparator />
                                             <DropdownMenuItem
                                                 onClick={() => setConfirmDelete(selected)}
-                                                className="gap-2 text-red-500 focus:text-red-500"
+                                                className="gap-2 text-red-500 focus:bg-brand-gradient focus:text-white focus:[&_svg:not([class*='text-'])]:text-white"
                                             >
                                                 <Trash2 className="h-4 w-4" />
                                                 Supprimer la conversation
