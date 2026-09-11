@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { AlertTriangle, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -10,22 +10,39 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { LEAVE_TYPE_META, businessDays, todayIso } from "@/lib/data/rh"
 import { extractApiErrorMessage } from "@/lib/api-error"
-import { employeeService, type IEmployee, type IEmployeeLeave, type LeaveType } from "@/lib/api/employee.service"
+import {
+    employeeService,
+    type IEmployee,
+    type IEmployeeLeave,
+    type ILeaveBalance,
+    type LeaveType,
+} from "@/lib/api/employee.service"
 
 interface LeaveDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
-    employee: IEmployee
+    /** Employé concerné (fiche détail). Sans lui, la modale propose de le choisir. */
+    employee?: IEmployee | null
+    /** Employés proposés au choix quand `employee` n'est pas fourni. */
+    employees?: IEmployee[]
+    /** Employé présélectionné dans ce choix. */
+    defaultEmployeeId?: string | null
+    /** Soldes connus par employé, quand l'employé n'embarque pas le sien. */
+    balances?: Record<string, ILeaveBalance>
     onCreated: (leave: IEmployeeLeave) => void
 }
 
 /**
- * Pose d'un congé pour un employé. La durée en jours ouvrés s'affiche pendant
- * la saisie (même calcul que le backend) et, pour des congés payés, le solde
- * restant : dépasser le solde n'empêche pas l'enregistrement, mais l'approbation
- * sera refusée — autant le dire avant.
+ * Pose d'un congé. La durée en jours ouvrés s'affiche pendant la saisie (même
+ * calcul que le backend) et, pour des congés payés, le solde restant :
+ * dépasser le solde n'empêche pas l'enregistrement, mais l'approbation sera
+ * refusée — autant le dire avant.
+ *
+ * Depuis la fiche employé, l'employé est imposé ; depuis la page Congés, il se
+ * choisit parmi les employés présents.
  */
-export function LeaveDialog({ open, onOpenChange, employee, onCreated }: LeaveDialogProps) {
+export function LeaveDialog({ open, onOpenChange, employee, employees = [], defaultEmployeeId, balances, onCreated }: LeaveDialogProps) {
+    const [employeeId, setEmployeeId] = useState("")
     const [type, setType] = useState<LeaveType>("PAID")
     const [startDate, setStartDate] = useState("")
     const [endDate, setEndDate] = useState("")
@@ -35,20 +52,29 @@ export function LeaveDialog({ open, onOpenChange, employee, onCreated }: LeaveDi
 
     useEffect(() => {
         if (open) {
+            setEmployeeId(defaultEmployeeId ?? "")
             setType("PAID")
             setStartDate(todayIso())
             setEndDate(todayIso())
             setReason("")
             setError(null)
         }
-    }, [open])
+    }, [open, defaultEmployeeId])
+
+    // Un employé parti ne pose plus de congé : le backend le refuserait.
+    const selectable = useMemo(
+        () => employees.filter((e) => e.status !== "TERMINATED").sort((a, b) => a.lastName.localeCompare(b.lastName, "fr")),
+        [employees],
+    )
+    const target = employee ?? selectable.find((e) => e.id === employeeId) ?? null
 
     const days = businessDays(startDate, endDate)
-    const balance = employee.leaveBalance
+    const balance = employee?.leaveBalance ?? (target ? balances?.[target.id] : undefined)
     const countsAgainstBalance = LEAVE_TYPE_META[type].countsAgainstBalance
     const exceedsBalance = countsAgainstBalance && !!balance && days > balance.remaining - balance.pending
 
     const submit = async () => {
+        if (!target) return setError("Choisissez l'employé concerné.")
         if (!startDate || !endDate) return setError("Indiquez les dates de début et de fin.")
         if (endDate < startDate) return setError("La date de fin doit suivre la date de début.")
         if (days === 0) return setError("La période choisie ne contient aucun jour ouvré.")
@@ -56,8 +82,10 @@ export function LeaveDialog({ open, onOpenChange, employee, onCreated }: LeaveDi
         setSaving(true)
         setError(null)
         try {
-            const leave = await employeeService.createLeave(employee.id, { type, startDate, endDate, reason: reason.trim() || null })
-            toast.success(`Congé enregistré : ${days} jour${days > 1 ? "s" : ""} ouvré${days > 1 ? "s" : ""}, en attente de validation.`)
+            const leave = await employeeService.createLeave(target.id, { type, startDate, endDate, reason: reason.trim() || null })
+            toast.success(
+                `Congé enregistré pour ${target.fullName} : ${days} jour${days > 1 ? "s" : ""} ouvré${days > 1 ? "s" : ""}, en attente de validation.`,
+            )
             onCreated(leave)
             onOpenChange(false)
         } catch (err) {
@@ -74,10 +102,38 @@ export function LeaveDialog({ open, onOpenChange, employee, onCreated }: LeaveDi
             <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle>Poser un congé</DialogTitle>
-                    <DialogDescription>{employee.fullName} · le congé sera enregistré en attente de validation.</DialogDescription>
+                    <DialogDescription>
+                        {employee ? `${employee.fullName} · ` : ""}Le congé sera enregistré en attente de validation.
+                    </DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-4">
+                    {!employee && (
+                        <div>
+                            <p className="mb-1.5 text-sm font-medium text-foreground">
+                                Employé<span className="ml-0.5 text-destructive">*</span>
+                            </p>
+                            <Select
+                                value={employeeId || undefined}
+                                onValueChange={(v) => {
+                                    setEmployeeId(v)
+                                    setError(null)
+                                }}
+                            >
+                                <SelectTrigger className="w-full" aria-label="Employé concerné">
+                                    <SelectValue placeholder={selectable.length ? "Choisir un employé" : "Aucun employé présent"} />
+                                </SelectTrigger>
+                                <SelectContent className="max-h-72">
+                                    {selectable.map((e) => (
+                                        <SelectItem key={e.id} value={e.id}>
+                                            {e.fullName} <span className="text-muted-foreground">· {e.jobTitle}</span>
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
+
                     <div>
                         <p className="mb-1.5 text-sm font-medium text-foreground">Type d&apos;absence</p>
                         <Select value={type} onValueChange={(v) => setType(v as LeaveType)}>

@@ -107,9 +107,38 @@ export interface IHireableCandidature {
     prefill: Partial<Pick<EmployeePayload, "firstName" | "lastName" | "email" | "phone" | "address" | "jobTitle" | "contractType">>
 }
 
+/** Identité minimale d'un employé, embarquée dans les congés et les soldes de la page Congés. */
+export interface IEmployeeSummary {
+    id: string
+    fullName: string
+    firstName: string
+    lastName: string
+    matricule: string
+    jobTitle: string
+    department: string | null
+    status: EmployeeStatus
+}
+
+/** Solde de congés d'un employé, tel que listé par la page Congés. */
+export interface ILeaveBalanceRow extends ILeaveBalance {
+    employee: IEmployeeSummary
+}
+
+export interface LeaveFilters {
+    status?: HrWorkflowStatus[]
+    type?: LeaveType[]
+    employeeId?: string
+    department?: string
+    search?: string
+    from?: string
+    to?: string
+}
+
 export interface IEmployeeLeave {
     id: string
     employeeId: string
+    /** Présent sur la liste de l'entreprise uniquement. */
+    employee?: IEmployeeSummary | null
     type: LeaveType
     startDate: string
     endDate: string
@@ -156,6 +185,16 @@ export const employeeService = {
     remove: async (id: string) => apiRequest<{ message: string }>({ endpoint: `/employees/${id}`, method: "DELETE" }),
 
     // ── Congés ──
+    /** Congés de toute l'entreprise (page Congés), employé inclus. */
+    companyLeaves: async (filters: LeaveFilters = {}) => {
+        const params = { ...filters, status: filters.status?.join(","), type: filters.type?.join(",") }
+        return unwrap<IEmployeeLeave[]>(await apiRequest({ endpoint: "/employee-leaves", method: "GET", params }))
+    },
+
+    /** Soldes de congés payés de tous les employés présents. */
+    leaveBalances: async (year?: number) =>
+        unwrap<ILeaveBalanceRow[]>(await apiRequest({ endpoint: "/employee-leaves/balances", method: "GET", params: year ? { year } : {} })),
+
     leaves: async (employeeId: string) =>
         unwrap<IEmployeeLeave[]>(await apiRequest({ endpoint: `/employees/${employeeId}/leaves`, method: "GET" })),
 

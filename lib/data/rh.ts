@@ -26,14 +26,15 @@ export const EMPLOYEE_STATUS_META: Record<EmployeeStatus, StatusMeta & { dot: st
 /** Libellé affiché quand un employé est en congé aujourd'hui, par-dessus son statut. */
 export const ON_LEAVE_META: StatusMeta = { label: "En congé", className: "bg-violet-100 text-violet-700" }
 
-export const LEAVE_TYPE_META: Record<LeaveType, { label: string; countsAgainstBalance: boolean }> = {
-    PAID: { label: "Congés payés", countsAgainstBalance: true },
-    SICK: { label: "Maladie", countsAgainstBalance: false },
-    MATERNITY: { label: "Maternité", countsAgainstBalance: false },
-    PATERNITY: { label: "Paternité", countsAgainstBalance: false },
-    FAMILY_EVENT: { label: "Événement familial", countsAgainstBalance: false },
-    UNPAID: { label: "Sans solde", countsAgainstBalance: false },
-    OTHER: { label: "Autre absence", countsAgainstBalance: false },
+/** `color` : teinte du type dans le planning et les pastilles de la page Congés. */
+export const LEAVE_TYPE_META: Record<LeaveType, { label: string; countsAgainstBalance: boolean; color: string }> = {
+    PAID: { label: "Congés payés", countsAgainstBalance: true, color: "bg-blue-500" },
+    SICK: { label: "Maladie", countsAgainstBalance: false, color: "bg-rose-500" },
+    MATERNITY: { label: "Maternité", countsAgainstBalance: false, color: "bg-pink-500" },
+    PATERNITY: { label: "Paternité", countsAgainstBalance: false, color: "bg-cyan-500" },
+    FAMILY_EVENT: { label: "Événement familial", countsAgainstBalance: false, color: "bg-violet-500" },
+    UNPAID: { label: "Sans solde", countsAgainstBalance: false, color: "bg-slate-500" },
+    OTHER: { label: "Autre absence", countsAgainstBalance: false, color: "bg-teal-500" },
 }
 
 export const HR_REQUEST_TYPE_META: Record<HrRequestType, { label: string; needsAmount: boolean }> = {
@@ -113,9 +114,25 @@ export function businessDays(startDate?: string | null, endDate?: string | null)
     return days
 }
 
+/** Date locale → « aaaa-mm-jj ». Les dates ISO se comparent alors comme des chaînes. */
+export function toIsoDate(date: Date): string {
+    const pad = (n: number) => String(n).padStart(2, "0")
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+}
+
 /** Date du jour au format « aaaa-mm-jj », en heure locale. */
 export function todayIso(): string {
-    const now = new Date()
-    const pad = (n: number) => String(n).padStart(2, "0")
-    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
+    return toIsoDate(new Date())
+}
+
+/** « aaaa-mm-jj » décalée de `days` jours (négatif pour reculer). */
+export function addDaysIso(value: string, days: number): string {
+    const date = parseLocalDate(value) ?? new Date()
+    date.setDate(date.getDate() + days)
+    return toIsoDate(date)
+}
+
+/** Minuscules sans accents, pour une recherche qui trouve « Kone » dans « Koné ». */
+export function normaliseText(value: string): string {
+    return value.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase()
 }

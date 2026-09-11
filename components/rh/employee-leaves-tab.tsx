@@ -1,22 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { toast } from "sonner"
-import { CalendarDays, CalendarPlus, Check, MoreHorizontal, Trash2, X } from "lucide-react"
+import { CalendarDays, CalendarPlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { ConfirmDialog } from "@/components/rh/confirm-dialog"
-import { DecisionDialog } from "@/components/rh/decision-dialog"
+import { LeaveActionButtons, useLeaveWorkflow } from "@/components/rh/leave-actions"
 import { LeaveDialog } from "@/components/rh/leave-dialog"
 import { StatusPill } from "@/components/rh/status-pill"
 import { LEAVE_TYPE_META, WORKFLOW_STATUS_META, formatDate } from "@/lib/data/rh"
-import { extractApiErrorMessage } from "@/lib/api-error"
-import { employeeService, type HrWorkflowStatus, type IEmployee, type IEmployeeLeave } from "@/lib/api/employee.service"
+import type { IEmployee, IEmployeeLeave } from "@/lib/api/employee.service"
 
 interface EmployeeLeavesTabProps {
     employee: IEmployee
@@ -25,56 +16,16 @@ interface EmployeeLeavesTabProps {
     onChanged: () => Promise<void> | void
 }
 
-const DECISION_COPY: Partial<Record<HrWorkflowStatus, { title: string; confirm: string; tone: "approve" | "reject" | "neutral"; done: string }>> = {
-    APPROVED: { title: "Approuver ce congé ?", confirm: "Approuver", tone: "approve", done: "Congé approuvé." },
-    REJECTED: { title: "Refuser ce congé ?", confirm: "Refuser", tone: "reject", done: "Congé refusé." },
-    CANCELLED: { title: "Annuler ce congé ?", confirm: "Annuler le congé", tone: "neutral", done: "Congé annulé." },
-}
-
-/** Onglet « Congés » : solde de l'année, pose d'un congé et décisions. */
+/** Onglet « Congés » de la fiche : solde de l'année, pose d'un congé et décisions. */
 export function EmployeeLeavesTab({ employee, leaves, loading, onChanged }: EmployeeLeavesTabProps) {
     const [createOpen, setCreateOpen] = useState(false)
-    const [decision, setDecision] = useState<{ leave: IEmployeeLeave; status: HrWorkflowStatus } | null>(null)
-    const [deciding, setDeciding] = useState(false)
-    const [toDelete, setToDelete] = useState<IEmployeeLeave | null>(null)
-    const [deleting, setDeleting] = useState(false)
+    const { requestDecision, requestDelete, dialogs } = useLeaveWorkflow(onChanged)
 
     const balance = employee.leaveBalance
     const departed = employee.status === "TERMINATED"
 
-    const decide = async (comment: string | null) => {
-        if (!decision) return
-        setDeciding(true)
-        try {
-            await employeeService.decideLeave(decision.leave.id, decision.status, comment)
-            toast.success(DECISION_COPY[decision.status]?.done ?? "Congé mis à jour.")
-            setDecision(null)
-            await onChanged()
-        } catch (err) {
-            toast.error(extractApiErrorMessage(err, "La décision n'a pas pu être enregistrée."))
-        } finally {
-            setDeciding(false)
-        }
-    }
-
-    const remove = async () => {
-        if (!toDelete) return
-        setDeleting(true)
-        try {
-            await employeeService.removeLeave(toDelete.id)
-            toast.success("Congé supprimé.")
-            setToDelete(null)
-            await onChanged()
-        } catch (err) {
-            toast.error(extractApiErrorMessage(err, "La suppression du congé a échoué."))
-        } finally {
-            setDeleting(false)
-        }
-    }
-
     const takenPct = balance && balance.entitlement > 0 ? Math.min(100, (balance.taken / balance.entitlement) * 100) : 0
     const pendingPct = balance && balance.entitlement > 0 ? Math.min(100 - takenPct, (balance.pending / balance.entitlement) * 100) : 0
-    const copy = decision ? DECISION_COPY[decision.status] : undefined
 
     return (
         <div className="space-y-4">
@@ -125,6 +76,7 @@ export function EmployeeLeavesTab({ employee, leaves, loading, onChanged }: Empl
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                 <div className="min-w-0">
                                     <div className="flex flex-wrap items-center gap-2">
+                                        <span className={`h-2.5 w-2.5 rounded-full ${LEAVE_TYPE_META[leave.type]?.color ?? "bg-muted"}`} aria-hidden="true" />
                                         <p className="font-semibold text-foreground">{LEAVE_TYPE_META[leave.type]?.label ?? leave.type}</p>
                                         <StatusPill meta={WORKFLOW_STATUS_META[leave.status]} />
                                     </div>
@@ -142,46 +94,7 @@ export function EmployeeLeavesTab({ employee, leaves, loading, onChanged }: Empl
                                     )}
                                 </div>
 
-                                <div className="flex shrink-0 items-center gap-2">
-                                    {leave.status === "PENDING" && (
-                                        <>
-                                            <Button size="sm" className="bg-green-600 text-white hover:bg-green-700" onClick={() => setDecision({ leave, status: "APPROVED" })}>
-                                                <Check className="h-4 w-4" />
-                                                Approuver
-                                            </Button>
-                                            <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50 hover:text-red-700" onClick={() => setDecision({ leave, status: "REJECTED" })}>
-                                                <X className="h-4 w-4" />
-                                                Refuser
-                                            </Button>
-                                        </>
-                                    )}
-                                    {leave.status === "APPROVED" && (
-                                        <Button size="sm" variant="outline" className="hover:bg-muted hover:text-foreground" onClick={() => setDecision({ leave, status: "CANCELLED" })}>
-                                            Annuler
-                                        </Button>
-                                    )}
-                                    {leave.status !== "APPROVED" && (
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button size="icon-sm" variant="ghost" aria-label="Autres actions" className="hover:bg-muted hover:text-foreground">
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                {leave.status === "PENDING" && (
-                                                    <DropdownMenuItem onSelect={() => setDecision({ leave, status: "CANCELLED" })}>
-                                                        <X className="h-4 w-4" />
-                                                        Annuler la demande
-                                                    </DropdownMenuItem>
-                                                )}
-                                                <DropdownMenuItem onSelect={() => setToDelete(leave)} className="text-red-600 focus:text-red-600">
-                                                    <Trash2 className="h-4 w-4" />
-                                                    Supprimer
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    )}
-                                </div>
+                                <LeaveActionButtons leave={leave} onDecide={requestDecision} onDelete={requestDelete} />
                             </div>
                         </li>
                     ))}
@@ -189,33 +102,7 @@ export function EmployeeLeavesTab({ employee, leaves, loading, onChanged }: Empl
             )}
 
             <LeaveDialog open={createOpen} onOpenChange={setCreateOpen} employee={employee} onCreated={() => void onChanged()} />
-
-            <DecisionDialog
-                open={!!decision}
-                onOpenChange={(open) => !open && setDecision(null)}
-                title={copy?.title ?? ""}
-                description={
-                    decision
-                        ? `${LEAVE_TYPE_META[decision.leave.type]?.label} du ${formatDate(decision.leave.startDate)} au ${formatDate(decision.leave.endDate)} (${decision.leave.days} j).`
-                        : undefined
-                }
-                confirmLabel={copy?.confirm ?? "Confirmer"}
-                tone={copy?.tone}
-                commentRequired={decision?.status === "REJECTED"}
-                loading={deciding}
-                onConfirm={decide}
-            />
-
-            <ConfirmDialog
-                open={!!toDelete}
-                onOpenChange={(open) => !open && setToDelete(null)}
-                title="Supprimer ce congé ?"
-                description="Il disparaîtra de l'historique de l'employé. Cette action est définitive."
-                confirmLabel="Supprimer"
-                destructive
-                loading={deleting}
-                onConfirm={remove}
-            />
+            {dialogs}
         </div>
     )
 }
