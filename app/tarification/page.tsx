@@ -10,11 +10,13 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Reveal, ScrollProgress, MarketingMotionStyles } from "@/components/marketing/reveal"
 import { SiteHeader } from "@/components/marketing/site-header"
 import { SiteFooter } from "@/components/marketing/site-footer"
-import { Building2, Check, Gift, Sparkles } from "lucide-react"
+import { Building2, Check, Gift, Mail, MessageCircle, Sparkles } from "lucide-react"
 import { subscriptionService } from "@/lib/api/subscription.service"
+import { SUPPORT_EMAIL, SUPPORT_EMAIL_HREF, SUPPORT_PHONE, SUPPORT_WHATSAPP_HREF } from "@/lib/contact"
 
 interface Plan {
     id: string
@@ -62,6 +64,7 @@ function findPopularPlanId(plans: Plan[]): string | null {
 export default function TarificationPage() {
     const [plans, setPlans] = useState<Plan[]>([])
     const [loading, setLoading] = useState(true)
+    const [contactOpen, setContactOpen] = useState(false)
 
     useEffect(() => {
         subscriptionService.getPlans("ENTREPRISE")
@@ -219,49 +222,94 @@ export default function TarificationPage() {
                                     </div>
                                 )
                             })}
+
+                            {/* Offre sur mesure : pas un SubscriptionPlan (pas de prix fixe,
+                                pas de checkout) — même disposition que les autres cartes,
+                                le CTA ouvre le choix du canal de contact plutôt qu'un
+                                abonnement. */}
+                            <div className="relative flex w-full max-w-sm flex-col overflow-hidden rounded-md border border-black/[0.06] bg-white shadow-sm transition-transform duration-300 hover:-translate-y-1 sm:w-[calc(50%-0.75rem)] lg:w-[330px]">
+                                <div className="p-7">
+                                    <div className="flex items-center gap-2">
+                                        <Building2 className="h-4 w-4 text-[#2447FF]" />
+                                        <h3 className="text-xl font-semibold text-[#0B1220]">Sur mesure</h3>
+                                    </div>
+
+                                    <p className="mt-1 text-sm text-[#5B6472]">
+                                        Grand compte ou besoins spécifiques
+                                    </p>
+
+                                    <div className="mt-5 flex items-baseline gap-1.5">
+                                        <span className="text-4xl text-[#0B1220]">Sur devis</span>
+                                    </div>
+
+                                    <Button
+                                        variant="outline"
+                                        className="mt-6 w-full rounded-full border-black/10 transition-transform duration-200 hover:scale-[1.02]"
+                                        onClick={() => setContactOpen(true)}
+                                    >
+                                        Nous contacter
+                                    </Button>
+                                </div>
+
+                                <div className="flex-1 border-t border-black/[0.06] bg-[#F7F8FC] px-7 py-6">
+                                    <ul className="space-y-3">
+                                        {[
+                                            "Volume d'offres et d'utilisateurs illimité",
+                                            "Intégrations API dédiées",
+                                            "SLA et accompagnement par un account manager dédié",
+                                        ].map((f) => (
+                                            <li key={f} className="flex items-start gap-2.5 text-sm text-[#5B6472]">
+                                                <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#2447FF]" />
+                                                {f}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
                         </Reveal>
                     )}
-
-                    {/* Offre sur mesure : pas un SubscriptionPlan (pas de prix fixe,
-                        pas de checkout) — une carte à part qui redirige vers le
-                        contact, pour les besoins hors grille tarifaire standard. */}
-                    <Reveal delay={100} className="mx-auto mt-6 max-w-[1100px]">
-                        <div className="flex flex-col items-center gap-6 rounded-md border border-black/[0.06] bg-white p-7 shadow-sm sm:flex-row sm:justify-between">
-                            <div className="text-center sm:text-left">
-                                <div className="flex items-center justify-center gap-2 sm:justify-start">
-                                    <Building2 className="h-4 w-4 text-[#2447FF]" />
-                                    <h3 className="text-xl font-semibold text-[#0B1220]">Sur mesure</h3>
-                                </div>
-                                <p className="mt-1 text-sm text-[#5B6472]">
-                                    Grand compte, volumes de recrutement élevés ou besoins spécifiques (SLA, intégrations
-                                    dédiées, accompagnement) - un forfait taillé pour votre organisation.
-                                </p>
-                                <ul className="mt-4 flex flex-wrap justify-center gap-x-5 gap-y-2 sm:justify-start">
-                                    {[
-                                        "Volume d'offres et d'utilisateurs illimité",
-                                        "Intégrations API dédiées",
-                                        "Accompagnement et account manager dédié",
-                                    ].map((f) => (
-                                        <li key={f} className="flex items-center gap-2 text-sm text-[#5B6472]">
-                                            <Check className="h-4 w-4 shrink-0 text-[#2447FF]" />
-                                            {f}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                            <div className="flex shrink-0 flex-col items-center gap-2">
-                                <span className="text-lg font-semibold text-[#0B1220]">Sur devis</span>
-                                <Button
-                                    asChild
-                                    className="rounded-full bg-[#2447FF] px-6 text-white transition-transform duration-200 hover:scale-[1.02] hover:bg-[#1d3ce0]"
-                                >
-                                    <Link href="/assistance">Nous contacter</Link>
-                                </Button>
-                            </div>
-                        </div>
-                    </Reveal>
                 </div>
             </section>
+
+            {/* Choix du canal de contact pour l'offre sur mesure */}
+            <Dialog open={contactOpen} onOpenChange={setContactOpen}>
+                <DialogContent className="max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle>Contactez-nous</DialogTitle>
+                        <DialogDescription>
+                            Décrivez vos besoins, notre équipe vous propose un forfait sur mesure.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex flex-col gap-3">
+                        <a
+                            href={SUPPORT_EMAIL_HREF}
+                            className="flex items-center gap-3 rounded-lg border border-black/[0.06] px-4 py-3 transition-colors hover:bg-[#F7F8FC]"
+                        >
+                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50">
+                                <Mail className="h-4 w-4 text-blue-600" />
+                            </span>
+                            <span>
+                                <span className="block text-sm font-medium text-[#0B1220]">Par email</span>
+                                <span className="block text-xs text-[#5B6472]">{SUPPORT_EMAIL}</span>
+                            </span>
+                        </a>
+                        <a
+                            href={SUPPORT_WHATSAPP_HREF}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center gap-3 rounded-lg border border-black/[0.06] px-4 py-3 transition-colors hover:bg-[#F7F8FC]"
+                        >
+                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green-50">
+                                <MessageCircle className="h-4 w-4 text-green-600" />
+                            </span>
+                            <span>
+                                <span className="block text-sm font-medium text-[#0B1220]">Par téléphone / WhatsApp</span>
+                                <span className="block text-xs text-[#5B6472]">{SUPPORT_PHONE}</span>
+                            </span>
+                        </a>
+                    </div>
+                </DialogContent>
+            </Dialog>
 
             {/* FAQ */}
             <section className="bg-white py-24">

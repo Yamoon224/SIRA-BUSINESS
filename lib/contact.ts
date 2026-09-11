@@ -19,3 +19,6 @@ export const SUPPORT_PHONE = process.env.NEXT_PUBLIC_SUPPORT_PHONE || "+225 07 5
 export const SUPPORT_PHONE_HREF = `tel:${SUPPORT_PHONE.replace(/[^\d+]/g, "")}`
 
 export const SUPPORT_EMAIL_HREF = `mailto:${SUPPORT_EMAIL}`
+
+/** Lien wa.me : indicatif + numéro, sans le « + » ni les espaces. */
+export const SUPPORT_WHATSAPP_HREF = `https://wa.me/${SUPPORT_PHONE.replace(/[^\d]/g, "")}`
