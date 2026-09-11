@@ -9,8 +9,10 @@ import type {
     EmployeeStatus,
     HrRequestType,
     HrWorkflowStatus,
+    IEmployee,
     LeaveType,
 } from "@/lib/api/employee.service"
+import type { ContractKind, ContractStatus, IEmployeeContract } from "@/lib/api/contract.service"
 
 export { DEPARTMENTS, JOB_TYPES as CONTRACT_TYPES, jobTypeLabel as contractTypeLabel } from "@/lib/data/offres"
 
@@ -53,6 +55,95 @@ export const WORKFLOW_STATUS_META: Record<HrWorkflowStatus, StatusMeta> = {
     APPROVED: { label: "Approuvé", className: "bg-green-100 text-green-700" },
     REJECTED: { label: "Refusé", className: "bg-red-100 text-red-700" },
     CANCELLED: { label: "Annulé", className: "bg-gray-200 text-gray-600" },
+}
+
+// ── Contrats ───────────────────────────────────────────────────────────────
+
+export const CONTRACT_STATUS_META: Record<ContractStatus, StatusMeta> = {
+    DRAFT: { label: "Brouillon", className: "bg-gray-200 text-gray-700" },
+    ACTIVE: { label: "En vigueur", className: "bg-green-100 text-green-700" },
+    ENDED: { label: "Terminé", className: "bg-slate-100 text-slate-600" },
+    TERMINATED: { label: "Rompu", className: "bg-red-100 text-red-700" },
+}
+
+export const CONTRACT_KIND_META: Record<ContractKind, { label: string }> = {
+    INITIAL: { label: "Contrat initial" },
+    RENEWAL: { label: "Renouvellement" },
+    AMENDMENT: { label: "Avenant" },
+}
+
+/** Types de contrat qui ont nécessairement une date de fin (même règle que le backend). */
+export const FIXED_TERM_CONTRACT_TYPES: readonly string[] = ["CDD", "STAGE", "ALTERNANCE"]
+
+/** Fenêtres d'alerte : échéance d'un contrat, fin de période d'essai. */
+export const CONTRACT_ALERT_DAYS = { ending: 30, trial: 15 } as const
+
+export type ContractAlertKind = "EXPIRED" | "NO_CONTRACT" | "ENDING_SOON" | "TRIAL_ENDING" | "UNSIGNED"
+
+export interface ContractAlert {
+    key: string
+    kind: ContractAlertKind
+    employeeId: string
+    employeeName: string
+    contract?: IEmployeeContract
+    date?: string
+    /** Jours restants (ou écoulés pour un contrat échu). */
+    days?: number
+    /** Pour NO_CONTRACT : l'employé a déjà eu des contrats. */
+    hasHistory?: boolean
+}
+
+/**
+ * Situations à traiter sur les contrats, les plus urgentes d'abord : contrat
+ * échu toujours en vigueur, employé présent sans contrat, échéance proche, fin
+ * de période d'essai proche, contrat en vigueur non signé.
+ */
+export function contractAlerts(contracts: IEmployeeContract[], employees: IEmployee[] | null, today: string = todayIso()): ContractAlert[] {
+    const names = new Map((employees ?? []).map((e) => [e.id, e.fullName]))
+    const nameOf = (c: IEmployeeContract) => c.employee?.fullName ?? names.get(c.employeeId) ?? "Employé"
+    const alerts: ContractAlert[] = []
+
+    for (const contract of contracts) {
+        if (contract.status !== "ACTIVE") continue
+        const base = { employeeId: contract.employeeId, employeeName: nameOf(contract), contract }
+
+        if (contract.endDate && contract.endDate < today) {
+            alerts.push({ ...base, key: `expired-${contract.id}`, kind: "EXPIRED", date: contract.endDate, days: daysBetween(contract.endDate, today) })
+        } else if (contract.endDate && daysBetween(today, contract.endDate) <= CONTRACT_ALERT_DAYS.ending) {
+            alerts.push({ ...base, key: `ending-${contract.id}`, kind: "ENDING_SOON", date: contract.endDate, days: daysBetween(today, contract.endDate) })
+        }
+        if (contract.trialEndDate && contract.trialEndDate >= today && daysBetween(today, contract.trialEndDate) <= CONTRACT_ALERT_DAYS.trial) {
+            alerts.push({ ...base, key: `trial-${contract.id}`, kind: "TRIAL_ENDING", date: contract.trialEndDate, days: daysBetween(today, contract.trialEndDate) })
+        }
+        if (!contract.signedAt && !contract.document) {
+            alerts.push({ ...base, key: `unsigned-${contract.id}`, kind: "UNSIGNED" })
+        }
+    }
+
+    if (employees) {
+        const withActive = new Set(contracts.filter((c) => c.status === "ACTIVE").map((c) => c.employeeId))
+        const withHistory = new Set(contracts.map((c) => c.employeeId))
+        for (const employee of employees) {
+            if (employee.status === "TERMINATED" || withActive.has(employee.id)) continue
+            alerts.push({
+                key: `none-${employee.id}`,
+                kind: "NO_CONTRACT",
+                employeeId: employee.id,
+                employeeName: employee.fullName,
+                hasHistory: withHistory.has(employee.id),
+            })
+        }
+    }
+
+    const rank: Record<ContractAlertKind, number> = { EXPIRED: 0, NO_CONTRACT: 1, ENDING_SOON: 2, TRIAL_ENDING: 3, UNSIGNED: 4 }
+    return alerts.sort((a, b) => rank[a.kind] - rank[b.kind] || (a.days ?? 0) - (b.days ?? 0))
+}
+
+/** « Du 5 janv. 2026 au 31 déc. 2026 » ou « Depuis le 5 janv. 2026 · durée indéterminée ». */
+export function contractPeriod(contract: Pick<IEmployeeContract, "startDate" | "endDate">): string {
+    return contract.endDate
+        ? `Du ${formatDate(contract.startDate)} au ${formatDate(contract.endDate)}`
+        : `Depuis le ${formatDate(contract.startDate)} · durée indéterminée`
 }
 
 // ── Formatage ──────────────────────────────────────────────────────────────
@@ -130,6 +221,14 @@ export function addDaysIso(value: string, days: number): string {
     const date = parseLocalDate(value) ?? new Date()
     date.setDate(date.getDate() + days)
     return toIsoDate(date)
+}
+
+/** Nombre de jours entre deux dates « aaaa-mm-jj » (négatif si `to` précède `from`). */
+export function daysBetween(from: string, to: string): number {
+    const start = parseLocalDate(from)
+    const end = parseLocalDate(to)
+    if (!start || !end) return 0
+    return Math.round((end.getTime() - start.getTime()) / 86_400_000)
 }
 
 /** Minuscules sans accents, pour une recherche qui trouve « Kone » dans « Koné ». */

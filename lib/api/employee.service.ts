@@ -66,6 +66,17 @@ export interface IEmployee {
     notes: string | null
     /** Présent sur la fiche détail uniquement. */
     leaveBalance?: ILeaveBalance
+    /** Contrat en vigueur : type, date de fin et salaire de la fiche en découlent. */
+    activeContract?: {
+        id: string
+        reference: string
+        kind: "INITIAL" | "RENEWAL" | "AMENDMENT"
+        type: ContractType
+        startDate: string
+        endDate: string | null
+        trialEndDate: string | null
+        signed: boolean
+    } | null
     createdAt: string
     updatedAt: string
 }
