@@ -35,6 +35,9 @@ function EvaluationsContent() {
     const [loading, setLoading] = useState(true)
 
     const [createOpen, setCreateOpen] = useState(false)
+    // `null` = création ; sinon id de l'évaluation en cours de modification.
+    const [editingId, setEditingId] = useState<string | null>(null)
+    const [editingHasResponses, setEditingHasResponses] = useState(false)
     const [title, setTitle] = useState("")
     const [description, setDescription] = useState("")
     const [questions, setQuestions] = useState<ISurveyQuestion[]>([newQuestion()])
@@ -62,27 +65,61 @@ function EvaluationsContent() {
         load()
     }, [])
 
-    const handleCreate = async () => {
+    const resetForm = () => {
+        setTitle("")
+        setDescription("")
+        setQuestions([newQuestion()])
+        setDueDate("")
+        setDepartment("")
+    }
+
+    const openCreate = () => {
+        setEditingId(null)
+        setEditingHasResponses(false)
+        resetForm()
+        setCreateOpen(true)
+    }
+
+    const openEdit = (survey: IEmployeeSurvey) => {
+        setEditingId(survey.id)
+        setEditingHasResponses(survey.hasResponses)
+        setTitle(survey.title)
+        setDescription(survey.description ?? "")
+        setQuestions(survey.questions.length > 0 ? survey.questions : [newQuestion()])
+        setDueDate(survey.dueDate ?? "")
+        setDepartment(survey.department ?? "")
+        setCreateOpen(true)
+    }
+
+    const handleSubmit = async () => {
         const validQuestions = questions.filter((q) => q.question.trim())
         if (!title.trim() || validQuestions.length === 0) return
         setCreating(true)
         try {
-            await employeeSurveyService.create({
-                title: title.trim(),
-                description: description.trim() || undefined,
-                questions: validQuestions,
-                dueDate: dueDate || null,
-                department: department.trim() || null,
-            })
+            if (editingId) {
+                await employeeSurveyService.update(editingId, {
+                    title: title.trim(),
+                    description: description.trim() || null,
+                    // Verrouillées côté API dès qu'une réponse existe - inutile de
+                    // les renvoyer, et ça éviterait un 400 pour rien.
+                    ...(editingHasResponses ? {} : { questions: validQuestions }),
+                    dueDate: dueDate || null,
+                    department: department.trim() || null,
+                })
+            } else {
+                await employeeSurveyService.create({
+                    title: title.trim(),
+                    description: description.trim() || undefined,
+                    questions: validQuestions,
+                    dueDate: dueDate || null,
+                    department: department.trim() || null,
+                })
+            }
             setCreateOpen(false)
-            setTitle("")
-            setDescription("")
-            setQuestions([newQuestion()])
-            setDueDate("")
-            setDepartment("")
+            resetForm()
             await load()
         } catch (err) {
-            console.error("[evaluations] create error:", err)
+            console.error("[evaluations] save error:", err)
         } finally {
             setCreating(false)
         }
@@ -134,7 +171,7 @@ function EvaluationsContent() {
                 title="Évaluations employés"
                 description="Enquêtes internes anonymes : les réponses ne sont jamais individuellement identifiables."
                 actions={
-                    <Button className="gap-1.5 bg-blue-500 hover:bg-blue-600" onClick={() => setCreateOpen(true)}>
+                    <Button className="gap-1.5 bg-blue-500 hover:bg-blue-600" onClick={openCreate}>
                         <Plus className="h-4 w-4" />Nouvelle enquête
                     </Button>
                 }
@@ -178,6 +215,9 @@ function EvaluationsContent() {
                                             <SelectItem value="CLOSED">Clôturée</SelectItem>
                                         </SelectContent>
                                     </Select>
+                                    <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs" onClick={() => openEdit(survey)}>
+                                        <Pencil className="h-3.5 w-3.5" />Modifier
+                                    </Button>
                                     <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs" onClick={() => openStats(survey)}>
                                         <BarChart3 className="h-3.5 w-3.5" />Statistiques
                                     </Button>
@@ -191,10 +231,10 @@ function EvaluationsContent() {
                 </div>
             )}
 
-            {/* Créer une enquête */}
-            <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+            {/* Créer / modifier une enquête */}
+            <Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if (!open) { setEditingId(null); setEditingHasResponses(false) } }}>
                 <DialogContent className="max-w-lg">
-                    <DialogHeader><DialogTitle>Nouvelle enquête</DialogTitle></DialogHeader>
+                    <DialogHeader><DialogTitle>{editingId ? "Modifier l'enquête" : "Nouvelle enquête"}</DialogTitle></DialogHeader>
                     <div className="space-y-3">
                         <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Titre de l'enquête" />
                         <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description (optionnel)" className="min-h-[60px]" />
@@ -221,43 +261,51 @@ function EvaluationsContent() {
 
                         <div className="space-y-2">
                             <p className="text-xs font-medium text-foreground">Questions</p>
-                            {questions.map((q, i) => (
-                                <div key={q.id} className="flex items-center gap-2">
-                                    <Input
-                                        value={q.question}
-                                        onChange={(e) => setQuestions((prev) => prev.map((p, idx) => idx === i ? { ...p, question: e.target.value } : p))}
-                                        placeholder={`Question ${i + 1}`}
-                                        className="flex-1"
-                                    />
-                                    <Select
-                                        value={q.type}
-                                        onValueChange={(v) => setQuestions((prev) => prev.map((p, idx) => idx === i ? { ...p, type: v as ISurveyQuestion["type"] } : p))}
-                                    >
-                                        <SelectTrigger className="h-9 w-28 text-xs"><SelectValue /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="RATING">Note</SelectItem>
-                                            <SelectItem value="TEXT">Texte</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-9 w-9 shrink-0 text-red-500 hover:bg-red-50"
-                                        disabled={questions.length === 1}
-                                        onClick={() => setQuestions((prev) => prev.filter((_, idx) => idx !== i))}
-                                    >
-                                        <Trash2 className="h-3.5 w-3.5" />
-                                    </Button>
-                                </div>
-                            ))}
-                            <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => setQuestions((prev) => [...prev, newQuestion()])}>
-                                <Plus className="h-3.5 w-3.5" />Ajouter une question
-                            </Button>
+                            {editingHasResponses && (
+                                <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                                    Cette enquête a déjà reçu des réponses : les questions ne sont plus modifiables (titre, échéance et département le restent).
+                                </p>
+                            )}
+                            <fieldset disabled={editingHasResponses} className="space-y-2 disabled:opacity-60">
+                                {questions.map((q, i) => (
+                                    <div key={q.id} className="flex items-center gap-2">
+                                        <Input
+                                            value={q.question}
+                                            onChange={(e) => setQuestions((prev) => prev.map((p, idx) => idx === i ? { ...p, question: e.target.value } : p))}
+                                            placeholder={`Question ${i + 1}`}
+                                            className="flex-1"
+                                        />
+                                        <Select
+                                            value={q.type}
+                                            onValueChange={(v) => setQuestions((prev) => prev.map((p, idx) => idx === i ? { ...p, type: v as ISurveyQuestion["type"] } : p))}
+                                            disabled={editingHasResponses}
+                                        >
+                                            <SelectTrigger className="h-9 w-28 text-xs"><SelectValue /></SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="RATING">Note</SelectItem>
+                                                <SelectItem value="TEXT">Texte</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-9 w-9 shrink-0 text-red-500 hover:bg-red-50"
+                                            disabled={questions.length === 1}
+                                            onClick={() => setQuestions((prev) => prev.filter((_, idx) => idx !== i))}
+                                        >
+                                            <Trash2 className="h-3.5 w-3.5" />
+                                        </Button>
+                                    </div>
+                                ))}
+                                <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => setQuestions((prev) => [...prev, newQuestion()])}>
+                                    <Plus className="h-3.5 w-3.5" />Ajouter une question
+                                </Button>
+                            </fieldset>
                         </div>
 
                         <DialogFooter>
-                            <Button disabled={creating || !title.trim()} onClick={handleCreate} className="w-full bg-blue-500 hover:bg-blue-600">
-                                {creating ? "Création..." : "Créer l'enquête"}
+                            <Button disabled={creating || !title.trim()} onClick={handleSubmit} className="w-full bg-blue-500 hover:bg-blue-600">
+                                {creating ? "Enregistrement..." : editingId ? "Enregistrer les modifications" : "Créer l'enquête"}
                             </Button>
                         </DialogFooter>
                     </div>
