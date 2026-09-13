@@ -158,7 +158,7 @@ export function DocumentDialog({ open, onOpenChange, document, employees = [], f
                                             parcourez
                                         </button>
                                     </p>
-                                    <p className="mt-0.5 text-xs text-muted-foreground">PDF, image, Word ou Excel — 10 Mo maximum.</p>
+                                    <p className="mt-0.5 text-xs text-muted-foreground">PDF, image, Word ou Excel - 10 Mo maximum.</p>
                                 </div>
                             )}
                             <input

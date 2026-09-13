@@ -174,7 +174,7 @@ export function UpcomingInterviewsCard() {
                                 id="interview-title"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
-                                placeholder="Entretien — Développeur Front-end"
+                                placeholder="Entretien - Développeur Front-end"
                             />
                         </div>
                         <div className="space-y-1.5">

@@ -282,7 +282,7 @@ export function EmployeesContent() {
                     </span>
                     <h2 className="mt-4 text-lg font-semibold text-foreground">Aucun employé pour l&apos;instant</h2>
                     <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-                        Embauchez un candidat accepté sur Goriya — sa fiche se remplit toute seule — ou ajoutez un
+                        Embauchez un candidat accepté sur Goriya - sa fiche se remplit toute seule - ou ajoutez un
                         collaborateur existant à la main.
                     </p>
                     <Button onClick={openCreate} className="mt-5 gap-1.5 rounded-full px-5">
@@ -332,7 +332,7 @@ export function EmployeesContent() {
                                     </TableCell>
                                     <TableCell className="hidden md:table-cell">
                                         <p className="truncate text-foreground">{employee.jobTitle}</p>
-                                        <p className="truncate text-xs text-muted-foreground">{employee.department ?? "—"}</p>
+                                        <p className="truncate text-xs text-muted-foreground">{employee.department ?? "-"}</p>
                                     </TableCell>
                                     <TableCell className="hidden lg:table-cell text-muted-foreground">{contractTypeLabel(employee.contractType)}</TableCell>
                                     <TableCell className="hidden sm:table-cell">

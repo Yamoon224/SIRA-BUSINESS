@@ -61,7 +61,7 @@ export default function ChoosePlanPage() {
     const [subscribing, setSubscribing] = useState<string | null>(null)
     const [loadError, setLoadError] = useState(false)
     const [phone, setPhone] = useState("")
-    // Durée choisie par plan (clé = plan.id) — seuls les plans avec
+    // Durée choisie par plan (clé = plan.id) - seuls les plans avec
     // `availablePeriods` (Business, Business+) affichent le sélecteur ;
     // les autres restent implicitement à 1 mois.
     const [periodByPlan, setPeriodByPlan] = useState<Record<string, number>>({})

@@ -10,7 +10,7 @@ import { PlanFeatureList } from "@/components/pricing/plan-feature-list"
 /**
  * Carte « Sur mesure » des pages tarification (page d'accueil, /tarification,
  * choix du forfait à l'inscription) : même disposition que les cartes de
- * forfait, mais pas un SubscriptionPlan — pas de prix fixe, pas de checkout.
+ * forfait, mais pas un SubscriptionPlan - pas de prix fixe, pas de checkout.
  * Le CTA ouvre le choix du canal de contact (email ou téléphone/WhatsApp).
  */
 export function CustomPlanCard() {

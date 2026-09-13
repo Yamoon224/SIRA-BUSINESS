@@ -17,7 +17,7 @@ import {
 import { notificationService, type INotification } from "@/lib/notification.service"
 
 /**
- * Destination d'une notification. Le backend porte désormais un `link` — un
+ * Destination d'une notification. Le backend porte désormais un `link` - un
  * chemin relatif qui désigne l'élément exact, par exemple
  * `/messages?conversation=<uuid>`. Les notifications antérieures à cette
  * colonne n'en ont pas : on retombe alors sur le type puis sur le libellé,
@@ -94,7 +94,7 @@ export function NotificationBell() {
                     <p className="px-2 py-4 text-center text-sm text-muted-foreground">Aucune notification pour l'instant.</p>
                 ) : (
                     /* `group` + `focus:` : l'élément survolé/sélectionné passe au
-                       dégradé de marque et TOUT son texte en blanc — les libellés
+                       dégradé de marque et TOUT son texte en blanc - les libellés
                        secondaires portent leur propre couleur, ils ne suivraient
                        pas la couleur héritée du parent. */
                     notifications.slice(0, 5).map((n) => (

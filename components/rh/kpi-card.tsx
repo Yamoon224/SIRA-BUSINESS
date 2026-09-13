@@ -21,7 +21,7 @@ export function KpiCard({ icon: Icon, label, value, hint, highlight, onClick }: 
             className={cn(
                 // `min-w-0` : sans lui, un item de grille garde la largeur de son
                 // contenu (libellé/indice longs) et peut faire déborder toute la
-                // grille — donc la page — sur mobile.
+                // grille - donc la page - sur mobile.
                 "min-w-0 rounded-xl border border-border bg-white p-4 text-left",
                 onClick && "transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
             )}

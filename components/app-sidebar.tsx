@@ -81,7 +81,7 @@ export function AppSidebar() {
     const [rhOpen, setRhOpen] = useState(isRhActive)
 
     // Demandes en attente : Congés et Demandes RH méritent une alerte dans la
-    // sidebar, où qu'on soit dans l'appli — pas seulement une fois sur leur page.
+    // sidebar, où qu'on soit dans l'appli - pas seulement une fois sur leur page.
     const [pendingCounts, setPendingCounts] = useState<{ conges: number; demandes: number }>({ conges: 0, demandes: 0 })
 
     useEffect(() => {

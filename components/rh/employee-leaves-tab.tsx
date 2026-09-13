@@ -89,7 +89,7 @@ export function EmployeeLeavesTab({ employee, leaves, loading, onChanged }: Empl
                                         <p className="mt-2 text-xs text-muted-foreground">
                                             {WORKFLOW_STATUS_META[leave.status].label} le {formatDate(leave.decidedAt)}
                                             {leave.decidedByName ? ` par ${leave.decidedByName}` : ""}
-                                            {leave.decisionComment ? ` — « ${leave.decisionComment} »` : ""}
+                                            {leave.decisionComment ? ` - « ${leave.decisionComment} »` : ""}
                                         </p>
                                     )}
                                 </div>

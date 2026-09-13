@@ -31,7 +31,7 @@ const DECISION_COPY: Partial<Record<HrWorkflowStatus, { title: string; confirm: 
 
 /**
  * Page Demandes RH : vue d'ensemble des demandes (attestations, avances,
- * formations…) de toute l'entreprise — jusqu'ici une demande n'était visible
+ * formations…) de toute l'entreprise - jusqu'ici une demande n'était visible
  * que depuis la fiche de son employé, sans liste centralisée pour les RH.
  */
 export default function DemandesPage() {
@@ -238,7 +238,7 @@ export default function DemandesPage() {
                                                 <p className="text-xs text-muted-foreground">{formatDate(r.createdAt)}</p>
                                                 <div className="mt-1 lg:hidden"><StatusPill meta={WORKFLOW_STATUS_META[r.status]} /></div>
                                             </TableCell>
-                                            <TableCell className="hidden text-right tabular-nums sm:table-cell">{r.amount ? `${r.amount.toLocaleString("fr-FR")} F` : "—"}</TableCell>
+                                            <TableCell className="hidden text-right tabular-nums sm:table-cell">{r.amount ? `${r.amount.toLocaleString("fr-FR")} F` : "-"}</TableCell>
                                             <TableCell className="hidden lg:table-cell">
                                                 <StatusPill meta={WORKFLOW_STATUS_META[r.status]} />
                                                 {r.decidedByName && <p className="mt-1 text-[11px] text-muted-foreground">par {r.decidedByName}</p>}

@@ -209,7 +209,7 @@ export function PayrollRunDetail({ id }: { id: string }) {
                                 <button type="button" onClick={() => setOpenPayslipId(p.id)} className="font-medium underline-offset-2 hover:underline">
                                     {p.employee.fullName}
                                 </button>{" "}
-                                — {p.warnings.filter((w) => w.blocking).map((w) => w.message).join(" ")}
+                                - {p.warnings.filter((w) => w.blocking).map((w) => w.message).join(" ")}
                             </li>
                         ))}
                     </ul>

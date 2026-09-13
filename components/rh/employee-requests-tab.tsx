@@ -151,7 +151,7 @@ export function EmployeeRequestsTab({ employee, requests, loading, onChanged }: 
                                             <p className="mt-2 text-xs text-muted-foreground">
                                                 {WORKFLOW_STATUS_META[request.status].label} le {formatDate(request.decidedAt)}
                                                 {request.decidedByName ? ` par ${request.decidedByName}` : ""}
-                                                {request.decisionComment ? ` — « ${request.decisionComment} »` : ""}
+                                                {request.decisionComment ? ` - « ${request.decisionComment} »` : ""}
                                             </p>
                                         )}
                                     </div>

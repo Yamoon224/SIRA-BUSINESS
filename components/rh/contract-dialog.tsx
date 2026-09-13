@@ -143,7 +143,7 @@ interface ContractDialogProps {
  *
  * Un brouillon se modifie librement. Un contrat mis en vigueur ne se réécrit
  * plus : seules sa date de signature et ses notes restent ouvertes, le reste se
- * change par un avenant — la modale le dit et verrouille les champs.
+ * change par un avenant - la modale le dit et verrouille les champs.
  */
 export function ContractDialog({ open, onOpenChange, contract, mode, employee, employees = [], activeReferenceOf, onSaved }: ContractDialogProps) {
     const effectiveMode = mode ?? INITIAL_MODE

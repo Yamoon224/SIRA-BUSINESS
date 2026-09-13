@@ -253,7 +253,7 @@ function MessagesContent() {
     /**
      * Crée la session Goriya Meet (en invitant l'autre participant, qui la
      * retrouvera dans son propre espace Appels) puis annonce le rendez-vous
-     * dans la conversation — un message reste le moyen le plus sûr d'avertir
+     * dans la conversation - un message reste le moyen le plus sûr d'avertir
      * quelqu'un qui n'a pas de notification push active.
      */
     const handleScheduleMeet = async () => {
@@ -265,7 +265,7 @@ function MessagesContent() {
             const quand = scheduledAtIso
                 ? new Date(scheduledAtIso).toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short" })
                 : "dès maintenant"
-            const contenu = `📅 Appel Goriya Meet planifié : « ${meetTitle.trim()} » — ${quand}. Rejoignez-le depuis votre espace Appels.`
+            const contenu = `📅 Appel Goriya Meet planifié : « ${meetTitle.trim()} » - ${quand}. Rejoignez-le depuis votre espace Appels.`
             await sendMessage(selected.id, contenu)
             await loadMessages(selected.id)
             setConversations((prev) => prev.map((c) => c.id === selected.id ? { ...c, lastMessage: contenu } : c))
@@ -500,7 +500,7 @@ function MessagesContent() {
                                 />
                                 <button
                                     onClick={() => fileInputRef.current?.click()}
-                                    title="Joindre un fichier (PDF, Word, Excel, texte ou image — 8 Mo max)"
+                                    title="Joindre un fichier (PDF, Word, Excel, texte ou image - 8 Mo max)"
                                     aria-label="Joindre un fichier"
                                     className="shrink-0 rounded-full p-1.5 text-muted-foreground hover:bg-gray-100 transition-colors"
                                 >
@@ -533,7 +533,7 @@ function MessagesContent() {
 
             <FileViewerDialog
                 file={viewedFile}
-                subtitle={selected ? `Pièce jointe — ${selected.name}` : null}
+                subtitle={selected ? `Pièce jointe - ${selected.name}` : null}
                 onClose={() => setViewedFile(null)}
             />
 

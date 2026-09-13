@@ -132,7 +132,7 @@ export function InterviewOutcomeDialog({ open, onOpenChange, candidate, intervie
                                             type="button"
                                             role="radio"
                                             aria-checked={rating === value}
-                                            aria-label={`${value} sur 5 — ${RATING_HINTS[value]}`}
+                                            aria-label={`${value} sur 5 - ${RATING_HINTS[value]}`}
                                             onClick={() => { setRating(value); setError(null) }}
                                             className="rounded p-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                         >

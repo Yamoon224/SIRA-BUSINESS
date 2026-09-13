@@ -312,14 +312,14 @@ function CandidateTable({ candidates, workflow }: { candidates: IRecruitmentCand
                                         </div>
                                     </div>
                                 </TableCell>
-                                <TableCell className="hidden max-w-[14rem] truncate md:table-cell">{candidate.jobOffer?.title ?? "—"}</TableCell>
+                                <TableCell className="hidden max-w-[14rem] truncate md:table-cell">{candidate.jobOffer?.title ?? "-"}</TableCell>
                                 <TableCell>
                                     <StatusPill meta={RECRUITMENT_STAGE_META[candidate.stage]} />
                                     {candidate.feedbackDueCount > 0 && <p className="mt-1 text-[11px] text-amber-700">Compte rendu à rédiger</p>}
                                 </TableCell>
                                 <TableCell className="hidden whitespace-nowrap lg:table-cell">{formatDate(candidate.appliedDate)}</TableCell>
-                                <TableCell className="hidden text-right tabular-nums sm:table-cell">{candidate.score > 0 ? `${candidate.score} %` : "—"}</TableCell>
-                                <TableCell className="hidden whitespace-nowrap xl:table-cell">{candidate.nextInterview ? formatDateTime(candidate.nextInterview.scheduledAt) : "—"}</TableCell>
+                                <TableCell className="hidden text-right tabular-nums sm:table-cell">{candidate.score > 0 ? `${candidate.score} %` : "-"}</TableCell>
+                                <TableCell className="hidden whitespace-nowrap xl:table-cell">{candidate.nextInterview ? formatDateTime(candidate.nextInterview.scheduledAt) : "-"}</TableCell>
                                 <TableCell className="text-right">
                                     <CandidateActionsMenu candidate={candidate} workflow={workflow} />
                                 </TableCell>
@@ -342,7 +342,7 @@ function OfferCard({ offer, onOpen }: { offer: IRecruitmentJobOffer; onOpen: () 
                 <div className="min-w-0">
                     <h3 className="truncate font-semibold text-foreground">{offer.title}</h3>
                     <p className="mt-0.5 text-xs text-muted-foreground">
-                        {[jobTypeLabel(offer.type), offer.location, offer.endDate ? `jusqu'au ${formatDate(offer.endDate)}` : null].filter(Boolean).join(" · ") || "—"}
+                        {[jobTypeLabel(offer.type), offer.location, offer.endDate ? `jusqu'au ${formatDate(offer.endDate)}` : null].filter(Boolean).join(" · ") || "-"}
                     </p>
                 </div>
                 {status && <StatusPill meta={status} />}

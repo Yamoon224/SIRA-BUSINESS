@@ -73,7 +73,7 @@ function findPopularPlanId(plans: Plan[]): string | null {
 export default function TarificationPage() {
     const [plans, setPlans] = useState<Plan[]>([])
     const [loading, setLoading] = useState(true)
-    // Durée choisie par plan (affichage seulement — cette page n'ouvre pas de
+    // Durée choisie par plan (affichage seulement - cette page n'ouvre pas de
     // checkout, le choix réel se fait à l'inscription/souscription).
     const [periodByPlan, setPeriodByPlan] = useState<Record<string, number>>({})
     const periodFor = (plan: Plan) => periodByPlan[plan.id] ?? plan.availablePeriods?.[0] ?? 1
@@ -262,7 +262,7 @@ export default function TarificationPage() {
                             })}
 
                             {/* Offre sur mesure : pas un SubscriptionPlan (pas de prix fixe,
-                                pas de checkout) — même disposition que les autres cartes,
+                                pas de checkout) - même disposition que les autres cartes,
                                 le CTA ouvre le choix du canal de contact plutôt qu'un
                                 abonnement. */}
                             <CustomPlanCard />

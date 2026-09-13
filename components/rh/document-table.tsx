@@ -41,7 +41,7 @@ function DocumentIcon({ mimeType }: { mimeType: string | null }) {
 /** Échéance d'un document : expiré, bientôt expiré, ou valide jusqu'à une date. */
 export function ExpiryBadge({ document }: { document: Pick<IHrDocument, "expiresAt"> }) {
     const expiry = documentExpiry(document)
-    if (!expiry) return <span className="text-muted-foreground">—</span>
+    if (!expiry) return <span className="text-muted-foreground">-</span>
     if (expiry.kind === "EXPIRED") {
         return <StatusPill meta={{ label: `Expiré depuis ${expiry.days} j`, className: "bg-red-100 text-red-700" }} />
     }

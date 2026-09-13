@@ -13,8 +13,8 @@ type PageHeaderProps = {
 
 /**
  * En-tête des pages de l'espace entreprise : titre, sous-titre et actions,
- * soulignés d'un filet. Chaque page déclarait son titre à sa façon — tailles
- * différentes, sous-titre présent ou absent, espacement variable — d'où ce
+ * soulignés d'un filet. Chaque page déclarait son titre à sa façon - tailles
+ * différentes, sous-titre présent ou absent, espacement variable - d'où ce
  * composant unique, calqué sur celui de l'espace candidat.
  *
  * L'espace SOUS le filet appartient à ce composant : ne le remplacez pas

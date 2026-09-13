@@ -146,7 +146,7 @@ export function PayslipDialog({ open, onOpenChange, payslip, run, onSaved }: Pay
                                             section.key === "TAX"
                                                 ? "Barème"
                                                 : [line.employeeRate, line.employerRate].some((r) => r !== null)
-                                                    ? [line.employeeRate, line.employerRate].map((r) => (r === null ? "—" : formatRate(r))).join(" / ")
+                                                    ? [line.employeeRate, line.employerRate].map((r) => (r === null ? "-" : formatRate(r))).join(" / ")
                                                     : ""
                                         return (
                                             <tr key={`${line.code}-${i}`} className="border-t border-border">

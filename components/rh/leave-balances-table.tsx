@@ -128,7 +128,7 @@ export function LeaveBalancesTable({ rows, loading, error, year, years, onYearCh
                                         </TableCell>
                                         <TableCell className="hidden text-right tabular-nums sm:table-cell">{row.entitlement} j</TableCell>
                                         <TableCell className="hidden text-right tabular-nums md:table-cell">{row.taken} j</TableCell>
-                                        <TableCell className="hidden text-right tabular-nums md:table-cell">{row.pending > 0 ? `${row.pending} j` : "—"}</TableCell>
+                                        <TableCell className="hidden text-right tabular-nums md:table-cell">{row.pending > 0 ? `${row.pending} j` : "-"}</TableCell>
                                         <TableCell className="text-right">
                                             <p className={cn("font-semibold tabular-nums", tone)}>{row.remaining} j</p>
                                             <div className="ml-auto mt-1 flex h-1.5 w-24 overflow-hidden rounded-full bg-muted" role="img" aria-label={`${row.taken} jours pris et ${row.pending} en attente sur ${row.entitlement}`}>

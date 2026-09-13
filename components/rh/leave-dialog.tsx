@@ -36,7 +36,7 @@ interface LeaveDialogProps {
  * Pose d'un congé. La durée en jours ouvrés s'affiche pendant la saisie (même
  * calcul que le backend) et, pour des congés payés, le solde restant :
  * dépasser le solde n'empêche pas l'enregistrement, mais l'approbation sera
- * refusée — autant le dire avant.
+ * refusée - autant le dire avant.
  *
  * Depuis la fiche employé, l'employé est imposé ; depuis la page Congés, il se
  * choisit parmi les employés présents.

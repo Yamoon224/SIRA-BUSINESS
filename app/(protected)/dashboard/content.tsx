@@ -65,8 +65,8 @@ type OfferAction =
 
 /**
  * Chaque bouton d'une offre récente mène à une action qui existe réellement
- * côté backend. Un brouillon ne se publie pas d'un clic — il lui manque en
- * général des champs exigés à la publication — il repasse donc par le
+ * côté backend. Un brouillon ne se publie pas d'un clic - il lui manque en
+ * général des champs exigés à la publication - il repasse donc par le
  * formulaire, comme sur /annonces.
  */
 function offerActions(id: string, status: string): OfferAction[] {

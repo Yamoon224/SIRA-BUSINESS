@@ -169,8 +169,8 @@ interface EmployeeFormDialogProps {
  * Ajout et modification d'un employé.
  *
  * Un ajout commence par l'origine du collaborateur : soit une candidature
- * acceptée — la fiche est alors pré-remplie depuis son profil Goriya et
- * l'offre visée, les RH n'ont plus qu'à vérifier et compléter —, soit une
+ * acceptée - la fiche est alors pré-remplie depuis son profil Goriya et
+ * l'offre visée, les RH n'ont plus qu'à vérifier et compléter -, soit une
  * saisie manuelle pour une personne recrutée hors de la plateforme.
  */
 export function EmployeeFormDialog({ open, onOpenChange, employee, candidatureId, employees, onSaved }: EmployeeFormDialogProps) {
@@ -234,7 +234,7 @@ export function EmployeeFormDialog({ open, onOpenChange, employee, candidatureId
 
     /**
      * Envoie le CV à l'extraction IA et pré-remplit le formulaire avec ce qui
-     * a pu en être tiré — les champs non détectés restent vides, à compléter
+     * a pu en être tiré - les champs non détectés restent vides, à compléter
      * à la main. Aucun champ n'est inventé côté backend.
      */
     const handleCvFile = async (file: File) => {

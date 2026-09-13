@@ -32,7 +32,7 @@ interface EmployeeHistoryProps {
 
 /**
  * Onglet « Historique » : chronologie reconstituée à partir de la fiche, des
- * contrats, des congés et des demandes déjà chargés — aucun appel supplémentaire.
+ * contrats, des congés et des demandes déjà chargés - aucun appel supplémentaire.
  */
 export function EmployeeHistory({ employee, leaves, requests, contracts = [] }: EmployeeHistoryProps) {
     const events: HistoryEvent[] = [
@@ -115,7 +115,7 @@ export function EmployeeHistory({ employee, leaves, requests, contracts = [] }: 
                 key: `leave-decision-${leave.id}`,
                 date: leave.decidedAt,
                 title: `${label} : ${WORKFLOW_STATUS_META[leave.status].label.toLowerCase()}`,
-                detail: [leave.decidedByName && `par ${leave.decidedByName}`, leave.decisionComment && `« ${leave.decisionComment} »`].filter(Boolean).join(" — ") || undefined,
+                detail: [leave.decidedByName && `par ${leave.decidedByName}`, leave.decisionComment && `« ${leave.decisionComment} »`].filter(Boolean).join(" - ") || undefined,
                 icon: CalendarCheck,
                 tone: WORKFLOW_STATUS_META[leave.status].className,
             })
@@ -136,7 +136,7 @@ export function EmployeeHistory({ employee, leaves, requests, contracts = [] }: 
                 key: `request-decision-${request.id}`,
                 date: request.decidedAt,
                 title: `${request.subject} : ${WORKFLOW_STATUS_META[request.status].label.toLowerCase()}`,
-                detail: [request.decidedByName && `par ${request.decidedByName}`, request.decisionComment && `« ${request.decisionComment} »`].filter(Boolean).join(" — ") || undefined,
+                detail: [request.decidedByName && `par ${request.decidedByName}`, request.decisionComment && `« ${request.decisionComment} »`].filter(Boolean).join(" - ") || undefined,
                 icon: ClipboardCheck,
                 tone: WORKFLOW_STATUS_META[request.status].className,
             })

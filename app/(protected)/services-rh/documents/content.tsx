@@ -39,9 +39,9 @@ const CHECK_ICON: Record<FileChecklistStatus, { icon: typeof CheckCircle2; class
 }
 
 /**
- * Page Documents RH : tous les documents de l'entreprise en un seul endroit —
+ * Page Documents RH : tous les documents de l'entreprise en un seul endroit -
  * dossiers des employés, documents communs, attestations, contrats signés et
- * bulletins — avec leurs échéances et la complétude des dossiers.
+ * bulletins - avec leurs échéances et la complétude des dossiers.
  */
 export function DocumentsContent() {
     const [documents, setDocuments] = useState<IHrDocument[]>([])
@@ -300,7 +300,7 @@ export function DocumentsContent() {
                                                                     <button
                                                                         type="button"
                                                                         onClick={() => setEditor({ document: null, employee, category: item.category })}
-                                                                        title={`${style.label} — ajouter`}
+                                                                        title={`${style.label} - ajouter`}
                                                                         aria-label={`${item.label} de ${employee.fullName} : ${style.label}. Ajouter`}
                                                                         className="mx-auto flex items-center justify-center rounded-full p-1 transition-colors hover:bg-muted"
                                                                     >

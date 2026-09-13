@@ -104,9 +104,9 @@ export function EmployeeContractsTab({ employee, contracts, loading, onChanged }
 
                             <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-border pt-3 text-sm sm:grid-cols-4">
                                 <Term label="Période" className="col-span-2">{contractPeriod(contract)}</Term>
-                                <Term label="Fin d'essai">{contract.trialEndDate ? formatDate(contract.trialEndDate) : "—"}</Term>
+                                <Term label="Fin d'essai">{contract.trialEndDate ? formatDate(contract.trialEndDate) : "-"}</Term>
                                 <Term label="Salaire brut">{formatFcfa(contract.salary)}</Term>
-                                <Term label="Durée hebdomadaire">{contract.weeklyHours ? `${contract.weeklyHours} h` : "—"}</Term>
+                                <Term label="Durée hebdomadaire">{contract.weeklyHours ? `${contract.weeklyHours} h` : "-"}</Term>
                                 <Term label="Signature">
                                     {contract.signedAt ? `Le ${formatDate(contract.signedAt)}` : <span className="text-amber-700">Non signé</span>}
                                 </Term>
@@ -131,7 +131,7 @@ export function EmployeeContractsTab({ employee, contracts, loading, onChanged }
                             {contract.status === "TERMINATED" && (
                                 <p className="mt-3 rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">
                                     Rompu le {formatDate(contract.terminationDate)}
-                                    {contract.terminationReason ? ` — ${contract.terminationReason}` : ""}
+                                    {contract.terminationReason ? ` - ${contract.terminationReason}` : ""}
                                 </p>
                             )}
                             {contract.notes && <p className="mt-3 whitespace-pre-line text-sm text-muted-foreground">{contract.notes}</p>}

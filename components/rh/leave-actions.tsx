@@ -147,7 +147,7 @@ interface LeaveActionButtonsProps {
 
 /**
  * Actions possibles selon le statut : un congé en attente s'approuve, se
- * refuse ou s'annule. Une fois approuvé, il est définitif — on ne l'annule
+ * refuse ou s'annule. Une fois approuvé, il est définitif - on ne l'annule
  * plus, on le supprime si besoin (retour anticipé, erreur d'approbation).
  */
 export function LeaveActionButtons({ leave, onDecide, onDelete, compact = false }: LeaveActionButtonsProps) {

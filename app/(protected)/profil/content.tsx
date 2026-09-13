@@ -223,7 +223,7 @@ export default function Content({ company }: ProfilContentProps) {
                 <div className="flex flex-col gap-5 p-4 sm:p-6 md:flex-row md:items-start">
                     {/* Avatar + camera. `self-start` est indispensable : sans lui la
                         colonne mobile étire ce conteneur sur toute la largeur, et le
-                        badge appareil photo — positionné par rapport à lui — part se
+                        badge appareil photo - positionné par rapport à lui - part se
                         coller au bord droit de la carte. */}
                     <div className="relative -mt-12 shrink-0 self-start sm:-mt-14">
                         <div className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-blue-500">

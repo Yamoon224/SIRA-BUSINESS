@@ -95,7 +95,7 @@ function validateDraft(draft: Draft): string | null {
 
 /**
  * Paramètres de paie : cotisations sociales et barème de l'impôt sur salaire.
- * Les valeurs par défaut sont indicatives — le formulaire le dit en tête, et
+ * Les valeurs par défaut sont indicatives - le formulaire le dit en tête, et
  * rappelle qu'un changement ne touche que les paies encore en brouillon.
  */
 export function PayrollSettingsForm() {

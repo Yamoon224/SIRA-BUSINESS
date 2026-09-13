@@ -71,7 +71,7 @@ export function EmployeePayslipsTab({ employee, payslips, loading }: EmployeePay
                                         {capitalize(payslip.run.label)}
                                     </Link>
                                 ) : (
-                                    <span>—</span>
+                                    <span>-</span>
                                 )}
                                 <div className="mt-1 flex flex-wrap items-center gap-1.5">
                                     {payslip.run && <StatusPill meta={PAYROLL_STATUS_META[payslip.run.status]} />}

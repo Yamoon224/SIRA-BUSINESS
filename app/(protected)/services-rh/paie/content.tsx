@@ -102,10 +102,10 @@ export function PaieContent() {
             />
 
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-                <KpiCard icon={Banknote} label="Masse salariale brute" value={reference ? formatFcfa(reference.totals.gross) : "—"} hint={reference ? capitalize(reference.label) : "Aucune paie"} />
-                <KpiCard icon={Wallet} label="Net à payer" value={reference ? formatFcfa(reference.totals.net) : "—"} hint={reference ? PAYROLL_STATUS_META[reference.status].label : undefined} />
-                <KpiCard icon={Building2} label="Coût employeur" value={reference ? formatFcfa(reference.totals.employerCost) : "—"} hint={reference ? `dont ${formatFcfa(reference.totals.employerContributions)} de charges` : undefined} />
-                <KpiCard icon={Users} label="Salariés payés" value={reference ? reference.employeesCount : "—"} />
+                <KpiCard icon={Banknote} label="Masse salariale brute" value={reference ? formatFcfa(reference.totals.gross) : "-"} hint={reference ? capitalize(reference.label) : "Aucune paie"} />
+                <KpiCard icon={Wallet} label="Net à payer" value={reference ? formatFcfa(reference.totals.net) : "-"} hint={reference ? PAYROLL_STATUS_META[reference.status].label : undefined} />
+                <KpiCard icon={Building2} label="Coût employeur" value={reference ? formatFcfa(reference.totals.employerCost) : "-"} hint={reference ? `dont ${formatFcfa(reference.totals.employerContributions)} de charges` : undefined} />
+                <KpiCard icon={Users} label="Salariés payés" value={reference ? reference.employeesCount : "-"} />
             </div>
 
             <Tabs value={tab} onValueChange={setTab}>

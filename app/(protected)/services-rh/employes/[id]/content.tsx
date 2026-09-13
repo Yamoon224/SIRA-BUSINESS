@@ -268,7 +268,7 @@ export function EmployeeDetail({ id }: { id: string }) {
                 <KpiCard
                     icon={Wallet}
                     label={`Solde congés ${balance?.year ?? ""}`.trim()}
-                    value={balance ? `${balance.remaining} / ${balance.entitlement} j` : "—"}
+                    value={balance ? `${balance.remaining} / ${balance.entitlement} j` : "-"}
                     hint={balance ? `${balance.taken} pris · ${balance.pending} en attente` : undefined}
                 />
                 <KpiCard icon={CalendarDays} label="Congés en attente" value={String(pendingLeaves)} highlight={pendingLeaves > 0} onClick={() => setTab("conges")} />

@@ -180,7 +180,7 @@ export function CandidateDetail({ id }: { id: string }) {
                         <XCircle className="mt-0.5 h-4 w-4 shrink-0" />
                         <p>
                             Candidature refusée {sinceLabel(candidate.stageSince)}
-                            {candidate.rejectionReason ? ` — « ${candidate.rejectionReason} »` : "."}
+                            {candidate.rejectionReason ? ` - « ${candidate.rejectionReason} »` : "."}
                         </p>
                     </div>
                     <Button size="sm" variant="outline" onClick={() => workflow.move(candidate, "SCREENING")} className="border-red-200 bg-white hover:bg-red-100 hover:text-red-800">
@@ -193,8 +193,8 @@ export function CandidateDetail({ id }: { id: string }) {
             )}
 
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-                <KpiCard icon={Check} label="Compatibilité avec l'offre" value={candidate.score > 0 ? `${candidate.score} %` : "—"} />
-                <KpiCard icon={Sparkles} label="Évaluation IA" value={candidate.assessmentScore !== null ? `${candidate.assessmentScore} / 100` : "—"} hint={candidate.assessmentScore === null ? "à générer depuis Candidatures" : undefined} />
+                <KpiCard icon={Check} label="Compatibilité avec l'offre" value={candidate.score > 0 ? `${candidate.score} %` : "-"} />
+                <KpiCard icon={Sparkles} label="Évaluation IA" value={candidate.assessmentScore !== null ? `${candidate.assessmentScore} / 100` : "-"} hint={candidate.assessmentScore === null ? "à générer depuis Candidatures" : undefined} />
                 <KpiCard
                     icon={CalendarPlus}
                     label="Entretiens"
@@ -203,7 +203,7 @@ export function CandidateDetail({ id }: { id: string }) {
                     highlight={candidate.feedbackDueCount > 0}
                     onClick={() => setTab("entretiens")}
                 />
-                <KpiCard icon={Star} label="Note moyenne" value={candidate.averageRating !== null ? `${candidate.averageRating.toLocaleString("fr-FR")} / 5` : "—"} />
+                <KpiCard icon={Star} label="Note moyenne" value={candidate.averageRating !== null ? `${candidate.averageRating.toLocaleString("fr-FR")} / 5` : "-"} />
             </div>
 
             <Tabs value={tab} onValueChange={setTab}>

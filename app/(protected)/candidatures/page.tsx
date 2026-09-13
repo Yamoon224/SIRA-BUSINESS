@@ -270,7 +270,7 @@ function CandidaturesContent() {
         <div className="space-y-6">
             <PageHeader
                 title="Candidatures"
-                description="Filtrez, comparez et traitez les candidatures reçues sur vos offres — profil, compétences et score de compatibilité IA."
+                description="Filtrez, comparez et traitez les candidatures reçues sur vos offres - profil, compétences et score de compatibilité IA."
             />
 
             <div className="space-y-4 rounded-xl border border-border bg-white p-4">
@@ -330,7 +330,7 @@ function CandidaturesContent() {
                                         </div>
                                         {/* Le titre professionnel dit qui est le candidat ;
                                             l'e-mail, lui, ne sert qu'au moment de le
-                                            contacter — il reste dans le détail et dans la
+                                            contacter - il reste dans le détail et dans la
                                             modale de message. Repli sur l'intitulé de
                                             l'offre visée quand le profil n'en déclare pas. */}
                                         <p className="truncate text-sm text-muted-foreground">
@@ -661,7 +661,7 @@ function CandidaturesContent() {
 
             <FileViewerDialog
                 file={cvFile}
-                subtitle={cvFor ? `CV de ${cvFor.name}${cvFor.jobOfferTitle ? ` — ${cvFor.jobOfferTitle}` : ""}` : null}
+                subtitle={cvFor ? `CV de ${cvFor.name}${cvFor.jobOfferTitle ? ` - ${cvFor.jobOfferTitle}` : ""}` : null}
                 onClose={() => setCvFor(null)}
             />
         </div>

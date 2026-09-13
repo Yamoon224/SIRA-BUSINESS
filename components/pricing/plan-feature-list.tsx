@@ -9,7 +9,7 @@ interface PlanFeatureListProps {
 
 /**
  * Liste complète des fonctionnalités de la grille tarifaire (voir
- * lib/pricing-feature-matrix.ts), une ligne par fonctionnalité — cochée en
+ * lib/pricing-feature-matrix.ts), une ligne par fonctionnalité - cochée en
  * vert si incluse dans `planName`, barrée d'une croix rouge sinon. Remplace
  * l'ancienne liste `plan.features` (qui n'affichait que les fonctionnalités
  * incluses, sans comparaison entre forfaits).
@@ -37,7 +37,7 @@ export function PlanFeatureList({ planName, className }: PlanFeatureListProps) {
                         )}
                         <span>
                             {row.label}
-                            {typeof value === "string" && <span className="text-[#8891ab]"> — {value}</span>}
+                            {typeof value === "string" && <span className="text-[#8891ab]"> - {value}</span>}
                         </span>
                     </li>
                 )

@@ -136,7 +136,7 @@ function CandidateCard({
                     <Link href={`/services-rh/recrutements/${candidate.id}`} className="block truncate text-sm font-semibold text-foreground hover:underline">
                         {candidate.candidateName}
                     </Link>
-                    <p className="truncate text-xs text-muted-foreground">{candidate.jobOffer?.title ?? candidate.candidateTitle ?? "—"}</p>
+                    <p className="truncate text-xs text-muted-foreground">{candidate.jobOffer?.title ?? candidate.candidateTitle ?? "-"}</p>
                 </div>
                 {busy ? (
                     <Loader2 className="m-1.5 h-4 w-4 animate-spin text-primary" aria-label="Déplacement en cours" />

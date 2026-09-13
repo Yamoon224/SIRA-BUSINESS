@@ -41,7 +41,7 @@ function defaultStart(): string {
  * Planification (ou modification) d'un entretien. En visio, une salle GORIYA
  * Meet est ouverte : le recruteur la rejoint depuis la liste des entretiens,
  * le candidat depuis son espace Goriya Meet. Le candidat est convoqué par une
- * notification Goriya, sauf si on décoche — ou si la date est déjà passée.
+ * notification Goriya, sauf si on décoche - ou si la date est déjà passée.
  */
 export function InterviewDialog({ open, onOpenChange, candidate, interview, onSaved }: InterviewDialogProps) {
     const [type, setType] = useState<InterviewType>("VIDEO")
