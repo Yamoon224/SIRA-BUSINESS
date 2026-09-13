@@ -317,7 +317,7 @@ function IntegrationsApiContent() {
 
 export default function Page() {
     return (
-        <SubscriptionGate requiredTier="PAID" featureLabel="les intégrations API B2B">
+        <SubscriptionGate feature="Intégration API" featureLabel="les intégrations API B2B">
             <IntegrationsApiContent />
         </SubscriptionGate>
     )

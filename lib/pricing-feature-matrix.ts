@@ -45,3 +45,34 @@ export const ENTERPRISE_PLAN_FEATURE_MATRIX: PlanFeatureRow[] = [
     { label: "Gestion de projets", values: { Business: false, "Business+": false, "Sur Mesure": true } },
     { label: "Gestion de logistique", values: { Business: false, "Business+": false, "Sur Mesure": true } },
 ]
+
+/**
+ * Un forfait donné inclut-il `featureLabel` (une ligne de
+ * ENTERPRISE_PLAN_FEATURE_MATRIX) ? Sert de garde-fou (SubscriptionGate) en
+ * plus de l'affichage marketing. "Offre gratuite" et "Sur Mesure" ne sont
+ * pas des clés de la matrice (le premier n'est pas dans la grille PDF, le
+ * second n'est pas un SubscriptionPlan réel) : elles ne matchent donc aucune
+ * ligne et sont toujours refusées ici, par construction.
+ */
+export function planIncludesFeature(planName: string | null | undefined, featureLabel: string): boolean {
+    if (!planName) return false
+    const row = ENTERPRISE_PLAN_FEATURE_MATRIX.find((r) => r.label === featureLabel)
+    if (!row) return false
+    const value = row.values[planName as keyof PlanFeatureRow["values"]]
+    return value !== undefined && value !== false
+}
+
+/**
+ * Le moins cher des forfaits souscriptibles (Business, puis Business+) qui
+ * inclut `featureLabel`, ou `null` si seul "Sur Mesure" l'inclut — auquel
+ * cas la fonctionnalité n'est jamais en libre-service, il faut contacter
+ * l'équipe commerciale (voir CustomPlanCard). Sert au message d'upgrade de
+ * SubscriptionGate.
+ */
+export function cheapestPlanIncluding(featureLabel: string): "Business" | "Business+" | null {
+    const row = ENTERPRISE_PLAN_FEATURE_MATRIX.find((r) => r.label === featureLabel)
+    if (!row) return null
+    if (row.values.Business !== false) return "Business"
+    if (row.values["Business+"] !== false) return "Business+"
+    return null
+}
