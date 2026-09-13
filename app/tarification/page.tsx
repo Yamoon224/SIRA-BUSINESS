@@ -23,6 +23,15 @@ interface Plan {
     price: number
     billingPeriod: string
     features: string[]
+    /** Durées choisissables en mois (ex. [1,3,6,12]) ; absent/null = fixe à 1 mois. */
+    availablePeriods?: number[] | null
+}
+
+const PERIOD_LABELS: Record<number, string> = {
+    1: "1 mois",
+    3: "3 mois",
+    6: "6 mois",
+    12: "12 mois",
 }
 
 const faqs = [
@@ -63,6 +72,10 @@ function findPopularPlanId(plans: Plan[]): string | null {
 export default function TarificationPage() {
     const [plans, setPlans] = useState<Plan[]>([])
     const [loading, setLoading] = useState(true)
+    // Durée choisie par plan (affichage seulement — cette page n'ouvre pas de
+    // checkout, le choix réel se fait à l'inscription/souscription).
+    const [periodByPlan, setPeriodByPlan] = useState<Record<string, number>>({})
+    const periodFor = (plan: Plan) => periodByPlan[plan.id] ?? plan.availablePeriods?.[0] ?? 1
 
     useEffect(() => {
         subscriptionService.getPlans("ENTREPRISE")
@@ -162,17 +175,40 @@ export default function TarificationPage() {
                                             <p className="mt-1 text-sm text-[#5B6472]">
                                                 {isFree
                                                     ? "Testez l'espace recrutement sans payer"
-                                                    : plan.billingPeriod === "ANNUAL"
+                                                    : plan.name === "Business+"
                                                       ? "Pour les grandes entreprises"
                                                       : "Pour les entreprises en croissance"}
                                             </p>
 
+                                            {!isFree && plan.availablePeriods && plan.availablePeriods.length > 1 && (
+                                                <div className="mt-4 flex flex-wrap gap-1.5">
+                                                    {plan.availablePeriods.map((months) => (
+                                                        <button
+                                                            key={months}
+                                                            type="button"
+                                                            onClick={() =>
+                                                                setPeriodByPlan((prev) => ({ ...prev, [plan.id]: months }))
+                                                            }
+                                                            className={`rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                                                                periodFor(plan) === months
+                                                                    ? "border-[#2447FF] bg-[#2447FF]/10 text-[#2447FF]"
+                                                                    : "border-black/10 text-[#5B6472] hover:border-black/20"
+                                                            }`}
+                                                        >
+                                                            {PERIOD_LABELS[months] ?? `${months} mois`}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+
                                             <div className="mt-5 flex items-baseline gap-1.5">
                                                 <span className="text-4xl text-[#0B1220]">
-                                                    {isFree ? "0" : Number(plan.price).toLocaleString("fr-FR")}
+                                                    {isFree
+                                                        ? "0"
+                                                        : (Number(plan.price) * periodFor(plan)).toLocaleString("fr-FR")}
                                                 </span>
                                                 <span className="text-sm font-medium text-[#5B6472]">
-                                                    FCFA / {plan.billingPeriod === "ANNUAL" ? "an" : "mois"}
+                                                    FCFA / {periodFor(plan) > 1 ? `${periodFor(plan)} mois` : "mois"}
                                                 </span>
                                             </div>
 

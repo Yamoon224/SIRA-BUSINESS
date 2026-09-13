@@ -8,6 +8,8 @@ export interface CreateCheckoutData {
     successUrl?: string
     errorUrl?: string
     customerPhone?: string
+    /** Durée choisie (1/3/6/12 mois) pour les plans à périodicité choisissable — voir Plan.availablePeriods. Défaut backend : 1. */
+    periodMonths?: number
 }
 
 export interface ITransaction {
