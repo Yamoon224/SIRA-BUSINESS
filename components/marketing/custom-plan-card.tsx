@@ -3,14 +3,9 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Building2, Check, Mail, MessageCircle } from "lucide-react"
+import { Building2, Mail, MessageCircle } from "lucide-react"
 import { SUPPORT_EMAIL, SUPPORT_EMAIL_HREF, SUPPORT_PHONE, SUPPORT_WHATSAPP_HREF } from "@/lib/contact"
-
-const FEATURES = [
-    "Volume d'offres et d'utilisateurs illimité",
-    "Intégrations API dédiées",
-    "SLA et accompagnement par un account manager dédié",
-]
+import { PlanFeatureList } from "@/components/pricing/plan-feature-list"
 
 /**
  * Carte « Sur mesure » des pages tarification (page d'accueil, /tarification,
@@ -46,14 +41,7 @@ export function CustomPlanCard() {
                 </div>
 
                 <div className="flex-1 border-t border-black/[0.06] bg-[#F7F8FC] px-7 py-6">
-                    <ul className="space-y-3">
-                        {FEATURES.map((f) => (
-                            <li key={f} className="flex items-start gap-2.5 text-sm text-[#5B6472]">
-                                <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#2447FF]" />
-                                {f}
-                            </li>
-                        ))}
-                    </ul>
+                    <PlanFeatureList planName="Sur Mesure" className="space-y-3" />
                 </div>
             </div>
 

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { PhoneInput, telephoneValide } from "@/components/phone-input"
 import { Check, Gift, Loader2, Sparkles, Star } from "lucide-react"
 import { CustomPlanCard } from "@/components/marketing/custom-plan-card"
+import { PlanFeatureList } from "@/components/pricing/plan-feature-list"
 import { subscriptionService } from "@/lib/api/subscription.service"
 import { extractApiErrorMessage } from "@/lib/api-error"
 import {
@@ -343,21 +344,27 @@ export default function ChoosePlanPage() {
                                     )}
                                 </Button>
 
-                                <ul className="mt-6 space-y-2.5 border-t border-black/[0.06] pt-5">
-                                    {(plan.features ?? []).map((feature, i) => (
-                                        <li
-                                            key={i}
-                                            className="flex items-start gap-2 text-[13px] leading-snug text-[#5B6472]"
-                                        >
-                                            <Check
-                                                className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${
-                                                    isFree ? "text-[#16a34a]" : "text-[#2447FF]"
-                                                }`}
-                                            />
-                                            {feature}
-                                        </li>
-                                    ))}
-                                </ul>
+                                {isFree ? (
+                                    // "Offre gratuite" n'est pas dans la grille Business/Business+/Sur
+                                    // Mesure du PDF (c'est un 4ᵉ palier propre à l'app) : elle garde sa
+                                    // propre liste de fonctionnalités renvoyée par l'API.
+                                    <ul className="mt-6 space-y-2.5 border-t border-black/[0.06] pt-5">
+                                        {(plan.features ?? []).map((feature, i) => (
+                                            <li
+                                                key={i}
+                                                className="flex items-start gap-2 text-[13px] leading-snug text-[#5B6472]"
+                                            >
+                                                <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#16a34a]" />
+                                                {feature}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <PlanFeatureList
+                                        planName={plan.name}
+                                        className="mt-6 space-y-2.5 border-t border-black/[0.06] pt-5"
+                                    />
+                                )}
 
                                 {isFree && (
                                     <p className="mt-4 rounded-lg bg-[#F7F8FC] p-3 text-[11px] leading-relaxed text-[#5B6472]">

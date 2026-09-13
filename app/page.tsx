@@ -25,6 +25,7 @@ import {
 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CustomPlanCard } from "@/components/marketing/custom-plan-card"
+import { PlanFeatureList } from "@/components/pricing/plan-feature-list"
 import { subscriptionService } from "@/lib/api/subscription.service"
 
 
@@ -760,21 +761,24 @@ export default function HomePage() {
                                         </div>
 
                                         <div className="flex-1 border-t border-black/[0.06] bg-[#F7F8FC] px-7 py-6">
-                                            <ul className="space-y-3">
-                                                {(plan.features ?? []).map((f, i) => (
-                                                    <li
-                                                        key={i}
-                                                        className="flex items-start gap-2.5 text-sm text-[#5B6472]"
-                                                    >
-                                                        <Check
-                                                            className={`mt-0.5 h-4 w-4 shrink-0 ${
-                                                                isFree ? "text-[#16a34a]" : "text-[#2447FF]"
-                                                            }`}
-                                                        />
-                                                        {f}
-                                                    </li>
-                                                ))}
-                                            </ul>
+                                            {isFree ? (
+                                                // "Offre gratuite" n'est pas dans la grille Business/Business+/Sur
+                                                // Mesure du PDF (c'est un 4ᵉ palier propre à l'app) : elle garde
+                                                // sa propre liste de fonctionnalités renvoyée par l'API.
+                                                <ul className="space-y-3">
+                                                    {(plan.features ?? []).map((f, i) => (
+                                                        <li
+                                                            key={i}
+                                                            className="flex items-start gap-2.5 text-sm text-[#5B6472]"
+                                                        >
+                                                            <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#16a34a]" />
+                                                            {f}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            ) : (
+                                                <PlanFeatureList planName={plan.name} className="space-y-3" />
+                                            )}
 
                                             {isFree && (
                                                 <p className="mt-4 text-xs leading-relaxed text-[#8891ab]">
