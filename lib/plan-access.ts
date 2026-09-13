@@ -46,11 +46,22 @@ export const FREE_PLAN_INCLUDES = [
     "Suivi des candidatures",
     "Messagerie avec les candidats",
     "Profil entreprise",
-    // Ouverts à l'offre gratuite : les pages Services RH n'exigent plus de forfait payant.
-    "Services RH (employés, recrutements, contrats, congés, paie, documents, évaluations)",
+    // Ouverts à l'offre gratuite : employés, recrutement, contrats, congés,
+    // documents. Paie et enquêtes internes en sont sortis (Business+/Sur
+    // Mesure uniquement, voir ENTERPRISE_PLAN_FEATURE_MATRIX) — grille
+    // tarifaire sept. 2026.
+    "Services RH (employés, recrutements, contrats, congés, documents)",
 ] as const
 
-/** Ce qui reste réservé aux forfaits payants. */
+/**
+ * Ce qui reste réservé aux forfaits payants. Grossier par construction :
+ * "Goriya Meet" est dans TOUS les forfaits payants (Business et Business+),
+ * mais "Intégrations API" n'est en réalité que sur devis (Sur Mesure) — pas
+ * même Business+. Pour un gate précis par fonctionnalité, utiliser
+ * `SubscriptionGate`'s `feature` prop (voir pricing-feature-matrix.ts) au
+ * lieu de `requiredTier="PAID"` + cette liste, qui ne sert plus qu'à
+ * l'affichage générique du gate par palier.
+ */
 export const PAID_PLAN_ONLY = [
     "Goriya Meet : appels vidéo et réunions",
     "Intégrations API",

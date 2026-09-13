@@ -370,7 +370,7 @@ function EvaluationsContent() {
 
 export default function Page() {
     return (
-        <SubscriptionGate featureLabel="les enquêtes internes">
+        <SubscriptionGate featureLabel="les enquêtes internes" feature="Services RH — Enquêtes internes">
             <EvaluationsContent />
         </SubscriptionGate>
     )
