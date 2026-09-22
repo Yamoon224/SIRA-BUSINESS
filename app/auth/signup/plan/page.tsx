@@ -61,6 +61,7 @@ export default function ChoosePlanPage() {
     const [subscribing, setSubscribing] = useState<string | null>(null)
     const [loadError, setLoadError] = useState(false)
     const [phone, setPhone] = useState("")
+    const [promoCode, setPromoCode] = useState("")
     // Durée choisie par plan (clé = plan.id) - seuls les plans avec
     // `availablePeriods` (Business, Business+) affichent le sélecteur ;
     // les autres restent implicitement à 1 mois.
@@ -163,11 +164,16 @@ export default function ChoosePlanPage() {
                 gateway: "paiementpro",
                 customerPhone: phone.trim(),
                 periodMonths,
+                promoCode: promoCode.trim() || undefined,
                 successUrl: `${origin}/auth/payment-success?userId=${userId}&planId=${plan.id}&gateway=paiementpro&flow=${flow}`,
                 errorUrl: `${origin}/auth/payment-error?planId=${plan.id}&flow=${flow}`,
             })
             const data = (res as any)?.data ?? res
             if (!data?.checkoutUrl) throw new Error("checkoutUrl manquante")
+
+            if (data.discountAmount) {
+                toast.success(`Code promo appliqué : -${Number(data.discountAmount).toLocaleString("fr-FR")} FCFA`)
+            }
 
             // La redirection externe fait perdre l'état React : on réécrit le
             // marqueur de parcours pour que le retour de paiement le retrouve.
@@ -247,6 +253,27 @@ export default function ChoosePlanPage() {
                         value={phone}
                         onChange={setPhone}
                         placeholder="07 00 00 00 00"
+                    />
+                </div>
+            )}
+
+            {/* Code promo : un seul champ global, appliqué au forfait choisi
+                au clic - revalidé et recalculé côté serveur (voir checkout()). */}
+            {hasPaidPlan && (
+                <div className="mx-auto mt-4 max-w-sm px-4">
+                    <label
+                        htmlFor="promo-code"
+                        className="mb-1.5 block text-xs font-medium text-[#5B6472]"
+                    >
+                        Code promo (optionnel)
+                    </label>
+                    <input
+                        id="promo-code"
+                        type="text"
+                        value={promoCode}
+                        onChange={(e) => setPromoCode(e.target.value)}
+                        placeholder="EX: GORIYA20"
+                        className="w-full rounded-md border border-black/10 px-3 py-2 text-sm uppercase outline-none focus:border-[#2447FF] placeholder:normal-case"
                     />
                 </div>
             )}
