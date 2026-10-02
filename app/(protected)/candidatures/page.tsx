@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
@@ -112,6 +112,42 @@ function CandidaturesContent() {
         }
         load()
     }, [])
+
+    // Compatibilité IA : normalement calculée au dépôt de la candidature. Un
+    // score à 0 veut dire « pas encore calculé » (candidature antérieure, IA
+    // indisponible ce jour-là) : on le demande ici, une candidature à la fois
+    // pour ne pas lancer des dizaines d'appels IA en parallèle.
+    const [scoringIds, setScoringIds] = useState<Set<string>>(new Set())
+    const requestedScores = useRef<Set<string>>(new Set())
+
+    const computeScore = async (id: string) => {
+        setScoringIds((prev) => new Set(prev).add(id))
+        try {
+            const res = await apiRequest<any>({ endpoint: `/candidatures/${id}/compatibility`, method: "POST" })
+            const score = Number((res?.data ?? res)?.score ?? 0)
+            if (score > 0) {
+                setCandidates((prev) => prev.map((c) => (c.id === id ? { ...c, score } : c)))
+            }
+        } catch (err) {
+            console.error("[candidatures] compatibility error:", err)
+        } finally {
+            setScoringIds((prev) => {
+                const next = new Set(prev)
+                next.delete(id)
+                return next
+            })
+        }
+    }
+
+    useEffect(() => {
+        const pending = candidates.filter((c) => !(c.score > 0) && !requestedScores.current.has(c.id))
+        if (pending.length === 0) return
+        pending.forEach((c) => requestedScores.current.add(c.id))
+        setScoringIds((prev) => new Set([...prev, ...pending.map((c) => c.id)]))
+        void (async () => {
+            for (const c of pending) await computeScore(c.id)
+        })()
+    }, [candidates])
 
     // Pas de route dédiée /candidatures/{id}/status côté backend - PATCH
     // /candidatures/{id} accepte déjà `status` et vérifie que l'appelant est
@@ -340,11 +376,13 @@ function CandidaturesContent() {
                                             <span className="inline-flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{new Date(candidate.appliedDate).toLocaleDateString("fr-FR")}</span>
                                         </div>
                                     </div>
-                                    <div className="flex shrink-0 items-center gap-1 text-sm font-semibold text-foreground">
-                                        <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-                                        <span>{candidate.score}</span>
-                                        <span className="text-muted-foreground">/100</span>
-                                    </div>
+                                    {candidate.score > 0 && (
+                                        <div className="flex shrink-0 items-center gap-1 text-sm font-semibold text-foreground">
+                                            <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                                            <span>{candidate.score}</span>
+                                            <span className="text-muted-foreground">/100</span>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Compétences en étiquettes : de quoi juger un profil
@@ -366,12 +404,29 @@ function CandidaturesContent() {
                                 )}
 
                                 <div className="mt-4 text-xs text-blue-500">Compatibilite IA</div>
-                                <div className="mt-1 flex items-center gap-3">
-                                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-blue-100">
-                                        <div className="h-full rounded-full bg-blue-500" style={{ width: `${candidate.score}%` }} />
+                                {/* Un score à 0 n'est pas « 0 % de compatibilité » mais
+                                    « pas encore calculé » : on le dit, au lieu d'afficher
+                                    une barre vide qui ressemble à un mauvais profil. */}
+                                {candidate.score > 0 ? (
+                                    <div className="mt-1 flex items-center gap-3">
+                                        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-blue-100">
+                                            <div className="h-full rounded-full bg-blue-500" style={{ width: `${candidate.score}%` }} />
+                                        </div>
+                                        <span className={`w-8 text-right text-xs font-semibold ${candidate.score >= 90 ? "text-green-500" : candidate.score >= 80 ? "text-blue-500" : "text-muted-foreground"}`}>{candidate.score}%</span>
                                     </div>
-                                    <span className={`w-8 text-right text-xs font-semibold ${candidate.score >= 90 ? "text-green-500" : candidate.score >= 80 ? "text-blue-500" : "text-muted-foreground"}`}>{candidate.score}%</span>
-                                </div>
+                                ) : scoringIds.has(candidate.id) ? (
+                                    <p className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                                        <Loader2 className="h-3.5 w-3.5 animate-spin text-blue-500" />
+                                        Analyse du profil en cours…
+                                    </p>
+                                ) : (
+                                    <p className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                                        Score indisponible pour le moment.
+                                        <button className="font-medium text-blue-500 hover:underline" onClick={() => computeScore(candidate.id)}>
+                                            Réessayer
+                                        </button>
+                                    </p>
+                                )}
 
                                 {/* `mt-auto` colle le bloc d'actions en bas : les
                                     cartes d'une même ligne alignent leurs boutons. */}
