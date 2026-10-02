@@ -662,6 +662,15 @@ function CandidaturesContent() {
                         <div className="space-y-4">
                             {assessment.status === "PENDING" ? (
                                 <p className="text-sm text-muted-foreground">Évaluation en cours de génération...</p>
+                            ) : assessment.status === "FAILED" ? (
+                                <div className="space-y-3">
+                                    <p className="text-sm text-muted-foreground">
+                                        L&apos;évaluation n&apos;a pas pu être générée (service d&apos;analyse indisponible). Aucun score n&apos;a été attribué.
+                                    </p>
+                                    <Button size="sm" className="w-full gap-1.5 bg-blue-500 text-xs hover:bg-blue-600" onClick={generateAssessment}>
+                                        <Sparkles className="h-3.5 w-3.5" />Réessayer
+                                    </Button>
+                                </div>
                             ) : (
                                 <>
                                     <div className="space-y-3">
