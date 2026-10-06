@@ -1,3 +1,6 @@
+"use client"
+
+import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { initials } from "@/lib/data/rh"
 
@@ -32,11 +35,29 @@ interface EmployeeAvatarProps {
     id: string
     firstName?: string | null
     lastName?: string | null
+    /** Photo du compte Goriya lié (voir EmployeeResource::avatar) — absente pour une fiche manuelle. */
+    avatar?: string | null
     size?: keyof typeof SIZES
     className?: string
 }
 
-export function EmployeeAvatar({ id, firstName, lastName, size = "md", className }: EmployeeAvatarProps) {
+export function EmployeeAvatar({ id, firstName, lastName, avatar, size = "md", className }: EmployeeAvatarProps) {
+    const [failed, setFailed] = useState(false)
+
+    if (avatar && !failed) {
+        return (
+            <div className={cn("shrink-0 overflow-hidden rounded-full bg-muted", SIZES[size], className)}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                    src={avatar}
+                    alt={[firstName, lastName].filter(Boolean).join(" ") || "Employé"}
+                    className="h-full w-full object-cover"
+                    onError={() => setFailed(true)}
+                />
+            </div>
+        )
+    }
+
     return (
         <div
             aria-hidden="true"

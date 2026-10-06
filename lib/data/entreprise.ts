@@ -30,3 +30,27 @@ export const SECTORS = [
     "Industrie",
     "Services",
 ] as const
+
+/**
+ * Mission et valeurs proposées sur le profil entreprise — une liste choisie
+ * plutôt qu'un texte libre, pour que les valeurs restent cohérentes entre
+ * entreprises (et affichables comme étiquettes sur le profil public).
+ */
+export const COMPANY_VALUES = [
+    "Innovation",
+    "Excellence",
+    "Intégrité",
+    "Esprit d'équipe",
+    "Engagement client",
+    "Transparence",
+    "Performance",
+    "Passion",
+    "Esprit entrepreneurial",
+    "Diversité et inclusion",
+    "Éthique",
+    "Qualité",
+    "Agilité",
+    "Leadership",
+    "Responsabilité sociale",
+    "Durabilité",
+] as const

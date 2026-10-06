@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AutocompleteInput } from "@/components/autocomplete-input"
 import { PhoneInput, telephoneValide } from "@/components/phone-input"
 import { LOCALISATIONS } from "@/lib/data/afrique"
-import { COMPANY_SIZES } from "@/lib/data/entreprise"
+import { COMPANY_SIZES, COMPANY_VALUES } from "@/lib/data/entreprise"
 import { updateCompany } from "@/actions/companies"
 import { ProfilContentProps } from "@/@types/props"
 import { ICompany } from "@/@types/interface"
@@ -92,7 +92,6 @@ export default function Content({ company }: ProfilContentProps) {
         : [companyData.companySize, ...COMPANY_SIZES]
     const [benefits, setBenefits] = useState<string[]>([])
     const [newBenefit, setNewBenefit] = useState("")
-    const [mission, setMission] = useState(company.about ?? "")
 
     // `/companies/{id}` ne renvoie pas les offres de l'entreprise (CompanyResource
     // n'expose pas `jobOffers`) : ces deux stats restaient bloquées sur "-".
@@ -127,6 +126,26 @@ export default function Content({ company }: ProfilContentProps) {
 
     const removeBenefit = (b: string) => setBenefits(benefits.filter((x) => x !== b))
 
+    // Réseaux sociaux : liste libre, pas seulement LinkedIn — l'icône est
+    // déduite de l'URL à l'affichage public (voir SocialLinkIcon côté
+    // standard), donc aucune contrainte de plateforme ni d'ordre ici.
+    const socialLinks = companyData.socialLinks ?? []
+    const addSocialLink = () => setCompanyData({ ...companyData, socialLinks: [...socialLinks, ""] })
+    const updateSocialLink = (index: number, value: string) =>
+        setCompanyData({ ...companyData, socialLinks: socialLinks.map((l, i) => (i === index ? value : l)) })
+    const removeSocialLink = (index: number) =>
+        setCompanyData({ ...companyData, socialLinks: socialLinks.filter((_, i) => i !== index) })
+
+    // Mission et valeurs : choisies parmi COMPANY_VALUES plutôt que du texte
+    // libre. Remplace un champ qui, avant, se contentait d'afficher le résumé
+    // de l'entreprise (`about`) sans jamais rien enregistrer.
+    const companyValues = companyData.values ?? []
+    const toggleValue = (v: string) =>
+        setCompanyData({
+            ...companyData,
+            values: companyValues.includes(v) ? companyValues.filter((x) => x !== v) : [...companyValues, v],
+        })
+
     const handleSubmit = async () => {
         try {
             setLoading(true)
@@ -155,6 +174,10 @@ export default function Content({ company }: ProfilContentProps) {
             formData.append("website", companyData.website ?? "")
             formData.append("email", companyData.email ?? "")
             formData.append("phone", companyData.phone ?? "")
+            // Lignes vides (bouton « Ajouter un lien » sans saisie) écartées :
+            // elles ne doivent pas atterrir dans le profil public.
+            formData.append("socialLinks", JSON.stringify(socialLinks.map((l) => l.trim()).filter(Boolean)))
+            formData.append("values", JSON.stringify(companyValues))
             if (companyData.creationDate) {
                 const d = new Date(companyData.creationDate)
                 if (!isNaN(d.getTime())) formData.append("creationDate", d.toISOString())
@@ -361,13 +384,25 @@ export default function Content({ company }: ProfilContentProps) {
 
                 <div>
                     <p className="mb-1.5 text-xs text-muted-foreground">Mission et valeurs</p>
-                    <Textarea
-                        value={mission}
-                        onChange={(e) => setMission(e.target.value)}
-                        placeholder="Décrivez votre mission et vos valeurs..."
-                        rows={3}
-                        className="text-sm resize-none"
-                    />
+                    <div className="flex flex-wrap gap-1.5">
+                        {COMPANY_VALUES.map((v) => {
+                            const selected = companyValues.includes(v)
+                            return (
+                                <button
+                                    key={v}
+                                    type="button"
+                                    onClick={() => toggleValue(v)}
+                                    className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                                        selected
+                                            ? "border-transparent bg-brand-gradient text-white"
+                                            : "border-border bg-white text-muted-foreground hover:bg-gray-50"
+                                    }`}
+                                >
+                                    {v}
+                                </button>
+                            )
+                        })}
+                    </div>
                 </div>
             </div>
 
@@ -495,13 +530,41 @@ export default function Content({ company }: ProfilContentProps) {
                             onChange={(v) => setCompanyData({ ...companyData, phone: v })}
                         />
                     </div>
-                    <div>
-                        <p className="mb-1 text-xs text-muted-foreground">Linkedin entreprise</p>
-                        <Input
-                            defaultValue={(company.socialLinks as string[])?.[0] ?? ""}
-                            placeholder="https://linkedin.com/company/..."
-                            className="h-8 border-0 border-b border-border rounded-none px-0 text-sm shadow-none focus-visible:ring-0"
-                        />
+                </div>
+
+                {/* Liste libre plutôt qu'un seul champ LinkedIn : l'icône du
+                    réseau est déduite de l'URL à l'affichage public, donc
+                    Facebook, Instagram, X, YouTube... s'ajoutent de la même
+                    façon, dans n'importe quel ordre. */}
+                <div>
+                    <p className="mb-2 text-xs text-muted-foreground">Réseaux sociaux</p>
+                    <div className="space-y-2">
+                        {socialLinks.map((link, i) => (
+                            <div key={i} className="flex items-center gap-2">
+                                <Input
+                                    value={link}
+                                    onChange={(e) => updateSocialLink(i, e.target.value)}
+                                    placeholder="https://linkedin.com/company/... ou facebook.com/..., instagram.com/..."
+                                    className="h-8 flex-1 border-0 border-b border-border rounded-none px-0 text-sm shadow-none focus-visible:ring-0"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => removeSocialLink(i)}
+                                    aria-label="Retirer ce lien"
+                                    className="shrink-0 rounded p-1 text-muted-foreground transition-colors hover:bg-red-50 hover:text-red-500"
+                                >
+                                    <X className="h-3.5 w-3.5" />
+                                </button>
+                            </div>
+                        ))}
+                        <button
+                            type="button"
+                            onClick={addSocialLink}
+                            className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-500 hover:underline"
+                        >
+                            <Plus className="h-3.5 w-3.5" />
+                            Ajouter un lien
+                        </button>
                     </div>
                 </div>
             </div>

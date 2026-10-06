@@ -27,6 +27,8 @@ export interface IEmployeeSurvey {
 export interface IEmployeeSurveyStats {
     participationCount: number
     ratings: Record<string, number>
+    /** Réponses texte brutes, groupées par question (anonymes : jamais liées à un répondant). */
+    textAnswers: Record<string, string[]>
     trends: string[]
     frictionPoints: string[]
     recommendations: string[]

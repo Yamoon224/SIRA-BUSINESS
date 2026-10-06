@@ -34,6 +34,8 @@ export interface IEmployee {
     source: EmployeeSource
     candidatureId: string | null
     userId: string | null
+    /** Photo du compte Goriya lié — absente pour une fiche saisie manuellement (sans compte). */
+    avatar?: string | null
     hiredFrom?: {
         candidatureId: string
         jobOfferId: string

@@ -336,6 +336,19 @@ function EvaluationsContent() {
                                     ))}
                                 </div>
                             )}
+                            {statsFor && statsFor.questions.filter((q) => q.type === "TEXT" && (stats.textAnswers?.[q.id]?.length ?? 0) > 0).length > 0 && (
+                                <div className="space-y-3 border-t border-border pt-3">
+                                    <p className="text-xs font-medium text-foreground">Réponses libres</p>
+                                    {statsFor.questions.filter((q) => q.type === "TEXT" && (stats.textAnswers?.[q.id]?.length ?? 0) > 0).map((q) => (
+                                        <div key={q.id}>
+                                            <p className="mb-1 text-xs italic text-muted-foreground">{q.question}</p>
+                                            <ul className="list-disc space-y-1 pl-4 text-xs text-foreground">
+                                                {stats.textAnswers[q.id].map((answer, i) => <li key={i}>{answer}</li>)}
+                                            </ul>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                             {stats.trends.length > 0 && (
                                 <div>
                                     <p className="mb-1 text-xs font-medium text-foreground">Tendances (analyse IA)</p>

@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -21,6 +21,7 @@ import { Bell, Calendar, ChevronRight, Circle, Clock3, Eye, FileText, MessageSqu
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
 import { DashboardContentProps } from "@/@types/props"
 import { deleteJobOffer, updateJobStatus } from "@/actions/offers"
+import { getRecommendations } from "@/actions/dashboard"
 import { extractApiErrorMessage } from "@/lib/api-error"
 import { UpcomingInterviewsCard } from "@/components/upcoming-interviews-card"
 
@@ -131,6 +132,13 @@ export default function Content(props: DashboardContentProps) {
   const [confirmDelete, setConfirmDelete] = useState<{ id: string; title: string } | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [dismissedTips, setDismissedTips] = useState(false)
+  const [recommendations, setRecommendations] = useState<string[] | null>(null)
+
+  useEffect(() => {
+    getRecommendations()
+      .then((res) => setRecommendations(res.items))
+      .catch((err) => console.error("[dashboard] recommendations error:", err))
+  }, [])
 
   const recents = offers.map(o => {
     const s = OFFER_STATUS[o.status] ?? { label: o.status, cls: "bg-gray-100 text-gray-600" }
@@ -216,7 +224,9 @@ export default function Content(props: DashboardContentProps) {
         </Card>
       </div>
 
-      {!dismissedTips && (
+      {/* N'apparaît qu'une fois les recommandations chargées : pas de place
+          pour un texte générique pendant que les vraies stats se calculent. */}
+      {!dismissedTips && recommendations && recommendations.length > 0 && (
         <Card className="overflow-hidden border-0 bg-brand-gradient text-white">
           <CardContent className="relative p-5">
             <button
@@ -228,9 +238,7 @@ export default function Content(props: DashboardContentProps) {
             </button>
             <div className="mb-2 flex items-center gap-2"><Sparkles className="h-4 w-4" /><p className="text-lg sm:text-xl font-semibold">Recommandations IA du jour</p></div>
             <div className="space-y-1 text-xs sm:text-sm text-blue-100">
-              <p>• Optimisation d'offres : vos offres ont attire 35% plus de candidats qualifies.</p>
-              <p>• Moment ideal : mardi 10h est votre meilleur creneau de publication.</p>
-              <p>• Candidat potentiel : 13 profils correspondent a vos criteres de recrutement.</p>
+              {recommendations.map((item, i) => <p key={i}>• {item}</p>)}
             </div>
             <div className="pointer-events-none absolute -bottom-8 right-2 h-24 w-24 rounded-full border-[18px] border-blue-300/40" />
           </CardContent>

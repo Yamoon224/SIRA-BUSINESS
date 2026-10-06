@@ -84,7 +84,12 @@ function DialogHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn('flex flex-col gap-2 text-center sm:text-left', className)}
+      // Réserve la place du bouton de fermeture (toujours affiché, voir
+      // `showCloseButton` sur DialogContent) : sans ça, un titre long repasse
+      // sous le X dès que la fenêtre est étroite (mobile). Symétrique sur
+      // mobile (`px-8`) pour que le titre centré reste visuellement centré ;
+      // seulement à droite (`sm:pr-8`) une fois le texte aligné à gauche.
+      className={cn('flex flex-col gap-2 px-8 text-center sm:px-0 sm:pr-8 sm:text-left', className)}
       {...props}
     />
   )

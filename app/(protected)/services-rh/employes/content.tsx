@@ -323,7 +323,7 @@ export function EmployeesContent() {
                                 <TableRow key={employee.id} className="cursor-pointer" onClick={() => router.push(`/services-rh/employes/${employee.id}`)}>
                                     <TableCell>
                                         <div className="flex min-w-0 items-center gap-3">
-                                            <EmployeeAvatar id={employee.id} firstName={employee.firstName} lastName={employee.lastName} size="sm" />
+                                            <EmployeeAvatar id={employee.id} firstName={employee.firstName} lastName={employee.lastName} avatar={employee.avatar} size="sm" />
                                             <div className="min-w-0">
                                                 <p className="truncate font-medium text-foreground">{employee.fullName}</p>
                                                 <p className="truncate text-xs text-muted-foreground">{employee.matricule}{employee.email ? ` · ${employee.email}` : ""}</p>
@@ -531,7 +531,7 @@ function EmployeeCard({
 
             <Link href={`/services-rh/employes/${employee.id}`} className="flex flex-1 flex-col rounded-xl p-4 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
                 <div className="flex items-start gap-3 pr-8">
-                    <EmployeeAvatar id={employee.id} firstName={employee.firstName} lastName={employee.lastName} />
+                    <EmployeeAvatar id={employee.id} firstName={employee.firstName} lastName={employee.lastName} avatar={employee.avatar} />
                     <div className="min-w-0">
                         <p className="truncate font-semibold text-foreground">{employee.fullName}</p>
                         <p className="truncate text-sm text-muted-foreground">{employee.jobTitle}</p>

@@ -107,6 +107,8 @@ export interface ICompany {
     coverImage?: string | null
     gallery?: string[]
     socialLinks: string[]
+    /** Mission et valeurs, choisies parmi COMPANY_VALUES (lib/data/entreprise.ts). */
+    values?: string[]
     country: string
     headquarters: string
     status: string

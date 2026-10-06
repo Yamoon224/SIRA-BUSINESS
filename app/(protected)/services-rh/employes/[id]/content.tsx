@@ -201,7 +201,7 @@ export function EmployeeDetail({ id }: { id: string }) {
             <div className="overflow-hidden rounded-xl border border-border bg-white">
                 <div className="h-16 bg-brand-gradient" />
                 <div className="px-4 pb-5 sm:px-6">
-                    <EmployeeAvatar id={employee.id} firstName={employee.firstName} lastName={employee.lastName} size="lg" className="-mt-8 ring-4 ring-white" />
+                    <EmployeeAvatar id={employee.id} firstName={employee.firstName} lastName={employee.lastName} avatar={employee.avatar} size="lg" className="-mt-8 ring-4 ring-white" />
 
                     <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                         <div className="min-w-0">

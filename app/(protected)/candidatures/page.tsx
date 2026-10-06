@@ -354,13 +354,13 @@ function CandidaturesContent() {
                         const us = uiStatus(candidate)
                         const meta = STATUS_META[us]
                         return (
-                            <div key={candidate.id} className="flex h-full flex-col rounded-xl border border-border bg-white px-5 py-5">
-                                <div className="flex items-start gap-3">
-                                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-500">
-                                        <User className="h-4 w-4 text-white" />
+                            <div key={candidate.id} className="flex h-full flex-col rounded-xl border border-border bg-white px-4 py-4 sm:px-5 sm:py-5">
+                                <div className="flex items-start gap-2.5 sm:gap-3">
+                                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-500 sm:h-9 sm:w-9">
+                                        <User className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" />
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <div className="mb-1 flex flex-wrap items-center gap-2">
+                                        <div className="mb-0.5 flex flex-wrap items-center gap-2 sm:mb-1">
                                             <h3 className="truncate text-base font-semibold text-foreground sm:text-lg">{candidate.name}</h3>
                                             <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${meta.statusClass}`}>{meta.label}</span>
                                         </div>
@@ -369,10 +369,10 @@ function CandidaturesContent() {
                                             contacter - il reste dans le détail et dans la
                                             modale de message. Repli sur l'intitulé de
                                             l'offre visée quand le profil n'en déclare pas. */}
-                                        <p className="truncate text-sm text-muted-foreground">
+                                        <p className="truncate text-xs text-muted-foreground sm:text-sm">
                                             {candidate.title || candidate.jobOfferTitle || "Titre non renseigné"}
                                         </p>
-                                        <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                                        <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground sm:mt-1.5">
                                             <span className="inline-flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{new Date(candidate.appliedDate).toLocaleDateString("fr-FR")}</span>
                                         </div>
                                     </div>
@@ -386,24 +386,34 @@ function CandidaturesContent() {
                                 </div>
 
                                 {/* Compétences en étiquettes : de quoi juger un profil
-                                    d'un coup d'œil sans ouvrir le CV. Au-delà de six, on
-                                    compte le reste plutôt que de faire enfler la carte. */}
+                                    d'un coup d'œil sans ouvrir le CV. Trois sur mobile (une
+                                    ligne la plupart du temps), six à partir de sm où la carte
+                                    a plus de largeur ; au-delà, on compte le reste plutôt que
+                                    de faire enfler la carte. */}
                                 {(candidate.skills?.length ?? 0) > 0 && (
-                                    <div className="mt-3 flex flex-wrap gap-1.5">
-                                        {candidate.skills!.slice(0, 6).map((skill) => (
-                                            <span key={skill} className="rounded-md bg-muted px-2 py-1 text-[11px] font-medium text-foreground">
+                                    <div className="mt-2.5 flex flex-wrap gap-1.5 sm:mt-3">
+                                        {candidate.skills!.slice(0, 6).map((skill, i) => (
+                                            <span
+                                                key={skill}
+                                                className={`rounded-md bg-muted px-2 py-1 text-[11px] font-medium text-foreground ${i >= 3 ? "hidden sm:inline-flex" : ""}`}
+                                            >
                                                 {skill}
                                             </span>
                                         ))}
+                                        {candidate.skills!.length > 3 && (
+                                            <span className="rounded-md px-2 py-1 text-[11px] font-medium text-muted-foreground sm:hidden">
+                                                +{candidate.skills!.length - 3}
+                                            </span>
+                                        )}
                                         {candidate.skills!.length > 6 && (
-                                            <span className="rounded-md px-2 py-1 text-[11px] font-medium text-muted-foreground">
+                                            <span className="hidden rounded-md px-2 py-1 text-[11px] font-medium text-muted-foreground sm:inline-flex">
                                                 +{candidate.skills!.length - 6}
                                             </span>
                                         )}
                                     </div>
                                 )}
 
-                                <div className="mt-4 text-xs text-blue-500">Compatibilite IA</div>
+                                <div className="mt-4 text-xs text-blue-500">Compatibilité IA</div>
                                 {/* Un score à 0 n'est pas « 0 % de compatibilité » mais
                                     « pas encore calculé » : on le dit, au lieu d'afficher
                                     une barre vide qui ressemble à un mauvais profil. */}
@@ -431,7 +441,7 @@ function CandidaturesContent() {
                                 {/* `mt-auto` colle le bloc d'actions en bas : les
                                     cartes d'une même ligne alignent leurs boutons. */}
                                 <div className="mt-auto pt-4">
-                                    <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
+                                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
                                         {/* Sans CV joint, le bouton n'ouvrirait rien : il le dit
                                             plutôt que de rester cliquable dans le vide. */}
                                         <Button
@@ -451,11 +461,6 @@ function CandidaturesContent() {
                                         >
                                             <ClipboardList className="h-3.5 w-3.5" />
                                             Candidature
-                                            {(candidate.answers?.length ?? 0) > 0 && (
-                                                <span className="rounded-full bg-muted px-1.5 text-[10px] font-semibold">
-                                                    {candidate.answers?.length}
-                                                </span>
-                                            )}
                                         </Button>
                                         <Button
                                             variant="outline"
@@ -690,7 +695,12 @@ function CandidaturesContent() {
                                             <p className="mb-1 text-xs font-medium text-foreground">Questions suggérées pour l'entretien</p>
                                             <ul className="list-disc space-y-1 pl-4 text-sm text-muted-foreground">
                                                 {assessment.skillsTest.map((q, i) => (
-                                                    <li key={i}>{q.question} <span className="text-[10px] uppercase text-muted-foreground/70">({q.type})</span></li>
+                                                    <li key={i}>
+                                                        {q.question}{" "}
+                                                        <span className="ml-0.5 inline-block rounded-full bg-brand-gradient px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white align-middle">
+                                                            {q.type}
+                                                        </span>
+                                                    </li>
                                                 ))}
                                             </ul>
                                         </div>

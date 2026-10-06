@@ -15,3 +15,7 @@ export const stats = async (token: string, params?: DashboardStatsParams) => {
         throw err
     }
 }
+
+/** Carte « Recommandations IA du jour » — calculées sur les vraies statistiques de l'entreprise. */
+export const getRecommendations = () =>
+    apiRequest<{ items: string[] }>({ endpoint: "/dashboard/recommendations", method: "GET" })
