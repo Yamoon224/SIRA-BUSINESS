@@ -151,6 +151,24 @@
   background-image: var(--brand-gradient);
 }
 
+/* Ascenseur du corps des modales longues (évaluation IA, etc.) : le navet
+   gris par défaut casse l'identité de marque, on reprend donc le dégradé. */
+@utility scrollbar-gradient {
+  scrollbar-width: thin;
+  scrollbar-color: var(--brand-via) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-image: var(--brand-gradient);
+    border-radius: 9999px;
+  }
+}
+
 /* Le logo est en dégradé : sur fond bleu il perdrait son contraste, et le
    passer en blanc reviendrait à le rendre monochrome. On lui pose donc une
    surface claire dessous, ses couleurs restent intactes. */

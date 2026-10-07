@@ -654,82 +654,84 @@ function CandidaturesContent() {
             </Dialog>
 
             <Dialog open={!!assessmentFor} onOpenChange={(open) => !open && setAssessmentFor(null)}>
-                <DialogContent className="max-w-lg">
+                <DialogContent className="flex max-h-[85vh] max-w-lg flex-col overflow-hidden">
                     <DialogHeader>
                         <DialogTitle>Évaluation IA - {assessmentFor?.name}</DialogTitle>
                     </DialogHeader>
 
-                    {assessmentLoading ? (
-                        <div className="flex items-center justify-center py-10">
-                            <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
-                        </div>
-                    ) : assessment ? (
-                        <div className="space-y-4">
-                            {assessment.status === "PENDING" ? (
-                                <p className="text-sm text-muted-foreground">Évaluation en cours de génération...</p>
-                            ) : assessment.status === "FAILED" ? (
-                                <div className="space-y-3">
-                                    <p className="text-sm text-muted-foreground">
-                                        L&apos;évaluation n&apos;a pas pu être générée (service d&apos;analyse indisponible). Aucun score n&apos;a été attribué.
-                                    </p>
-                                    <Button size="sm" className="w-full gap-1.5 bg-blue-500 text-xs hover:bg-blue-600" onClick={generateAssessment}>
-                                        <Sparkles className="h-3.5 w-3.5" />Réessayer
-                                    </Button>
-                                </div>
-                            ) : (
-                                <>
+                    <div className="scrollbar-gradient -mr-6 min-h-0 flex-1 overflow-y-auto pr-6">
+                        {assessmentLoading ? (
+                            <div className="flex items-center justify-center py-10">
+                                <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+                            </div>
+                        ) : assessment ? (
+                            <div className="space-y-4">
+                                {assessment.status === "PENDING" ? (
+                                    <p className="text-sm text-muted-foreground">Évaluation en cours de génération...</p>
+                                ) : assessment.status === "FAILED" ? (
                                     <div className="space-y-3">
-                                        <ScoreRow label="Score global" value={assessment.overallScore} />
-                                        <ScoreRow label="Compétences techniques" value={assessment.technicalScore} />
-                                        <ScoreRow label="Soft skills" value={assessment.softSkillsScore} />
-                                        <ScoreRow label="Adéquation culturelle" value={assessment.culturalFitScore} />
-                                    </div>
-                                    {assessment.softSkillsFeedback && (
-                                        <div>
-                                            <p className="mb-1 text-xs font-medium text-foreground">Feedback</p>
-                                            <p className="text-sm text-muted-foreground">{assessment.softSkillsFeedback}</p>
-                                        </div>
-                                    )}
-                                    {assessment.skillsTest && assessment.skillsTest.length > 0 && (
-                                        <div>
-                                            <p className="mb-1 text-xs font-medium text-foreground">Questions suggérées pour l'entretien</p>
-                                            <ul className="list-disc space-y-1 pl-4 text-sm text-muted-foreground">
-                                                {assessment.skillsTest.map((q, i) => (
-                                                    <li key={i}>
-                                                        {q.question}{" "}
-                                                        <span className="ml-0.5 inline-block rounded-full bg-brand-gradient px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white align-middle">
-                                                            {q.type}
-                                                        </span>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    )}
-                                    <div className="flex flex-col gap-2 sm:flex-row">
-                                        <a href={candidateAssessmentService.reportUrl(assessmentFor!.id)} target="_blank" rel="noreferrer" className="sm:flex-1">
-                                            <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs"><Download className="h-3.5 w-3.5" />Télécharger le rapport (.docx)</Button>
-                                        </a>
-                                        <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs sm:w-auto" disabled={assessmentLoading} onClick={generateAssessment}>
-                                            <Sparkles className="h-3.5 w-3.5" />Régénérer
+                                        <p className="text-sm text-muted-foreground">
+                                            L&apos;évaluation n&apos;a pas pu être générée (service d&apos;analyse indisponible). Aucun score n&apos;a été attribué.
+                                        </p>
+                                        <Button size="sm" className="w-full gap-1.5 bg-blue-500 text-xs hover:bg-blue-600" onClick={generateAssessment}>
+                                            <Sparkles className="h-3.5 w-3.5" />Réessayer
                                         </Button>
                                     </div>
-                                </>
-                            )}
-                        </div>
-                    ) : (
-                        <div className="space-y-3">
-                            <p className="text-sm text-muted-foreground">Aucune évaluation générée pour cette candidature.</p>
-                            <Textarea
-                                value={exchangeNotes}
-                                onChange={(e) => setExchangeNotes(e.target.value)}
-                                placeholder="Notes d'échange avec le candidat (optionnel, améliore la précision de l'évaluation)..."
-                                className="min-h-[80px] text-sm"
-                            />
-                            <Button size="sm" className="w-full gap-1.5 bg-blue-500 text-xs hover:bg-blue-600" onClick={generateAssessment}>
-                                <Sparkles className="h-3.5 w-3.5" />Générer l'évaluation IA
-                            </Button>
-                        </div>
-                    )}
+                                ) : (
+                                    <>
+                                        <div className="space-y-3">
+                                            <ScoreRow label="Score global" value={assessment.overallScore} />
+                                            <ScoreRow label="Compétences techniques" value={assessment.technicalScore} />
+                                            <ScoreRow label="Soft skills" value={assessment.softSkillsScore} />
+                                            <ScoreRow label="Adéquation culturelle" value={assessment.culturalFitScore} />
+                                        </div>
+                                        {assessment.softSkillsFeedback && (
+                                            <div>
+                                                <p className="mb-1 text-xs font-medium text-foreground">Feedback</p>
+                                                <p className="text-sm text-muted-foreground">{assessment.softSkillsFeedback}</p>
+                                            </div>
+                                        )}
+                                        {assessment.skillsTest && assessment.skillsTest.length > 0 && (
+                                            <div>
+                                                <p className="mb-1 text-xs font-medium text-foreground">Questions suggérées pour l'entretien</p>
+                                                <ul className="list-disc space-y-1 pl-4 text-sm text-muted-foreground">
+                                                    {assessment.skillsTest.map((q, i) => (
+                                                        <li key={i}>
+                                                            {q.question}{" "}
+                                                            <span className="ml-0.5 inline-block rounded-full bg-brand-gradient px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white align-middle">
+                                                                {q.type}
+                                                            </span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                        <div className="flex flex-col gap-2 sm:flex-row">
+                                            <a href={candidateAssessmentService.reportUrl(assessmentFor!.id)} target="_blank" rel="noreferrer" className="sm:flex-1">
+                                                <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs"><Download className="h-3.5 w-3.5" />Télécharger le rapport (.docx)</Button>
+                                            </a>
+                                            <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs sm:w-auto" disabled={assessmentLoading} onClick={generateAssessment}>
+                                                <Sparkles className="h-3.5 w-3.5" />Régénérer
+                                            </Button>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                <p className="text-sm text-muted-foreground">Aucune évaluation générée pour cette candidature.</p>
+                                <Textarea
+                                    value={exchangeNotes}
+                                    onChange={(e) => setExchangeNotes(e.target.value)}
+                                    placeholder="Notes d'échange avec le candidat (optionnel, améliore la précision de l'évaluation)..."
+                                    className="min-h-[80px] text-sm"
+                                />
+                                <Button size="sm" className="w-full gap-1.5 bg-blue-500 text-xs hover:bg-blue-600" onClick={generateAssessment}>
+                                    <Sparkles className="h-3.5 w-3.5" />Générer l'évaluation IA
+                                </Button>
+                            </div>
+                        )}
+                    </div>
                 </DialogContent>
             </Dialog>
 
