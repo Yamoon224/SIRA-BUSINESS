@@ -672,7 +672,7 @@ function CandidaturesContent() {
                     <div className="scrollbar-gradient -mr-6 min-h-0 flex-1 overflow-y-auto pr-6">
                         {assessmentLoading ? (
                             <div className="flex flex-col items-center justify-center gap-5 py-10 text-center">
-                                <GoriyaLogoLoader width={150} />
+                                <GoriyaLogoLoader width={90} />
                                 <p className="text-[13px] text-muted-foreground">Goriya analyse le profil…</p>
                             </div>
                         ) : assessment ? (
