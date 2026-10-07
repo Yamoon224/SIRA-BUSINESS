@@ -653,7 +653,16 @@ function CandidaturesContent() {
                 </DialogContent>
             </Dialog>
 
-            <Dialog open={!!assessmentFor} onOpenChange={(open) => !open && setAssessmentFor(null)}>
+            <Dialog
+                open={!!assessmentFor}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setAssessmentFor(null)
+                        setAssessment(null)
+                        setExchangeNotes("")
+                    }
+                }}
+            >
                 <DialogContent className="flex max-h-[85vh] max-w-lg flex-col overflow-hidden">
                     <DialogHeader>
                         <DialogTitle>Évaluation IA - {assessmentFor?.name}</DialogTitle>
@@ -707,7 +716,7 @@ function CandidaturesContent() {
                                             </div>
                                         )}
                                         <div className="flex flex-col gap-2 sm:flex-row">
-                                            <a href={candidateAssessmentService.reportUrl(assessmentFor!.id)} target="_blank" rel="noreferrer" className="sm:flex-1">
+                                            <a href={candidateAssessmentService.reportUrl(assessmentFor?.id ?? "")} target="_blank" rel="noreferrer" className="sm:flex-1">
                                                 <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs"><Download className="h-3.5 w-3.5" />Télécharger le rapport (.docx)</Button>
                                             </a>
                                             <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs sm:w-auto" disabled={assessmentLoading} onClick={generateAssessment}>
