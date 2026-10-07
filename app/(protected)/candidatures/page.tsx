@@ -20,6 +20,7 @@ import { candidateAssessmentService, type ICandidateAssessment } from "@/lib/api
 import { formatAnswerValue } from "@/lib/data/questions"
 import { FileViewerDialog, type ViewableFile } from "@/components/file-viewer-dialog"
 import { employeeService } from "@/lib/api/employee.service"
+import { GoriyaLogoLoader } from "@/components/goriya-loader"
 
 type UIStatus = "pending" | "interview" | "accepted" | "rejected" | "analyzed"
 
@@ -670,8 +671,9 @@ function CandidaturesContent() {
 
                     <div className="scrollbar-gradient -mr-6 min-h-0 flex-1 overflow-y-auto pr-6">
                         {assessmentLoading ? (
-                            <div className="flex items-center justify-center py-10">
-                                <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+                            <div className="flex flex-col items-center justify-center gap-5 py-10 text-center">
+                                <GoriyaLogoLoader width={150} />
+                                <p className="text-[13px] text-muted-foreground">Goriya analyse le profil…</p>
                             </div>
                         ) : assessment ? (
                             <div className="space-y-4">
