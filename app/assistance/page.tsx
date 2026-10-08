@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useEffect, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -407,7 +408,7 @@ export default function AssistancePage() {
                 <div className="mx-auto max-w-[1180px] px-4">
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-8">
                         <div>
-                            <img src="/images/logo.png" alt="Goriya" className="h-10 w-auto brightness-0 invert mb-4" />
+                            <Image src="/images/logo.png" alt="Goriya" width={140} height={40} className="h-10 w-auto brightness-0 invert mb-4" />
                             <p className="text-[13px] text-[#9098a7] leading-[1.7]">
                                 Goriya est une plateforme web intelligente qui permet aux recruteurs de gérer leurs offres d'emploi et candidatures efficacement.
                             </p>

@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { LayoutDashboard } from "lucide-react"
@@ -24,7 +25,7 @@ export function AssistanceNav() {
                     className="rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2f6de6]/40"
                     aria-label={isAuthenticated ? "Retour au tableau de bord" : "Retour à l'accueil"}
                 >
-                    <img src="/images/logo.png" alt="Goriya" className="h-8 w-auto" />
+                    <Image src="/images/logo.png" alt="Goriya" width={112} height={32} className="h-8 w-auto" priority />
                 </Link>
 
                 <nav className="hidden items-center gap-8 text-[13px] font-medium text-[#7a8495] md:flex">

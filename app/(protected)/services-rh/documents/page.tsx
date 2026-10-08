@@ -1,5 +1,3 @@
-"use client"
-
 import { SubscriptionGate } from "@/components/subscription-gate"
 import { DocumentsContent } from "./content"
 
