@@ -8,13 +8,12 @@ const footerLinks = [
     { href: "/assistance", label: "Assistance" },
 ]
 
-// Pages légales communes à la plateforme : portées par l'app candidat
-// (standard/, domaine goriya.net), pas dupliquées ici - même convention que
-// le lien "Espace candidat" de la nav (components/assistance-nav.tsx).
+// Pages légales propres à cette app (voir app/{confidentialite,cgu,mentions-legales}) -
+// même contenu que standard/, republié ici pour rester sur entreprise.goriya.net.
 const legalLinks = [
-    { href: "https://goriya.net/confidentialite", label: "Politique de confidentialité" },
-    { href: "https://goriya.net/cgu", label: "Conditions d'utilisation" },
-    { href: "https://goriya.net/mentions-legales", label: "Mentions légales" },
+    { href: "/confidentialite", label: "Politique de confidentialité" },
+    { href: "/cgu", label: "Conditions d'utilisation" },
+    { href: "/mentions-legales", label: "Mentions légales" },
 ]
 
 export function SiteFooter() {

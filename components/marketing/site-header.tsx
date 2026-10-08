@@ -15,11 +15,13 @@ import { useScrolled } from "./reveal"
  * Sous `md`, les liens (ancres et « Se connecter ») passent dans un menu
  * déroulant : ils étaient simplement masqués, sans autre accès sur mobile.
  */
-export function SiteHeader({ page = "home" }: { page?: "home" | "tarification" }) {
+export function SiteHeader({ page = "home", forceSolid = false }: { page?: "home" | "tarification" | "legal"; forceSolid?: boolean }) {
     const scrolled = useScrolled()
     const [menuOpen, setMenuOpen] = useState(false)
     // Menu ouvert au-dessus du hero : fond clair, sinon les liens foncés seraient illisibles.
-    const solid = scrolled || menuOpen
+    // `forceSolid` : pages sans hero sombre sous le header (ex. pages légales) -
+    // transparent + logo blanc y serait invisible sur un fond clair dès le chargement.
+    const solid = forceSolid || scrolled || menuOpen
 
     // Repasser en largeur desktop referme le menu mobile.
     useEffect(() => {
