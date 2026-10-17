@@ -199,12 +199,16 @@ export const CANDIDATE_VISIBLE_STATUS: Record<RecruitmentStage, string> = {
     REJECTED: "Refusée",
 }
 
+/** Téléphone : format historique, plus proposé à la planification mais encore affiché sur les entretiens déjà enregistrés ainsi. */
 export const INTERVIEW_TYPE_META: Record<InterviewType, { label: string; locationLabel: string; locationPlaceholder: string }> = {
     PHONE: { label: "Téléphone", locationLabel: "Numéro à appeler", locationPlaceholder: "+225 07 00 00 00 00 (facultatif)" },
     // La visio se tient toujours sur GORIYA Meet : pas de lieu à saisir.
     VIDEO: { label: "GORIYA Meet", locationLabel: "Salle GORIYA Meet", locationPlaceholder: "" },
-    ONSITE: { label: "Sur place", locationLabel: "Adresse", locationPlaceholder: "Immeuble, étage, quartier…" },
+    ONSITE: { label: "Rendez-vous présentiel", locationLabel: "Adresse", locationPlaceholder: "Immeuble, étage, quartier…" },
 }
+
+/** Les deux formats proposés à la planification (le téléphone reste lisible sur l'historique, plus sélectionnable). */
+export const CREATABLE_INTERVIEW_TYPES: readonly InterviewType[] = ["VIDEO", "ONSITE"]
 
 export const INTERVIEW_STATUS_META: Record<InterviewStatus, StatusMeta> = {
     SCHEDULED: { label: "Planifié", className: "bg-blue-100 text-blue-700" },

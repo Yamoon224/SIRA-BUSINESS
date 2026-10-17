@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import { AlertTriangle, Briefcase, CalendarClock, Handshake, Search, Send, UserCheck, Users } from "lucide-react"
+import { AlertTriangle, Briefcase, CalendarClock, CalendarDays, Handshake, List, Search, Send, UserCheck, Users } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { EmployeeAvatar } from "@/components/rh/employee-avatar"
+import { InterviewCalendar } from "@/components/rh/interview-calendar"
 import { InterviewList } from "@/components/rh/interview-list"
 import { KpiCard } from "@/components/rh/kpi-card"
 import { CandidateActionsMenu, useRecruitmentWorkflow } from "@/components/rh/recruitment-actions"
@@ -27,6 +28,7 @@ import {
 } from "@/lib/data/rh"
 import { JOB_STATUS_META, jobTypeLabel } from "@/lib/data/offres"
 import { extractApiErrorMessage } from "@/lib/api-error"
+import { cn } from "@/lib/utils"
 import {
     recruitmentService,
     type IRecruitmentCandidate,
@@ -52,6 +54,7 @@ export function RecrutementsContent() {
     const [tab, setTab] = useState("pipeline")
     const [offerId, setOfferId] = useState<string>(ALL)
     const [query, setQuery] = useState("")
+    const [interviewView, setInterviewView] = useState<"calendar" | "list">("calendar")
 
     const load = useCallback(async () => {
         try {
@@ -236,26 +239,54 @@ export function RecrutementsContent() {
                     </TabsContent>
 
                     <TabsContent value="entretiens" className="mt-4 space-y-6">
+                        <div className="flex items-center justify-end gap-1 rounded-full border border-border bg-white p-1">
+                            <Button
+                                size="sm"
+                                variant={interviewView === "calendar" ? "default" : "ghost"}
+                                className={cn("gap-1.5 rounded-full px-3", interviewView !== "calendar" && "text-muted-foreground hover:bg-muted hover:text-foreground")}
+                                onClick={() => setInterviewView("calendar")}
+                            >
+                                <CalendarDays className="h-4 w-4" />
+                                Calendrier
+                            </Button>
+                            <Button
+                                size="sm"
+                                variant={interviewView === "list" ? "default" : "ghost"}
+                                className={cn("gap-1.5 rounded-full px-3", interviewView !== "list" && "text-muted-foreground hover:bg-muted hover:text-foreground")}
+                                onClick={() => setInterviewView("list")}
+                            >
+                                <List className="h-4 w-4" />
+                                Liste
+                            </Button>
+                        </div>
+
                         {agenda.due.length > 0 && (
                             <section>
                                 <h2 className="mb-2 text-sm font-semibold text-amber-800">Comptes rendus à rédiger</h2>
                                 <InterviewList interviews={agenda.due} workflow={workflow} showCandidate emptyText="" />
                             </section>
                         )}
-                        <section>
-                            <h2 className="mb-2 text-sm font-semibold text-foreground">À venir</h2>
-                            <InterviewList
-                                interviews={agenda.upcoming}
-                                workflow={workflow}
-                                showCandidate
-                                emptyText="Aucun entretien planifié. Planifiez-en un depuis la carte ou le dossier d'un candidat."
-                            />
-                        </section>
-                        {agenda.past.length > 0 && (
-                            <section>
-                                <h2 className="mb-2 text-sm font-semibold text-foreground">Derniers entretiens</h2>
-                                <InterviewList interviews={agenda.past.slice(0, 20)} workflow={workflow} showCandidate emptyText="" />
-                            </section>
+
+                        {interviewView === "calendar" ? (
+                            <InterviewCalendar interviews={interviews} workflow={workflow} />
+                        ) : (
+                            <>
+                                <section>
+                                    <h2 className="mb-2 text-sm font-semibold text-foreground">À venir</h2>
+                                    <InterviewList
+                                        interviews={agenda.upcoming}
+                                        workflow={workflow}
+                                        showCandidate
+                                        emptyText="Aucun entretien planifié. Planifiez-en un depuis la carte ou le dossier d'un candidat."
+                                    />
+                                </section>
+                                {agenda.past.length > 0 && (
+                                    <section>
+                                        <h2 className="mb-2 text-sm font-semibold text-foreground">Derniers entretiens</h2>
+                                        <InterviewList interviews={agenda.past.slice(0, 20)} workflow={workflow} showCandidate emptyText="" />
+                                    </section>
+                                )}
+                            </>
                         )}
                     </TabsContent>
 

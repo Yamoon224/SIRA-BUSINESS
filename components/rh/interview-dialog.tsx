@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { INTERVIEW_TYPE_META, toDatetimeLocal } from "@/lib/data/rh"
+import { CREATABLE_INTERVIEW_TYPES, INTERVIEW_TYPE_META, toDatetimeLocal } from "@/lib/data/rh"
 import { extractApiErrorMessage } from "@/lib/api-error"
 import { recruitmentService, type IRecruitmentInterview, type InterviewType } from "@/lib/api/recruitment.service"
 import { cn } from "@/lib/utils"
@@ -56,7 +56,8 @@ export function InterviewDialog({ open, onOpenChange, candidate, interview, onSa
 
     useEffect(() => {
         if (!open) return
-        setType(interview?.type ?? "VIDEO")
+        // Téléphone (historique) : plus proposé à la création, le plus proche en comportement est « Présentiel ».
+        setType(interview?.type === "PHONE" ? "ONSITE" : interview?.type ?? "VIDEO")
         setWhen(interview ? toDatetimeLocal(interview.scheduledAt) : defaultStart())
         setDuration(String(interview?.durationMinutes ?? 45))
         setLocation(interview?.location ?? "")
@@ -75,6 +76,7 @@ export function InterviewDialog({ open, onOpenChange, candidate, interview, onSa
 
     const submit = async () => {
         if (!start || Number.isNaN(start.getTime())) return setError("Indiquez la date et l'heure de l'entretien.")
+        if (type === "ONSITE" && !location.trim()) return setError("Indiquez l'adresse du rendez-vous présentiel.")
         setSaving(true)
         setError(null)
         const payload = {
@@ -122,8 +124,8 @@ export function InterviewDialog({ open, onOpenChange, candidate, interview, onSa
                 <div className="space-y-4">
                     <div>
                         <p className="mb-1.5 text-sm font-medium text-foreground">Format</p>
-                        <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Format de l'entretien">
-                            {(Object.keys(INTERVIEW_TYPE_META) as InterviewType[]).map((value) => {
+                        <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Format de l'entretien">
+                            {CREATABLE_INTERVIEW_TYPES.map((value) => {
                                 const Icon = TYPE_ICONS[value]
                                 const selected = type === value
                                 return (
