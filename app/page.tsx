@@ -260,13 +260,12 @@ function PromoVideoCard() {
     }
 
     return (
-        <Reveal className="mx-auto max-w-[1100px] px-4 md:px-6 -mt-10 md:-mt-16 relative z-10">
+        <Reveal className="mx-auto max-w-[560px] px-4 md:px-6 -mt-10 md:-mt-16 relative z-10">
             <div className="overflow-hidden rounded-md bg-white shadow-[0_24px_60px_-24px_rgba(11,18,32,0.55)] ring-1 ring-black/5">
-                <div className="relative aspect-video w-full bg-[#0B1220]">
+                <div className="relative aspect-video w-full bg-gradient-to-br from-[#0B1220] to-[#2447FF]">
                     <video
                         ref={videoRef}
                         className="absolute inset-0 h-full w-full object-cover"
-                        poster="/images/apercu-dashboard.jpeg"
                         controls={isPlaying}
                         playsInline
                         preload="none"
