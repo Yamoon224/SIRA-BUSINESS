@@ -39,6 +39,6 @@ export async function proxy(request: NextRequest) {
 // leur propre authentification via getServerSession/getToken) et les routes /auth/*.
 export const config = {
     matcher: [
-        '/((?!_next/static|_next/image|favicon.ico|manifest.json|service-worker.js|icon|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|auth|api).*)',
+        '/((?!_next/static|_next/image|favicon.ico|manifest.json|service-worker.js|icon|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp4|webm|mov|m4v|mp3)$|auth|api).*)',
     ],
 };
