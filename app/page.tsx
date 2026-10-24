@@ -262,7 +262,7 @@ function PromoVideoCard() {
     }
 
     return (
-        <Reveal className="mx-auto max-w-[560px] px-4 md:px-6 -mt-10 md:-mt-16 relative z-10">
+        <Reveal className="mx-auto max-w-[560px] px-4 md:px-6 relative z-10">
             <div className="rounded-lg bg-brand-gradient p-2 sm:p-3 shadow-[0_24px_60px_-24px_rgba(11,18,32,0.55)]">
                 <div className="relative aspect-video w-full rounded-md overflow-hidden bg-[#0B1220]">
                     <video
@@ -441,9 +441,6 @@ export default function HomePage() {
                     </div>
                 </div>
             </section>
-
-            {/* Vidéo de présentation */}
-            <PromoVideoCard />
 
             {/* Capability bento */}
             <section className="border-b border-black/[0.06] bg-white pt-16 pb-16 md:pt-24">
@@ -874,6 +871,11 @@ export default function HomePage() {
                         </Button>
                     </div>
                 </Reveal>
+            </section>
+
+            {/* Vidéo de présentation */}
+            <section className="bg-white py-16 md:py-24">
+                <PromoVideoCard />
             </section>
 
             <SiteFooter />
