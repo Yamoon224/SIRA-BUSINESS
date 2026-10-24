@@ -255,8 +255,10 @@ function PromoVideoCard() {
     const [isPlaying, setIsPlaying] = useState(false)
 
     const handlePlay = () => {
+        // play() doit rester synchrone avec le clic, sinon le navigateur
+        // perd le geste utilisateur et ignore silencieusement l'appel.
+        videoRef.current?.play().catch(() => {})
         setIsPlaying(true)
-        requestAnimationFrame(() => videoRef.current?.play())
     }
 
     return (
