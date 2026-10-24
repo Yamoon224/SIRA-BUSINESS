@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Reveal, ScrollProgress, MarketingMotionStyles } from "@/components/marketing/reveal"
 import { SiteHeader } from "@/components/marketing/site-header"
@@ -20,8 +20,9 @@ import {
     UserPlus,
     Video,
     Wallet,
-    Check, 
-    Gift
+    Check,
+    Gift,
+    Play,
 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CustomPlanCard } from "@/components/marketing/custom-plan-card"
@@ -246,6 +247,56 @@ function AppPreview({
 }
 
 /**
+ * Card vidéo de présentation : poster + bouton Play, lecture déclenchée
+ * uniquement au clic (pas d'autoplay).
+ */
+function PromoVideoCard() {
+    const videoRef = useRef<HTMLVideoElement>(null)
+    const [isPlaying, setIsPlaying] = useState(false)
+
+    const handlePlay = () => {
+        setIsPlaying(true)
+        requestAnimationFrame(() => videoRef.current?.play())
+    }
+
+    return (
+        <Reveal className="mx-auto max-w-[1100px] px-4 md:px-6 -mt-10 md:-mt-16 relative z-10">
+            <div className="overflow-hidden rounded-md bg-white shadow-[0_24px_60px_-24px_rgba(11,18,32,0.55)] ring-1 ring-black/5">
+                <div className="relative aspect-video w-full bg-[#0B1220]">
+                    <video
+                        ref={videoRef}
+                        className="absolute inset-0 h-full w-full object-cover"
+                        poster="/images/apercu-dashboard.jpeg"
+                        controls={isPlaying}
+                        playsInline
+                        preload="none"
+                        onPause={() => setIsPlaying(false)}
+                        onEnded={() => setIsPlaying(false)}
+                    >
+                        <source src="/videos/goriya-entreprise-presentation.mp4" type="video/mp4" />
+                    </video>
+                    {!isPlaying && (
+                        <button
+                            type="button"
+                            onClick={handlePlay}
+                            aria-label="Lancer la vidéo de présentation Goriya Entreprise"
+                            className="group absolute inset-0 flex flex-col items-center justify-center gap-4 bg-gradient-to-br from-[#0B1220]/75 via-[#131c3a]/65 to-[#2447FF]/50 cursor-pointer"
+                        >
+                            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-lg transition-transform duration-300 group-hover:scale-110 sm:h-20 sm:w-20">
+                                <Play className="h-7 w-7 fill-[#2447FF] text-[#2447FF] sm:h-8 sm:w-8" />
+                            </span>
+                            <span className="text-sm font-semibold tracking-wide text-white sm:text-base">
+                                Découvrez Goriya Entreprise en vidéo
+                            </span>
+                        </button>
+                    )}
+                </div>
+            </div>
+        </Reveal>
+    )
+}
+
+/**
  * En-tête de section de la page d'accueil : titre en H1 gras centré, sous-titre
  * en H3 centré. Toutes les sections l'utilisent, pour une hiérarchie identique.
  */
@@ -390,8 +441,11 @@ export default function HomePage() {
                 </div>
             </section>
 
+            {/* Vidéo de présentation */}
+            <PromoVideoCard />
+
             {/* Capability bento */}
-            <section className="border-b border-black/[0.06] bg-white py-16">
+            <section className="border-b border-black/[0.06] bg-white pt-16 pb-16 md:pt-24">
                 <div className="container mx-auto px-4 md:px-6">
                     <SectionHeading
                         className="mb-12"
