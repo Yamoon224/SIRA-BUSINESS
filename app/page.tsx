@@ -263,35 +263,33 @@ function PromoVideoCard() {
 
     return (
         <Reveal className="mx-auto max-w-[560px] px-4 md:px-6 relative z-10">
-            <div className="rounded-lg bg-brand-gradient p-2 sm:p-3 shadow-[0_24px_60px_-24px_rgba(11,18,32,0.55)]">
-                <div className="relative aspect-video w-full rounded-md overflow-hidden bg-[#0B1220]">
-                    <video
-                        ref={videoRef}
-                        className="absolute inset-0 h-full w-full object-cover"
-                        controls={isPlaying}
-                        playsInline
-                        preload="none"
-                        onPause={() => setIsPlaying(false)}
-                        onEnded={() => setIsPlaying(false)}
+            <div className="relative aspect-video w-full max-w-[560px] mx-auto rounded-md overflow-hidden bg-[#0B1220] shadow-[0_24px_60px_-24px_rgba(11,18,32,0.55)]">
+                <video
+                    ref={videoRef}
+                    className="absolute inset-0 h-full w-full object-cover"
+                    controls={isPlaying}
+                    playsInline
+                    preload="none"
+                    onPause={() => setIsPlaying(false)}
+                    onEnded={() => setIsPlaying(false)}
+                >
+                    <source src="/videos/goriya-entreprise-presentation.mp4" type="video/mp4" />
+                </video>
+                {!isPlaying && (
+                    <button
+                        type="button"
+                        onClick={handlePlay}
+                        aria-label="Lancer la vidéo de présentation Goriya Entreprise"
+                        className="group absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/25 cursor-pointer"
                     >
-                        <source src="/videos/goriya-entreprise-presentation.mp4" type="video/mp4" />
-                    </video>
-                    {!isPlaying && (
-                        <button
-                            type="button"
-                            onClick={handlePlay}
-                            aria-label="Lancer la vidéo de présentation Goriya Entreprise"
-                            className="group absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/25 cursor-pointer"
-                        >
-                            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-lg transition-transform duration-300 group-hover:scale-110 sm:h-20 sm:w-20">
-                                <Play className="h-7 w-7 fill-[#2447FF] text-[#2447FF] sm:h-8 sm:w-8" />
-                            </span>
-                            <span className="text-sm font-semibold tracking-wide text-white sm:text-base">
-                                Découvrez Goriya Entreprise en vidéo
-                            </span>
-                        </button>
-                    )}
-                </div>
+                        <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-lg transition-transform duration-300 group-hover:scale-110 sm:h-20 sm:w-20">
+                            <Play className="h-7 w-7 fill-[#2447FF] text-[#2447FF] sm:h-8 sm:w-8" />
+                        </span>
+                        <span className="text-sm font-semibold tracking-wide text-white sm:text-base">
+                            Découvrez Goriya Entreprise en vidéo
+                        </span>
+                    </button>
+                )}
             </div>
         </Reveal>
     )
